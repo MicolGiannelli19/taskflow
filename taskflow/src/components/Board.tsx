@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Column from "./Column";
 import styles from "./Board.module.css";
-import { BoardType } from "../types";
+import type { BoardType } from "../types";
 
 // import { title } from "process";
 // fetch board API Call

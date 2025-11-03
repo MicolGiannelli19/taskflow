@@ -1,7 +1,7 @@
 // Board.jsx
 import React from "react";
 import styles from "./Ticket.module.css";
-import "@atlaskit/css-reset";
+// import "@atlaskit/css-reset";
 
 interface TicketProps {
   title: string;
