@@ -1,9 +1,9 @@
 // Board.jsx
-import React from "react";
 
 export default function Board() {
   return (
     <div className="board">
+      empty content
       {/* Render three columns */}
       {/* <Column title="To Do" />
       <Column title="In Progress" />

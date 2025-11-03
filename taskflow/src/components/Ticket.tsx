@@ -1,5 +1,4 @@
 // Board.jsx
-import React from "react";
 import styles from "./Ticket.module.css";
 // import "@atlaskit/css-reset";
 
