@@ -89,6 +89,7 @@ export default function Board() {
       {/* TODO: change this so that it displays the correct thing */}
       <div className={styles.mainBoard}>
         {boardData.columns.map((col) => (
+          // TODO: ticket proably shouldn't be a child of board ticket should just be displayed in the board it is assigned in ?
           <Column
             key={col.id}
             title={col.title} // QUESTION: should the json be unpacked defining the props here or wihtin column
