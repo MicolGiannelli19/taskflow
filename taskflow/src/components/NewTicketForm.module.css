@@ -1,0 +1,29 @@
+.new-ticket {
+  display: grid;
+  width: 90vw;
+  height: 90vh;
+  grid-template-rows: 10% auto;
+  /* This doesn't work because the main board goes beyond */
+  grid-template-columns: auto;
+  border: 5px black solid;
+  border-radius: 10px;
+  background-color: red;
+}
+
+form {
+  display: flex;
+  gap: 10px;
+  flex-direction: row;
+  align-items: stretch;
+  padding: 10px;
+  overflow: hidden;
+}
+
+/* TODO: center content vertically within this do something like flex */
+.header {
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+  align-items: center;
+  padding: 20px;
+}

@@ -1,6 +1,8 @@
 // import { useState } from "react";
 
 import { useState } from "react";
+import styles from "./NewTicketForm.module.css";
+import { Link } from "react-router-dom";
 
 interface NewTicketFormProps {
   handleSubmit: () => void;
@@ -8,17 +10,39 @@ interface NewTicketFormProps {
 
 export default function NewTicketForm({ handleSubmit }: NewTicketFormProps) {
   // const [newTitle, setNewTitle] = useState("")
-  const [newTitle, setNewTitle] = useState("");
+  interface TicketFormData {
+    title: string;
+    description: string;
+    priority: string;
+    date: string;
+  }
+  const [formData, setFormData] = useState<TicketFormData>({
+    title: "",
+    description: "",
+    priority: "",
+    date: "",
+  });
 
-  const handleNewTitle = (title: string) => {
-    console.log(title);
-    setNewTitle("");
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
+
   return (
-    <div>
-      <h1>Form review how to make forms in react</h1>
+    <div className={styles.NewTicketForm}>
+      <div className={styles.header}>
+        <h1>Form</h1>
+
+        <Link to="/">
+          <button>Close</button>
+        </Link>
+      </div>
+
       <form
-        action="submit"
         onSubmit={(e) => {
           e.preventDefault();
           handleSubmit();
@@ -26,11 +50,21 @@ export default function NewTicketForm({ handleSubmit }: NewTicketFormProps) {
       >
         <input
           type="text"
-          value={newTitle}
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-            handleNewTitle(event.target.value)
-          }
+          placeholder="title"
+          value={formData.title}
+          onChange={handleChange}
         />
+        <input
+          type="text"
+          placeholder="description"
+          value={formData.description}
+          onChange={handleChange}
+        />
+        {/* <input 
+        type="date"
+        value={formData.date}
+        onChange={handleChange} /> */}
+        <button type="submit">Submit</button>
       </form>
     </div>
   );
