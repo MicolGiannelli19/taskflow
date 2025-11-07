@@ -25,7 +25,7 @@ export default function NewTicketForm({ handleSubmit }: NewTicketFormProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
+    console.log(formData);
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -35,7 +35,7 @@ export default function NewTicketForm({ handleSubmit }: NewTicketFormProps) {
   return (
     <div className={styles.NewTicketForm}>
       <div className={styles.header}>
-        <h1>Form</h1>
+        <h1>New Ticket</h1>
 
         <Link to="/">
           <button>Close</button>
@@ -50,20 +50,24 @@ export default function NewTicketForm({ handleSubmit }: NewTicketFormProps) {
       >
         <input
           type="text"
+          name="title"
           placeholder="title"
           value={formData.title}
           onChange={handleChange}
         />
         <input
           type="text"
+          name="description"
           placeholder="description"
           value={formData.description}
           onChange={handleChange}
         />
-        {/* <input 
-        type="date"
-        value={formData.date}
-        onChange={handleChange} /> */}
+        <input
+          type="date"
+          name="date"
+          value={formData.date}
+          onChange={handleChange}
+        />
         <button type="submit">Submit</button>
       </form>
     </div>
