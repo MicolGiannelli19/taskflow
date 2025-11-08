@@ -4,7 +4,7 @@
 import Column from "./Column";
 import styles from "./Board.module.css";
 import { Link } from "react-router-dom";
-import type { BoardType } from "../types";
+import type { ColumnType, TicketType } from "../types";
 
 // import { title } from "process";
 // fetch board API Call
@@ -18,14 +18,15 @@ import type { BoardType } from "../types";
 //   return res.json();
 // }
 interface BoardProps {
-  boardData: BoardType;
+  columns: ColumnType[];
+  tickets: TicketType[];
 }
 
-export default function Board({ boardData }: BoardProps) {
+export default function Board({ columns, tickets }: BoardProps) {
   return (
     <div className={styles.board}>
       <div className={styles.header}>
-        <div>{boardData.title}</div>
+        <div>~Task Flow</div>
 
         <Link to="/new-ticket">
           <button>Add New Ticket</button>
@@ -34,12 +35,12 @@ export default function Board({ boardData }: BoardProps) {
 
       {/* TODO: change this so that it displays the correct thing */}
       <div className={styles.mainBoard}>
-        {boardData.columns.map((col) => (
+        {columns.map((col) => (
           // TODO: ticket proably shouldn't be a child of board ticket should just be displayed in the board it is assigned in ?
           <Column
             key={col.id}
             title={col.title} // QUESTION: should the json be unpacked defining the props here or wihtin column
-            tickets={boardData.tickets.filter((t) => t.columnID === col.id)}
+            tickets={tickets.filter((t) => t.columnID === col.id)}
           />
         ))}
       </div>
