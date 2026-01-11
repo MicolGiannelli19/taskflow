@@ -4,6 +4,12 @@ import "./App.css";
 import { Routes, Route, useNavigate} from "react-router-dom";
 import { useState, useEffect } from "react";
 import type { ColumnType, TicketType, TicketFormData } from "./types";
+import axios, { AxiosError } from "axios";
+
+interface BoardData {
+  columns: ColumnType[];
+  tickets: TicketType[];
+}
 
 function App() {
   // const [boardData, setBoardData] = useState<BoardType | null>(null);
@@ -28,6 +34,19 @@ function App() {
       { id: "2dlkjgas7", title: "IN PROGRESS" },
       { id: "ABCD", title: "DONE" },
     ];
+
+    // TODO: set baseURL in axios config file
+    // Set board id as constant for now
+    axios.get("http://localhost:8000/boards/550e8400-e29b-41d4-a716-446655440001").then((response) => {
+      const boardData = response.data;
+      setColumns(boardData.columns);
+      setTickets(boardData.tickets);
+    }).catch((error) => {
+      console.error("Error fetching board data:", error);
+      // Fallback to mock data in case of error
+      setColumns(mockColumns); // todo this should be changed
+      setTickets(mockTickets);
+    });
 
     setColumns(mockColumns);
     setTickets(mockTickets);

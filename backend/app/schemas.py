@@ -39,6 +39,7 @@ class BoardBase(BaseModel):
         from_attributes = True
 
 # Ticket schemas
+# TODO: you should normaize schema so tickets have column id
 class TicketBasic(BaseModel):
     id: uuid.UUID
     title: str
