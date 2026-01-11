@@ -144,3 +144,9 @@ FastAPI automatically generates interactive docs for all endpoints.
 * For dev, always run backend with `--reload` for hot reloading
 * Make sure `init.sql` matches your models to avoid DB errors
 * Use `psycopg2-binary` for local dev; use `psycopg2` in production for better performance
+
+
+## TODO LIST:
+- Re desing API endpoints to meet the requirments of the frontend 
+- Design User log in system 
+- 
