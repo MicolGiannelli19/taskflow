@@ -1,0 +1,18 @@
+# 1️⃣ Use official Node.js image
+FROM node:20-alpine
+
+# 2️⃣ Set working directory
+WORKDIR /app
+
+# 3️⃣ Copy package files and install dependencies
+COPY package.json package-lock.json ./
+RUN npm install
+
+# 4️⃣ Copy the rest of the frontend code
+COPY . .
+
+# 5️⃣ Expose Vite dev server port
+EXPOSE 5173
+
+# 6️⃣ Start Vite in dev mode
+CMD ["npm", "run", "dev", "--", "--host"]
