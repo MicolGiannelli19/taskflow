@@ -1,8 +1,0 @@
-.App {
-  display: flex;
-  justify-content: center; /* horizontal center */
-  align-items: center; /* vertical center */
-  min-height: 100vh; /* take full viewport height */
-  width: 100%; /* take full width */
-  margin: 0;
-}
