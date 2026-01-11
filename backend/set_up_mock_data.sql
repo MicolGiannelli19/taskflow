@@ -1,13 +1,14 @@
--- Run this in your database to set up test data
+-- -- Run this in your database to set up test data
 
 -- 1. Create mock user
-INSERT INTO users (id, email, name,  avatar) 
+INSERT INTO users (id, email, name, password_hash, avatar) 
 VALUES (
   '550e8400-e29b-41d4-a716-446655440000',
   'mock@taskflow.com',
   'Mock User',
+  'mock_hash_not_used',
   NULL
-) ON CONFLICT (id) DO NOTHING;
+)
 
 -- 2. Create test board
 INSERT INTO boards (id, name, description, owner_id, created_at) 
@@ -19,7 +20,7 @@ VALUES (
   CURRENT_TIMESTAMP
 ) ON CONFLICT (id) DO NOTHING;
 
--- 3. Create board membership
+-- -- 3. Create board membership
 INSERT INTO board_members (id, board_id, user_id, role, created_at)
 VALUES (
   '550e8400-e29b-41d4-a716-446655440010',
@@ -112,3 +113,5 @@ UNION ALL
 SELECT 'Tickets', COUNT(*) FROM tickets
 UNION ALL
 SELECT 'Comments', COUNT(*) FROM comments;
+
+SELECT id, name FROM users WHERE id = '550e8400-e29b-41d4-a716-446655440000';

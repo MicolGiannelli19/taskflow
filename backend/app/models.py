@@ -24,7 +24,7 @@ class Board(Base):
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    columns = relationship("Column", back_populates="board", cascade="all, delete-orphan")
+    columns = relationship("BoardColumn", back_populates="board", cascade="all, delete-orphan")
     tickets = relationship("Ticket", back_populates="board", cascade="all, delete-orphan")
 
 class BoardMember(Base):
@@ -63,7 +63,7 @@ class Ticket(Base):
     updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     board = relationship("Board", back_populates="tickets")
-    column = relationship("Column", back_populates="tickets")
+    column = relationship("BoardColumn", back_populates="tickets")
     comments = relationship("Comment", back_populates="ticket", cascade="all, delete-orphan")
     attachments = relationship("Attachment", back_populates="ticket", cascade="all, delete-orphan")
 
