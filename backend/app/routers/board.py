@@ -1,0 +1,74 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from typing import List
+import uuid
+from database import get_db
+from models import Board, Column, Ticket, User
+from schemas import BoardCreate, BoardBase, BoardWithColumns, ColumnWithTickets, TicketBasic
+from dependencies import get_current_user
+
+router = APIRouter(prefix="/api/boards", tags=["boards"])
+
+@router.get("", response_model=List[BoardBase])
+def get_boards(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    boards = db.query(Board).filter(Board.owner_id == current_user.id).all()
+    return boards
+
+@router.get("/{board_id}", response_model=BoardWithColumns)
+def get_board(board_id: uuid.UUID, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    board = db.query(Board).filter(Board.id == board_id).first()
+    if not board:
+        raise HTTPException(status_code=404, detail="Board not found")
+    
+    columns = db.query(Column).filter(Column.board_id == board_id).order_by(Column.position).all()
+    
+    result = BoardWithColumns(
+        id=board.id,
+        name=board.name,
+        description=board.description,
+        owner_id=board.owner_id,
+        created_at=board.created_at,
+        columns=[]
+    )
+    
+    for col in columns:
+        tickets = db.query(Ticket).filter(Ticket.column_id == col.id).order_by(Ticket.position).all()
+        
+        ticket_basics = []
+        for ticket in tickets:
+            assignee = None
+            if ticket.assignee_id:
+                assignee = db.query(User).filter(User.id == ticket.assignee_id).first()
+            
+            ticket_basics.append(TicketBasic(
+                id=ticket.id,
+                title=ticket.title,
+                position=ticket.position,
+                priority=ticket.priority,
+                assignee_id=ticket.assignee_id,
+                assignee_name=assignee.name if assignee else None,
+                assignee_avatar=assignee.avatar if assignee else None,
+                due_date=ticket.due_date,
+                created_at=ticket.created_at
+            ))
+        
+        result.columns.append(ColumnWithTickets(
+            id=col.id,
+            name=col.name,
+            position=col.position,
+            tickets=ticket_basics
+        ))
+    
+    return result
+
+@router.post("", response_model=BoardBase)
+def create_board(board: BoardCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    new_board = Board(
+        name=board.name,
+        description=board.description,
+        owner_id=current_user.id
+    )
+    db.add(new_board)
+    db.commit()
+    db.refresh(new_board)
+    return new_board

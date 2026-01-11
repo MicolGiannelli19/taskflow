@@ -1,15 +1,27 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import router
+from routers import auth, boards, tickets
 
-app = FastAPI()
+app = FastAPI(title="Kanban API", version="1.0.0")
 
-# Allow React frontend to call API
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # In production, specify your frontend URL
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(router)
+# Include routers
+app.include_router(auth.router)
+app.include_router(boards.router)
+app.include_router(tickets.router)
+
+@app.get("/")
+def root():
+    return {"message": "Kanban API is running"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
