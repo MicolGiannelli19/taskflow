@@ -6,8 +6,10 @@ from app.database import get_db
 from app.models import Board, BoardColumn, Ticket, User
 from app.schemas import BoardCreate, BoardBase, BoardWithColumns, ColumnWithTickets, TicketBasic
 from app.dependencies import get_current_user
+import logging
 
 router = APIRouter(prefix="/api/boards", tags=["boards"])
+logger = logging.getLogger(__name__)
 
 @router.get("", response_model=List[BoardBase])
 def get_boards(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -16,11 +18,15 @@ def get_boards(current_user: User = Depends(get_current_user), db: Session = Dep
 
 @router.get("/{board_id}", response_model=BoardWithColumns)
 def get_board(board_id: uuid.UUID, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+
+    logger.info(f"Fetching board with ID: {board_id} for user: {current_user.id}")
+
     board = db.query(Board).filter(Board.id == board_id).first()
+    
     if not board:
         raise HTTPException(status_code=404, detail="Board not found")
     
-    columns = db.query(BoardColum).filter(BoardColum.board_id == board_id).order_by(BoardColum.position).all()
+    columns = db.query(BoardColumn).filter(BoardColumn.board_id == board_id).order_by(BoardColumn.position).all()
     
     result = BoardWithColumns(
         id=board.id,

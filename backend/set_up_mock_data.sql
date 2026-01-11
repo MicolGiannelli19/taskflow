@@ -1,5 +1,7 @@
 -- -- Run this in your database to set up test data
 
+ALTER TABLE columns RENAME TO board_columns;
+
 -- 1. Create mock user
 INSERT INTO users (id, email, name, password_hash, avatar) 
 VALUES (
@@ -31,7 +33,7 @@ VALUES (
 ) ON CONFLICT (id) DO NOTHING;
 
 -- 4. Create columns
-INSERT INTO columns (id, board_id, name, position, created_at) VALUES
+INSERT INTO board_columns (id, board_id, name, position, created_at) VALUES
   ('550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440001', 'To Do', 0, CURRENT_TIMESTAMP),
   ('550e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440001', 'In Progress', 1, CURRENT_TIMESTAMP),
   ('550e8400-e29b-41d4-a716-446655440004', '550e8400-e29b-41d4-a716-446655440001', 'Done', 2, CURRENT_TIMESTAMP)
@@ -55,7 +57,7 @@ INSERT INTO tickets (id, board_id, column_id, title, description, position, prio
     '550e8400-e29b-41d4-a716-446655440001',
     '550e8400-e29b-41d4-a716-446655440002',
     'Design Database Schema',
-    'Create PostgreSQL schema for boards, columns, and tickets',
+    'Create PostgreSQL schema for boards, board_columns, and tickets',
     1,
     'high',
     '550e8400-e29b-41d4-a716-446655440000',
@@ -108,7 +110,7 @@ SELECT 'Users' as table_name, COUNT(*) as count FROM users
 UNION ALL
 SELECT 'Boards', COUNT(*) FROM boards
 UNION ALL
-SELECT 'Columns', COUNT(*) FROM columns
+SELECT 'Columns', COUNT(*) FROM board_columns
 UNION ALL
 SELECT 'Tickets', COUNT(*) FROM tickets
 UNION ALL

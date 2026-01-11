@@ -36,7 +36,7 @@ class BoardMember(Base):
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
 class BoardColumn(Base):
-    __tablename__ = "columns"
+    __tablename__ = "board_columns"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     board_id = Column(UUID(as_uuid=True), ForeignKey("boards.id", ondelete="CASCADE"))
     name = Column(String(255), nullable=False)
@@ -51,7 +51,7 @@ class Ticket(Base):
     __tablename__ = "tickets"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     board_id = Column(UUID(as_uuid=True), ForeignKey("boards.id", ondelete="CASCADE"))
-    column_id = Column(UUID(as_uuid=True), ForeignKey("columns.id", ondelete="CASCADE"))
+    column_id = Column(UUID(as_uuid=True), ForeignKey("board_columns.id", ondelete="CASCADE"))
     title = Column(String(500), nullable=False)
     description = Column(Text)
     position = Column(Integer, nullable=False)
