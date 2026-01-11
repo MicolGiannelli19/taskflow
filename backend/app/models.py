@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
 import uuid
-from database import Base
+from app.database import Base
 
 class User(Base):
     __tablename__ = "users"
@@ -35,7 +35,7 @@ class BoardMember(Base):
     role = Column(String(50), default="member")
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
-class Column(Base):
+class BoardColumn(Base):
     __tablename__ = "columns"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     board_id = Column(UUID(as_uuid=True), ForeignKey("boards.id", ondelete="CASCADE"))

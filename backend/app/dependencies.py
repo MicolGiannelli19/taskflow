@@ -2,9 +2,9 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
-from database import get_db
-from models import User
-from config import settings
+from app.database import get_db
+from app.models import User
+from app.config import settings
 import os
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/token")
@@ -50,9 +50,3 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
     return user
-
-# ============================================
-# FILE: backend/.env (add this line)
-# ============================================
-# Set to "false" when you want to use real authentication
-USE_MOCK_AUTH=true

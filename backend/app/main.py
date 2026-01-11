@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth, boards, tickets
+from app.routers import auth, board, ticket
 
 app = FastAPI(title="taskflow API", version="1.0.0")
 
@@ -15,8 +15,8 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth.router)
-app.include_router(boards.router)
-app.include_router(tickets.router)
+app.include_router(board.router)
+app.include_router(ticket.router)
 
 @app.get("/")
 def root():

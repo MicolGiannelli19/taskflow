@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import uuid
-from database import get_db
-from models import Ticket, User, Attachment, Comment
-from schemas import (TicketCreate, TicketUpdate, TicketDetailed, UserResponse,
+from app.database import get_db
+from app.models import Ticket, User, Attachment, Comment
+from app.schemas import (TicketCreate, TicketUpdate, TicketDetailed, UserResponse,
                      AttachmentResponse, CommentResponse)
-from dependencies import get_current_user
+from app.dependencies import get_current_user
 
 router = APIRouter(prefix="/api/boards/{board_id}/tickets", tags=["tickets"])
 

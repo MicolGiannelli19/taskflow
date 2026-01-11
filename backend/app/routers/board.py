@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 import uuid
-from database import get_db
-from models import Board, Column, Ticket, User
-from schemas import BoardCreate, BoardBase, BoardWithColumns, ColumnWithTickets, TicketBasic
-from dependencies import get_current_user
+from app.database import get_db
+from app.models import Board, BoardColumn, Ticket, User
+from app.schemas import BoardCreate, BoardBase, BoardWithColumns, ColumnWithTickets, TicketBasic
+from app.dependencies import get_current_user
 
 router = APIRouter(prefix="/api/boards", tags=["boards"])
 
@@ -20,7 +20,7 @@ def get_board(board_id: uuid.UUID, current_user: User = Depends(get_current_user
     if not board:
         raise HTTPException(status_code=404, detail="Board not found")
     
-    columns = db.query(Column).filter(Column.board_id == board_id).order_by(Column.position).all()
+    columns = db.query(BoardColum).filter(BoardColum.board_id == board_id).order_by(BoardColum.position).all()
     
     result = BoardWithColumns(
         id=board.id,
