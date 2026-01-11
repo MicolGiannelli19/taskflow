@@ -1,4 +1,4 @@
--- Kanban App Database Schema
+-- taskflow App Database Schema
 
 -- Users table
 CREATE TABLE users (

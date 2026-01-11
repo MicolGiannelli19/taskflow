@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import auth, boards, tickets
 
-app = FastAPI(title="Kanban API", version="1.0.0")
+app = FastAPI(title="taskflow API", version="1.0.0")
 
 # CORS middleware
 app.add_middleware(
@@ -20,7 +20,7 @@ app.include_router(tickets.router)
 
 @app.get("/")
 def root():
-    return {"message": "Kanban API is running"}
+    return {"message": "taskflow API is running"}
 
 if __name__ == "__main__":
     import uvicorn
