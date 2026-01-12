@@ -39,7 +39,7 @@ export default function Board({ columns, tickets }: BoardProps) {
           // TODO: ticket proably shouldn't be a child of board ticket should just be displayed in the board it is assigned in ?
           <Column
             key={col.id}
-            title={col.title} // QUESTION: should the json be unpacked defining the props here or wihtin column
+            title={col.name} // QUESTION: should the json be unpacked defining the props here or wihtin column
             tickets={tickets.filter((t) => t.columnID === col.id)}
           />
         ))}

@@ -114,18 +114,18 @@ class TicketDetailed(BaseModel):
         from_attributes = True
 
 # Column schemas
-class ColumnWithTickets(BaseModel):
+class ColumnResponse(BaseModel):
     id: uuid.UUID
     name: str
     position: int
-    tickets: List[TicketBasic] = []
     
     class Config:
         from_attributes = True
 
-class BoardWithColumns(BoardBase):
-    columns: List[ColumnWithTickets] = []
-    
+class BoardWithData(BoardBase):
+    columns: List[ColumnResponse] = []
+    tickets: List[TicketBasic] = []
+
     class Config:
         from_attributes = True
 

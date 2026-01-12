@@ -10,9 +10,9 @@ VALUES (
   'Mock User',
   'mock_hash_not_used',
   NULL
-)
+) ON CONFLICT (id) DO NOTHING;
 
--- 2. Create test board
+-- -- 2. Create test board
 INSERT INTO boards (id, name, description, owner_id, created_at) 
 VALUES (
   '550e8400-e29b-41d4-a716-446655440001',
@@ -22,7 +22,7 @@ VALUES (
   CURRENT_TIMESTAMP
 ) ON CONFLICT (id) DO NOTHING;
 
--- -- 3. Create board membership
+-- 3. Create board membership
 INSERT INTO board_members (id, board_id, user_id, role, created_at)
 VALUES (
   '550e8400-e29b-41d4-a716-446655440010',

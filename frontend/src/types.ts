@@ -8,7 +8,8 @@ export interface BoardType {
 
 export interface ColumnType {
   id: string;
-  title: string;
+  name: string;
+  position?: number;
 }
 
 export interface TicketType {
