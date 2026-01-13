@@ -3,7 +3,7 @@ import NewTicketForm from "./components/NewTicketForm";
 import "./App.css";
 import { Routes, Route, useNavigate} from "react-router-dom";
 import { useState, useEffect } from "react";
-import type { ColumnType, TicketType, TicketFormData } from "./types";
+import type { ColumnType, TicketTypeSmall, TicketFormData } from "./types";
 import axios from "axios";
 
 // interface BoardData {
@@ -15,19 +15,12 @@ function App() {
   // const [boardData, setBoardData] = useState<BoardType | null>(null);
   const navigate = useNavigate();
   const [columns, setColumns] = useState<ColumnType[]>([]);
-  const [tickets, setTickets] = useState<TicketType[]>([]);
+  const [tickets, setTickets] = useState<TicketTypeSmall[]>([]);
 
 
   useEffect(() => {
     // id: "12345",
     // title: "Micol Board",
-    const mockTickets: TicketType[] = [
-      { id: "h234567", title: "Design Data Model", columnID: "234567" },
-      { id: "h209765", title: "Build React App", columnID: "234567" },
-      { id: "h23ertyui7", title: "Build Backend", columnID: "234567" },
-      { id: "90734567", title: "Project Set Up", columnID: "2dlkjgas7" },
-      { id: "90709765", title: "Architecure plan", columnID: "2dlkjgas7" },
-    ];
 
     // Unsure about the getting the coloumns
     const mockColumns: ColumnType[] = [
@@ -45,20 +38,22 @@ function App() {
       
       console.log("Columns:", boardData.columns);
       console.log("Tickets:", boardData.tickets);
+
       setColumns(boardData.columns);
-      // setTickets(boardData.tickets);
+      setTickets(boardData.tickets);
+
+      console.log("Columns set in state:", tickets);
 
     }).catch((error) => {
 
       console.error("Error fetching board data:", error);
       // Fallback to mock data in case of error
       setColumns(mockColumns); // todo this should be changed
-      setTickets(mockTickets);
+      // setTickets(mockTickets);
 
     });
 
     setColumns(mockColumns);
-    setTickets(mockTickets);
     }, []); // empty list here means effect happens only on mount
 
   if (!columns) {

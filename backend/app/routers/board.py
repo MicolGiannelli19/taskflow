@@ -22,7 +22,7 @@ def get_board(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-
+    # NOTE: is this good practice should have multiple boards with the same id?
     board = db.query(Board).filter(Board.id == board_id).first()
 
     if not board:
@@ -35,56 +35,30 @@ def get_board(
         .all()
     )
 
+    tickets = (
+        db.query(Ticket)
+        .with_entities(
+                Ticket.id,
+                Ticket.board_id,
+                Ticket.column_id,
+                Ticket.title,
+                Ticket.priority,
+                Ticket.assignee_id,
+                Ticket.due_date
+        )
+        .filter(Ticket.board_id == board_id)
+        .all()
+    )
+
     result = BoardWithData(
         id=board.id,
         name=board.name,
         description=board.description,
         owner_id=board.owner_id,
         created_at=board.created_at,
-        columns=[],   # optional
-        tickets=[]    # ✅ flattened tickets
+        columns=columns,
+        tickets=tickets
     )
-
-    for col in columns:
-        # keep columns if you still need them
-        result.columns.append(
-            ColumnResponse(
-                id=col.id,
-                name=col.name,
-                position=col.position
-            )
-        )
-
-        tickets = (
-            db.query(Ticket)
-            .filter(Ticket.column_id == col.id)
-            .order_by(Ticket.position)
-            .all()
-        )
-
-        for ticket in tickets:
-            assignee = None
-            if ticket.assignee_id:
-                assignee = (
-                    db.query(User)
-                    .filter(User.id == ticket.assignee_id)
-                    .first()
-                )
-
-            result.tickets.append(
-                TicketBasic(
-                    id=ticket.id,
-                    column_id=ticket.column_id,
-                    title=ticket.title,
-                    position=ticket.position,
-                    priority=ticket.priority,
-                    assignee_id=ticket.assignee_id,
-                    assignee_name=assignee.name if assignee else None,
-                    assignee_avatar=assignee.avatar if assignee else None,
-                    due_date=ticket.due_date,
-                    created_at=ticket.created_at
-                )
-            )
 
     return result
 

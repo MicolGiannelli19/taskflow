@@ -4,7 +4,7 @@
 import Column from "./Column";
 import styles from "./Board.module.css";
 import { Link } from "react-router-dom";
-import type { ColumnType, TicketType } from "../types";
+import type { ColumnType, TicketTypeSmall } from "../types";
 
 // import { title } from "process";
 // fetch board API Call
@@ -19,7 +19,7 @@ import type { ColumnType, TicketType } from "../types";
 // }
 interface BoardProps {
   columns: ColumnType[];
-  tickets: TicketType[];
+  tickets: TicketTypeSmall[];
 }
 
 export default function Board({ columns, tickets }: BoardProps) {
@@ -40,7 +40,7 @@ export default function Board({ columns, tickets }: BoardProps) {
           <Column
             key={col.id}
             title={col.name} // QUESTION: should the json be unpacked defining the props here or wihtin column
-            tickets={tickets.filter((t) => t.columnID === col.id)}
+            tickets={tickets.filter((t) => t.column_id=== col.id)}
           />
         ))}
       </div>

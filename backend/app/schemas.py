@@ -42,17 +42,17 @@ class BoardBase(BaseModel):
 # TODO: you should normaize schema so tickets have column id
 class TicketBasic(BaseModel):
     id: uuid.UUID
+    board_id: uuid.UUID
+    column_id: uuid.UUID
     title: str
-    position: int
     priority: str
     assignee_id: Optional[uuid.UUID] = None
-    assignee_name: Optional[str] = None
     assignee_avatar: Optional[str] = None
     due_date: Optional[datetime] = None
-    created_at: datetime
-    
+
     class Config:
         from_attributes = True
+
 
 class TicketCreate(BaseModel):
     column_id: uuid.UUID
