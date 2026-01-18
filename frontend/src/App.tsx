@@ -20,6 +20,8 @@ function App() {
   useEffect(() => {
     const fetchBoard = async () => {
       try {
+
+        // TODO: this should be changed so board ID is a constant of this board or somethin
         const { data } = await instance.get(
           "/boards/550e8400-e29b-41d4-a716-446655440001"
         );
@@ -47,32 +49,29 @@ function App() {
 
   // TODO: Fix syntax
   // TODO: add logic to re introduce ticket in backend and look up how this should be done
-  //   HANDLE NEW TICKET SHOULD NOW HAPPEN ON BOARD SUBMISSION
+  // HANDLE NEW TICKET SHOULD NOW HAPPEN ON BOARD SUBMISSION
   const handleNewTicket = async (newTicketData: TicketFormData) => {
+    
     // pass in value of form here
     // should this be the saame function to edit a ticket?
     // For now this is a basic function with no optimisitc updates
     console.log("newTicketData", newTicketData);
     
-    // const response = await fetch(`{}tickets`, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify(newTicketData),
-    // });
+    const response = await instance.post("/tickets", newTicketData);
+    console.log("Response from creating ticket:", response.data);
 
     // // Set new Global State for tickets
-    // setTickets((prevTickets) => {
-    //   return [
-    //     ...prevTickets,
-    //     {
-    //       id: crypto.randomUUID(),
-    //       title: newTicketData.title,
-    //       columnID: "234567", // default to TO-DO column
-    //     },
-    //   ];
-    // });
+    setTickets((prevTickets) => {
+      return [
+        ...prevTickets,
+        {
+          // TODO: chack this is good practice
+          id: crypto.randomUUID(), // temporary id until we get from backend
+          title: newTicketData.title,
+          columnID: "234567", // default to TO-DO column
+        },
+      ];
+    });
 
     // Navigate back to board view
     navigate("/");

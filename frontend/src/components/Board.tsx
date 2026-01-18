@@ -10,9 +10,6 @@ import type { ColumnType, TicketTypeSmall } from "../types";
 // fetch board API Call
 // Create ticket api call
 
-// where should this be stored ?
-// export const API_BASE = "http://localhost:8000";
-
 // export async function fetchUsers() {
 //   const res = await fetch(`${API_BASE}/users`);
 //   return res.json();
@@ -40,8 +37,9 @@ export default function Board({ columns, tickets }: BoardProps) {
           <Column
             key={col.id}
             title={col.name} // QUESTION: should the json be unpacked defining the props here or wihtin column
-            tickets={tickets.filter((t) => t.column_id=== col.id)}
+            tickets={tickets.filter((t) => t.column_id === col.id)}
           />
+
         ))}
       </div>
     </div>

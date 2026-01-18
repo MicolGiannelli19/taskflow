@@ -1,13 +1,10 @@
 import Ticket from "./Ticket";
 import styles from "./Column.module.css";
+import type { TicketTypeSmall } from "../types";
 
-interface TicketType {
-  title: string;
-  description?: string;
-}
 interface ColumnProps {
   title: string;
-  tickets: TicketType[];
+  tickets: TicketTypeSmall[];
 }
 
 // TODO: review unpacking of props
@@ -18,7 +15,7 @@ export default function Column({ title, tickets }: ColumnProps) {
       <h2>{title}</h2>
       {tickets.map((ticket) => (
         // note tickets should probably have an id
-        <Ticket title={ticket.title} />
+        <Ticket key={ticket.id} title={ticket.title} />
       ))}
     </div>
   );
