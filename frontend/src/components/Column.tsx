@@ -15,7 +15,7 @@ export default function Column({ title, tickets }: ColumnProps) {
       <h2>{title}</h2>
       {tickets.map((ticket) => (
         // note tickets should probably have an id
-        <Ticket key={ticket.id} title={ticket.title} />
+        <Ticket key={ticket.id} ticket={ticket} />
       ))}
     </div>
   );

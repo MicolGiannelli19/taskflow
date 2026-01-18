@@ -1,26 +1,19 @@
 // Board.jsx
 import styles from "./Ticket.module.css";
-// import "@atlaskit/css-reset";
+import type { TicketTypeSmall } from "../types";
 
 interface TicketProps {
-  title: string;
+  ticket: TicketTypeSmall;
 }
 
-export default function Ticket({ title }: TicketProps) {
+export default function Ticket({ ticket }: TicketProps) {
   return (
     <div className={styles.ticket}>
       <header>
-        <h1>{title}</h1>
-
-        {/* TODO: change this to display drop down with ticket names */}
+        <h1>{ticket.title}</h1>
         <button>move</button>
       </header>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Culpa
-        praesentium eaque eius, iste reiciendis veritatis laboriosam voluptates
-        maiores, ut autem magnam facilis odit nam aliquam explicabo! Repudiandae
-        explicabo adipisci sapiente?
-      </p>
+      {/* <p>{description || "Lorem ipsum..."}</p> */}
     </div>
   );
 }

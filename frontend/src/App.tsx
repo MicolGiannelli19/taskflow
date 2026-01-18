@@ -61,17 +61,17 @@ function App() {
     console.log("Response from creating ticket:", response.data);
 
     // // Set new Global State for tickets
-    setTickets((prevTickets) => {
-      return [
-        ...prevTickets,
-        {
-          // TODO: chack this is good practice
-          id: crypto.randomUUID(), // temporary id until we get from backend
-          title: newTicketData.title,
-          columnID: "234567", // default to TO-DO column
-        },
-      ];
-    });
+    // setTickets((prevTickets) => {
+    //   return [
+    //     ...prevTickets,
+    //     {
+    //       // TODO: chack this is good practice
+    //       id: crypto.randomUUID(), // temporary id until we get from backend
+    //       title: newTicketData.title,
+    //       columnID: "234567", // default to TO-DO column
+    //     },
+    //   ];
+    // });
 
     // Navigate back to board view
     navigate("/");
