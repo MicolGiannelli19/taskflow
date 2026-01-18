@@ -4,7 +4,7 @@ import "./App.css";
 import { Routes, Route, useNavigate} from "react-router-dom";
 import { useState, useEffect } from "react";
 import type { ColumnType, TicketTypeSmall, TicketFormData } from "./types";
-import axios from "axios";
+import instance from "./api/axios";
 
 // interface BoardData {
 //   columns: ColumnType[];
@@ -17,44 +17,22 @@ function App() {
   const [columns, setColumns] = useState<ColumnType[]>([]);
   const [tickets, setTickets] = useState<TicketTypeSmall[]>([]);
 
-
   useEffect(() => {
-    // id: "12345",
-    // title: "Micol Board",
+    const fetchBoard = async () => {
+      try {
+        const { data } = await instance.get(
+          "/boards/550e8400-e29b-41d4-a716-446655440001"
+        );
 
-    // Unsure about the getting the coloumns
-    const mockColumns: ColumnType[] = [
-      { id: "234567", name: "TO-DO" },
-      { id: "2dlkjgas7", name: "IN PROGRESS" },
-      { id: "ABCD", name: "DONE" },
-    ];
+        setColumns(data.columns);
+        setTickets(data.tickets);
+      } catch (error) {
+        console.error("Error fetching board:", error);
+      }
+    };
 
-    // TODO: set baseURL in axios config file
-    // Set board id as constant for now
-    axios.get("http://localhost:8000/api/boards/550e8400-e29b-41d4-a716-446655440001").then((response) => {
-
-      const boardData = response.data;
-      console.log("Fetched board data:", boardData);
-      
-      console.log("Columns:", boardData.columns);
-      console.log("Tickets:", boardData.tickets);
-
-      setColumns(boardData.columns);
-      setTickets(boardData.tickets);
-
-      console.log("Columns set in state:", tickets);
-
-    }).catch((error) => {
-
-      console.error("Error fetching board data:", error);
-      // Fallback to mock data in case of error
-      setColumns(mockColumns); // todo this should be changed
-      // setTickets(mockTickets);
-
-    });
-
-    setColumns(mockColumns);
-    }, []); // empty list here means effect happens only on mount
+    fetchBoard();
+  }, []);
 
   if (!columns) {
     return <div>Loading...</div>;
