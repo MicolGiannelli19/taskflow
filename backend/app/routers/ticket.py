@@ -53,9 +53,15 @@ def create_ticket(board_id: uuid.UUID, ticket: TicketCreate,
     max_position = db.query(Ticket).filter(Ticket.column_id == ticket.column_id).count()
     
     new_ticket = Ticket(
-        board_id=board_id, column_id=ticket.column_id, title=ticket.title,
-        description=ticket.description, position=max_position, priority=ticket.priority,
-        assignee_id=ticket.assignee_id, creator_id=current_user.id, due_date=ticket.due_date
+        board_id=board_id,
+        column_id=ticket.column_id,
+        title=ticket.title,
+        description=ticket.description,
+        position=max_position,
+        priority=ticket.priority,
+        assignee_id=ticket.assignee_id,
+        creator_id=current_user.id,
+        due_date=ticket.due_date
     )
     db.add(new_ticket)
     db.commit()

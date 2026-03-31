@@ -118,27 +118,13 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 ---
 
-## Setup - Docker (Recommended)
+## Setup - Docker
 
 ### 1. Ensure Docker is Running
 
 ```bash
 docker info
 ```
-
-### 2. Start All Services
-
-From the project root directory:
-
-```bash
-docker compose up --build
-```
-
-This will start:
-* **Backend API** → http://localhost:8000
-* **PostgreSQL** → localhost:5432
-* **Frontend** → http://localhost:5173 (if configured)
-
 ### 3. Development with Hot Reload
 
 The Dockerfile is configured for development with automatic reload. Any code changes will be reflected immediately without restarting the container.

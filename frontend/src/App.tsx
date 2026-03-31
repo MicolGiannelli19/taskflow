@@ -11,6 +11,7 @@ import instance from "./api/axios";
 //   tickets: TicketType[];
 // }
 
+// TODO: this logic should be moved to board rather then app 
 function App() {
   // const [boardData, setBoardData] = useState<BoardType | null>(null);
   const navigate = useNavigate();

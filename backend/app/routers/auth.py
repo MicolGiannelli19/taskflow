@@ -11,6 +11,7 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 @router.post("/register", response_model=UserResponse)
 def register(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == user.email).first()
+
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
@@ -21,9 +22,11 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
         password_hash=hashed_password,
         avatar=user.avatar
     )
+    #  TODO make a plan specifically for the add new user function
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
     return new_user
 
 @router.post("/token")

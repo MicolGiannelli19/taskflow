@@ -5,6 +5,26 @@ The objective of this project is to create a full end-to-end application, focusi
 
 ---
 
+# Run project on local host
+
+# TODO clean these up from backedn files 
+
+
+TODO Move this to the main read me 
+### 2. Start All Services
+
+From the project root directory:
+
+```bash
+docker compose up --build
+```
+
+This will start:
+* **Backend API** → http://localhost:8000
+* **PostgreSQL** → localhost:5432
+* **Frontend** → http://localhost:5173 (if configured)
+
+
 ## Frontend Features
 
 ### Standard Requirements
