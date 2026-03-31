@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Text, ForeignKey, BigInteger, TIMESTAMP
+from sqlalchemy import Column, String, Integer, Text, ForeignKey, BigInteger, TIMESTAMP, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
@@ -17,6 +17,7 @@ class User(Base):
 
 class UserIdentity(Base):
     __tablename__ = "user_identities"
+    __table_args__ = (UniqueConstraint('provider', 'provider_id'),)
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     provider = Column(String(50), nullable=False)
@@ -40,16 +41,17 @@ class Board(Base):
 
 class BoardMember(Base):
     __tablename__ = "board_members"
+    __table_args__ = (UniqueConstraint('board_id', 'user_id'),)
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    board_id = Column(UUID(as_uuid=True), ForeignKey("boards.id", ondelete="CASCADE"))
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
+    board_id = Column(UUID(as_uuid=True), ForeignKey("boards.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     role = Column(String(50), nullable=False, default="member")
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
 class BoardColumn(Base):
     __tablename__ = "columns"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    board_id = Column(UUID(as_uuid=True), ForeignKey("boards.id", ondelete="CASCADE"))
+    board_id = Column(UUID(as_uuid=True), ForeignKey("boards.id", ondelete="CASCADE"), nullable=False)
     name = Column(String(255), nullable=False)
     position = Column(Integer, nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
@@ -61,14 +63,14 @@ class BoardColumn(Base):
 class Ticket(Base):
     __tablename__ = "tickets"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    board_id = Column(UUID(as_uuid=True), ForeignKey("boards.id", ondelete="CASCADE"))
-    column_id = Column(UUID(as_uuid=True), ForeignKey("columns.id", ondelete="CASCADE"))
+    board_id = Column(UUID(as_uuid=True), ForeignKey("boards.id", ondelete="CASCADE"), nullable=False)
+    column_id = Column(UUID(as_uuid=True), ForeignKey("columns.id", ondelete="CASCADE"), nullable=False)
     title = Column(String(500), nullable=False)
     description = Column(Text)
     position = Column(Integer, nullable=False)
     priority = Column(String(50), default="medium")
     assignee_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"))
-    creator_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
+    creator_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     due_date = Column(TIMESTAMP)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -80,8 +82,8 @@ class Ticket(Base):
 class Comment(Base):
     __tablename__ = "comments"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    ticket_id = Column(UUID(as_uuid=True), ForeignKey("tickets.id", ondelete="CASCADE"))
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
+    ticket_id = Column(UUID(as_uuid=True), ForeignKey("tickets.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     content = Column(Text, nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
