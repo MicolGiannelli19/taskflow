@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import uuid
 from app.database import get_db
-from app.models import Ticket, User, Attachment, Comment
+from app.models import Ticket, User, Comment
 from app.schemas import (TicketCreate, TicketUpdate, TicketDetailed, UserResponse,
                      AttachmentResponse, CommentResponse)
 from app.dependencies import get_current_user

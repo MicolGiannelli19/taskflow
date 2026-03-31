@@ -24,7 +24,7 @@ function App() {
 
         // TODO: this should be changed so board ID is a constant of this board or somethin
         const { data } = await instance.get(
-          "/boards/550e8400-e29b-41d4-a716-446655440001"
+          "/boards/b0000000-0000-0000-0000-000000000001"
         );
 
         setColumns(data.columns);

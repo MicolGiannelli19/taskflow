@@ -10,10 +10,21 @@ class User(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String(255), unique=True, nullable=False)
     name = Column(String(255), nullable=False)
-    password_hash = Column(String(255), nullable=False)
     avatar = Column(String(500))
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
+    identities = relationship("UserIdentity", back_populates="user", cascade="all, delete-orphan")
+
+class UserIdentity(Base):
+    __tablename__ = "user_identities"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    provider = Column(String(50), nullable=False)
+    provider_id = Column(String(255), nullable=False)
+    password_hash = Column(String(255))
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
+    user = relationship("User", back_populates="identities")
 
 class Board(Base):
     __tablename__ = "boards"
@@ -36,7 +47,7 @@ class BoardMember(Base):
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
 class BoardColumn(Base):
-    __tablename__ = "board_columns"
+    __tablename__ = "columns"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     board_id = Column(UUID(as_uuid=True), ForeignKey("boards.id", ondelete="CASCADE"))
     name = Column(String(255), nullable=False)
@@ -51,7 +62,7 @@ class Ticket(Base):
     __tablename__ = "tickets"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     board_id = Column(UUID(as_uuid=True), ForeignKey("boards.id", ondelete="CASCADE"))
-    column_id = Column(UUID(as_uuid=True), ForeignKey("board_columns.id", ondelete="CASCADE"))
+    column_id = Column(UUID(as_uuid=True), ForeignKey("columns.id", ondelete="CASCADE"))
     title = Column(String(500), nullable=False)
     description = Column(Text)
     position = Column(Integer, nullable=False)
@@ -65,7 +76,6 @@ class Ticket(Base):
     board = relationship("Board", back_populates="tickets")
     column = relationship("BoardColumn", back_populates="tickets")
     comments = relationship("Comment", back_populates="ticket", cascade="all, delete-orphan")
-    attachments = relationship("Attachment", back_populates="ticket", cascade="all, delete-orphan")
 
 class Comment(Base):
     __tablename__ = "comments"
@@ -77,15 +87,3 @@ class Comment(Base):
     updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     ticket = relationship("Ticket", back_populates="comments")
-
-class Attachment(Base):
-    __tablename__ = "attachments"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    ticket_id = Column(UUID(as_uuid=True), ForeignKey("tickets.id", ondelete="CASCADE"))
-    name = Column(String(500), nullable=False)
-    url = Column(String(1000), nullable=False)
-    size = Column(BigInteger, nullable=False)
-    uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
-    
-    ticket = relationship("Ticket", back_populates="attachments")
