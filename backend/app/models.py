@@ -31,7 +31,7 @@ class Board(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(255), nullable=False)
     description = Column(Text)
-    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
+    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
     updated_at = Column(TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -43,7 +43,7 @@ class BoardMember(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     board_id = Column(UUID(as_uuid=True), ForeignKey("boards.id", ondelete="CASCADE"))
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
-    role = Column(String(50), default="member")
+    role = Column(String(50), nullable=False, default="member")
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
 
 class BoardColumn(Base):

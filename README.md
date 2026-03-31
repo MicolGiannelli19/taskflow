@@ -5,43 +5,58 @@ The objective of this project is to create a full end-to-end application, focusi
 
 ---
 
-# Run project on local host
+## Running Locally
 
-# TODO clean these up from backedn files 
+### Start all services
 
-
-TODO Move this to the main read me 
-### 2. Start All Services
-
-From the project root directory:
+From the project root:
 
 ```bash
-docker compose up --build
+docker compose up
 ```
 
-This will start:
+This starts:
+* **Frontend** → http://localhost:5173
 * **Backend API** → http://localhost:8000
 * **PostgreSQL** → localhost:5432
-* **Frontend** → http://localhost:5173 (if configured)
 
+The database is automatically initialised with the schema and seeded with mock data on first run.
+
+### Reset the database
+
+To wipe and re-seed the database:
+
+```bash
+docker compose down -v && docker compose up
+```
+
+### Stop services
+
+```bash
+docker compose down
+```
+
+---
 
 ## Frontend Features
 
-### Standard Requirements
 - Basic board, column, and ticket management
 - Responsive design
 - Single-page application behavior
-
-### Additional Features
 - Drag-and-drop support for tickets and columns
-- Optimistic UI updates for faster user feedback
-- Clean and intuitive single-page application design
 
 ---
 
 ## Backend Features
+
 - FastAPI REST API
 - PostgreSQL database for persistent storage
+- JWT authentication with support for password and OAuth providers
 - User, board, column, ticket, and comment management
-- Automatic timestamp updates via triggers
 - Dockerized for easy development and deployment
+
+---
+
+## Further Documentation
+
+- [Backend README](./backend/README.md)
