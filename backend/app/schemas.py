@@ -4,18 +4,21 @@ from datetime import datetime
 import uuid
 
 # User schemas
-class UserBase(BaseModel):
+class UserCreate(BaseModel):
     email: EmailStr
-    name: str
-    avatar: Optional[str] = None
-
-class UserCreate(UserBase):
     password: str
 
-class UserResponse(UserBase):
+class UserProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    avatar: Optional[str] = None
+
+class UserResponse(BaseModel):
     id: uuid.UUID
+    email: EmailStr
+    name: Optional[str] = None
+    avatar: Optional[str] = None
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 
