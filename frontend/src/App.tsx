@@ -1,5 +1,6 @@
 import Board from "./components/Board"; // capitalize to match file name
 import NewTicketForm from "./components/NewTicketForm";
+import LogInForm from ""
 import "./App.css";
 import { Routes, Route, useNavigate} from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -89,6 +90,12 @@ function App() {
           path="/new-ticket"
           element={
             <NewTicketForm handleSubmit={handleNewTicket}></NewTicketForm>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <
           }
         />
       </Routes>

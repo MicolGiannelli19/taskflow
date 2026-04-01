@@ -6,6 +6,16 @@ export interface BoardType {
   tickets: TicketType[];
 }
 
+// Incomplete to be edited as I scope out more completly what this needs
+export interface UserType {
+  id : string;
+  email: string;
+  name: string | null;
+  avatar: string | null;
+  created_at: string;
+}
+
+
 export interface ColumnType {
   id: string;
   name: string;
@@ -45,6 +55,11 @@ export type TicketFormData = Pick<
   TicketType,
   "title" | "description" | "priority" | "due_date"
 >;
+
+export type LogInFromData = {
+  email: string;
+  password: string;
+}
 
 
 

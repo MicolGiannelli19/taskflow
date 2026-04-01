@@ -144,8 +144,30 @@ USE_MOCK_AUTH=false
 
 ---
 
+## Frontend Token Storage
+
+The frontend stores the JWT access token in **`localStorage`**.
+
+```
+localStorage.setItem('token', access_token)   // on login
+localStorage.getItem('token')                 // on each request (Axios interceptor)
+localStorage.removeItem('token')              // on logout
+```
+
+**Why localStorage (for now):**
+- The backend returns the token in a JSON response body, which maps naturally to localStorage
+- No backend changes required
+- Sufficient for an MVP that does not yet handle sensitive/regulated data
+
+**Known limitation:** localStorage is readable by any JavaScript on the page, making it vulnerable to XSS attacks. This is an accepted tradeoff for the MVP stage.
+
+**Future:** See the security spike in `todo.md` — the preferred production pattern is httpOnly cookies (refresh token) + in-memory (access token).
+
+---
+
 ## Limitations (current MVP)
 
+- **Token storage** — access token stored in localStorage (see above for tradeoffs and future plan)
 - **No refresh tokens** — when the access token expires the user must log in again
 - **No OAuth providers** — the `user_identities` schema supports Google/GitHub but the login endpoints are not implemented yet
 - **No email verification** on registration

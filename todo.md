@@ -121,6 +121,42 @@ alembic current
 
 ---
 
+# SPIKE: Research production-grade token storage options
+
+**Type:** Learning spike (timebox to ~3 hours)
+
+**Context:**
+For the MVP, JWTs are stored in `localStorage`. This was a deliberate tradeoff — simple to implement, no backend changes required, acceptable for non-sensitive data. Before moving to production, we should understand the full security landscape and make an informed decision.
+
+**Goal:**
+Understand the three main token storage patterns and when to use each, so we can make a conscious architecture decision rather than defaulting to whatever we shipped first.
+
+**Patterns to research:**
+
+1. **localStorage** (current) — token in JS-accessible browser storage
+   - Research: what does a real XSS attack against localStorage look like?
+   - Research: how does a Content Security Policy (CSP) reduce this risk?
+
+2. **httpOnly cookies** — token set by the server, invisible to JavaScript
+   - Research: implement `Set-Cookie` with `httponly`, `secure`, `samesite=lax` in FastAPI
+   - Research: what is CSRF and why does `samesite=lax` largely mitigate it?
+   - Research: when would you need `samesite=none` and a CSRF token on top?
+
+3. **Hybrid (recommended for production)** — refresh token in httpOnly cookie, access token in memory only
+   - Research: what is a refresh token and how does silent token renewal work?
+   - Research: implement a `/auth/refresh` endpoint in FastAPI
+   - Research: implement the Axios interceptor that retries failed requests after refresh
+
+**Acceptance criteria:**
+- [ ] Can explain the XSS and CSRF threat models in plain language
+- [ ] Have a working proof-of-concept for httpOnly cookie login in FastAPI (on a branch)
+- [ ] Decision documented in `backend/docs/auth.md` with rationale
+
+**Priority:** Medium — do before production or before handling any sensitive user data
+**Dependencies:** Frontend auth (localStorage) must be working first
+
+---
+
 # EPIC: DESIGN A WAY TO MAKE SHORT CUTS A CENTRAL FEATURE OF THIS
 
 # EPIC : Add tests to fast api application 

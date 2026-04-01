@@ -28,6 +28,9 @@ export default function Board({ columns, tickets }: BoardProps) {
         <Link to="/new-ticket">
           <button>Add New Ticket</button>
         </Link>
+        <Link to="/login">
+          <button>Log in</button>
+        </Link>
       </div>
 
       {/* TODO: change this so that it displays the correct thing */}
