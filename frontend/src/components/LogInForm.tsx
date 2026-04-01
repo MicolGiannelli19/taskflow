@@ -1,23 +1,53 @@
-
-// interface LogInFormProps{
-//     email: string;
-//     password: string;
-// }
+import type { LogInFromData } from "../types";
 
 import { useState } from "react"
 
 // This is a Controlled form example
 // this is wrong email 
-interface LogInFormProps(
-    handleLogIn: (FormData: loginFormData) => void;
-)
-export defualt function LogInForm({handleLogIn}: LogInFormProps){
+interface LogInFormProps {
+    handleLogIn: (FormData: LogInFromData) => void;
+}
 
-    const [FormData, setFromData] = useState()
+export default function LogInForm({handleLogIn}: LogInFormProps){
 
-    return <div>
-    <p>email</p>
-    <p>password</p>
+    const [formData, setFromData] = useState<LogInFromData>({
+        email: "",
+        password: "",
+        });
+    
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        
+        // I am slightly confused about this line 
+        const {name, value} = e.target
+
+        setFromData( (prev) => ({
+            ...prev,
+            [name]:value,
+        }));
+
+    }
+
+    // NOTE: handle change is passed in automatically below
+    return (<div>
+        <h1>LOG IN PAGE</h1>
+        <form onSubmit={(e) =>{
+            e.preventDefault()
+            handleLogIn(formData)
+            }
+        }>
+            <input type="text" 
+            name="email"
+            placeholder="email"
+            value={formData.email}
+            onChange={handleInputChange}/> 
+            <input type="password"
+            name="password"
+            placeholder="password"
+            value={formData.password}
+            onChange={handleInputChange}/>
+            <button type="submit">Log In</button>
+        </form>
     </div>
+    )
 
 }
