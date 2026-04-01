@@ -1,0 +1,68 @@
+Table users {
+  id uuid [pk]
+  email varchar(255) [unique, not null]
+  name varchar(255) [not null]
+  avatar varchar(500)
+  created_at timestamptz
+  updated_at timestamptz
+}
+
+Table user_identities {
+  id uuid [pk]
+  user_id uuid [not null, ref: > users.id]
+  provider varchar(50) [not null, note: "'password', 'google', 'github'"]
+  provider_id varchar(255) [not null, note: "email for password, sub/id for OAuth"]
+  password_hash varchar(255) [note: "only set when provider = 'password'"]
+  created_at timestamptz
+  updated_at timestamptz
+}
+
+Table boards {
+  id uuid [pk]
+  name varchar(255) [not null]
+  description text
+  owner_id uuid [not null, ref: > users.id]
+  created_at timestamptz
+  updated_at timestamptz
+}
+
+Table board_members {
+  id uuid [pk]
+  board_id uuid [not null, ref: > boards.id]
+  user_id uuid [not null, ref: > users.id]
+  role varchar(50) [not null, default: 'member', note: "'owner', 'admin', 'member', 'viewer'"]
+  created_at timestamptz
+}
+
+Table columns {
+  id uuid [pk]
+  board_id uuid [not null, ref: > boards.id]
+  name varchar(255) [not null]
+  position integer [not null]
+  created_at timestamptz
+  updated_at timestamptz
+}
+
+Table tickets {
+  id uuid [pk]
+  board_id uuid [not null, ref: > boards.id]
+  column_id uuid [not null, ref: > columns.id]
+  title varchar(500) [not null]
+  description text
+  position integer [not null]
+  priority varchar(50) [default: 'medium', note: "'low', 'medium', 'high'"]
+  assignee_id uuid [ref: > users.id]
+  creator_id uuid [not null, ref: > users.id]
+  due_date timestamptz
+  created_at timestamptz
+  updated_at timestamptz
+}
+
+Table comments {
+  id uuid [pk]
+  ticket_id uuid [not null, ref: > tickets.id]
+  user_id uuid [not null, ref: > users.id]
+  content text [not null]
+  created_at timestamptz
+  updated_at timestamptz
+}

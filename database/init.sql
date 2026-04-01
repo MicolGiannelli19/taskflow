@@ -1,14 +1,25 @@
 -- taskflow App Database Schema
 
--- Users table
+-- Users table (profile/app data only)
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email VARCHAR(255) UNIQUE NOT NULL,
-  name VARCHAR(255) NOT NULL,
+  name VARCHAR(255),
   avatar VARCHAR(500),
-  password_hash VARCHAR(255),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- User identities table (auth credentials, supports password + OAuth)
+CREATE TABLE user_identities (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  provider VARCHAR(50) NOT NULL,         -- 'password', 'google', 'github'
+  provider_id VARCHAR(255) NOT NULL,     -- email for password, sub/id for OAuth
+  password_hash VARCHAR(255),            -- only set when provider = 'password'
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(provider, provider_id)
 );
 
 -- Boards table
@@ -43,6 +54,7 @@ CREATE TABLE columns (
 
 -- Tickets table
 CREATE TABLE tickets (
+  
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   board_id UUID NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
   column_id UUID NOT NULL REFERENCES columns(id) ON DELETE CASCADE,
@@ -57,6 +69,7 @@ CREATE TABLE tickets (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+
 -- Comments table (optional, for ticket discussions)
 CREATE TABLE comments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -68,6 +81,7 @@ CREATE TABLE comments (
 );
 
 -- Indexes for better query performance
+CREATE INDEX idx_user_identities_user_id ON user_identities(user_id);
 CREATE INDEX idx_boards_owner_id ON boards(owner_id);
 CREATE INDEX idx_board_members_board_id ON board_members(board_id);
 CREATE INDEX idx_board_members_user_id ON board_members(user_id);
@@ -79,27 +93,3 @@ CREATE INDEX idx_tickets_creator_id ON tickets(creator_id);
 CREATE INDEX idx_comments_ticket_id ON comments(ticket_id);
 CREATE INDEX idx_comments_user_id ON comments(user_id);
 
--- Trigger to update updated_at timestamp automatically
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = CURRENT_TIMESTAMP;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Apply the trigger to relevant tables
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_boards_updated_at BEFORE UPDATE ON boards
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_columns_updated_at BEFORE UPDATE ON columns
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_tickets_updated_at BEFORE UPDATE ON tickets
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_comments_updated_at BEFORE UPDATE ON comments
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

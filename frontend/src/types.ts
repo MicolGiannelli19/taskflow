@@ -6,6 +6,16 @@ export interface BoardType {
   tickets: TicketType[];
 }
 
+// Incomplete to be edited as I scope out more completly what this needs
+export interface UserType {
+  id : string;
+  email: string;
+  name: string | null;
+  avatar: string | null;
+  created_at: string;
+}
+
+
 export interface ColumnType {
   id: string;
   name: string;
@@ -18,7 +28,7 @@ export interface TicketType {
   column_id: string;
   title: string;
   description?: string;
-  priority: "low" | "medium" | "high";
+  priority?: "low" | "medium" | "high";
   assignee_id?: string | null;
   creator_id: string;
   due_date?: string | null;   // ISO string
@@ -41,10 +51,15 @@ export interface TicketTypeSmall {
 }
 
 
-export type TicketFormData = Pick<
+export type TicketFormData = Omit<
   TicketType,
-  "title" | "description" | "priority" | "due_date"
+  "id" | "board_id" | "column_id" | "creator_id" | "assignee_id" | "created_at" | "updated_at" | "assignee_name" | "assignee_avatar"
 >;
+
+export type LogInFromData = {
+  email: string;
+  password: string;
+}
 
 
 

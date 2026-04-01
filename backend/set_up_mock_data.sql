@@ -3,12 +3,11 @@
 ALTER TABLE columns RENAME TO board_columns;
 
 -- 1. Create mock user
-INSERT INTO users (id, email, name, password_hash, avatar) 
+INSERT INTO users (id, email, name, avatar)
 VALUES (
   '550e8400-e29b-41d4-a716-446655440000',
   'mock@taskflow.com',
   'Mock User',
-  'mock_hash_not_used',
   NULL
 ) ON CONFLICT (id) DO NOTHING;
 

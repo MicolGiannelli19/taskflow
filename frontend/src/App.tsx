@@ -1,5 +1,6 @@
 import Board from "./components/Board"; // capitalize to match file name
 import NewTicketForm from "./components/NewTicketForm";
+import LogInForm from ""
 import "./App.css";
 import { Routes, Route, useNavigate} from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -11,6 +12,7 @@ import instance from "./api/axios";
 //   tickets: TicketType[];
 // }
 
+// TODO: this logic should be moved to board rather then app 
 function App() {
   // const [boardData, setBoardData] = useState<BoardType | null>(null);
   const navigate = useNavigate();
@@ -23,7 +25,7 @@ function App() {
 
         // TODO: this should be changed so board ID is a constant of this board or somethin
         const { data } = await instance.get(
-          "/boards/550e8400-e29b-41d4-a716-446655440001"
+          "/boards/b0000000-0000-0000-0000-000000000001"
         );
 
         setColumns(data.columns);
@@ -88,6 +90,12 @@ function App() {
           path="/new-ticket"
           element={
             <NewTicketForm handleSubmit={handleNewTicket}></NewTicketForm>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <
           }
         />
       </Routes>

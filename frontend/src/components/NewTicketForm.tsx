@@ -14,7 +14,7 @@ export default function NewTicketForm({ handleSubmit }: NewTicketFormProps) {
     title: "",
     description: "",
     priority: undefined,
-    date: "",
+    due_date: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -60,8 +60,8 @@ export default function NewTicketForm({ handleSubmit }: NewTicketFormProps) {
         />
           <input
           type="date"
-          name="date"
-          value={formData.date}
+          name="due_date"
+          value={formData.due_date ?? ""}
           onChange={handleChange}
         />
 
