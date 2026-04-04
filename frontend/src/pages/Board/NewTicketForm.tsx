@@ -1,15 +1,14 @@
-// import { useState } from "react";
-
-import { useState} from "react";
+import { useState } from "react";
 import styles from "./NewTicketForm.module.css";
-import { Link } from "react-router-dom";
-import type { TicketFormData } from "../types";
-interface NewTicketFormProps {
-  handleSubmit: (formData: TicketFormData) => void;
+import { Link, useOutletContext } from "react-router-dom";
+import type { TicketFormData } from "../../types";
+
+interface BoardOutletContext {
+  handleNewTicket: (formData: TicketFormData) => void;
 }
 
-export default function NewTicketForm({ handleSubmit }: NewTicketFormProps) {
-  // const [newTitle, setNewTitle] = useState("")
+export default function NewTicketForm() {
+  const { handleNewTicket: handleSubmit } = useOutletContext<BoardOutletContext>();
   const [formData, setFormData] = useState<TicketFormData>({
     title: "",
     description: "",
@@ -55,8 +54,8 @@ export default function NewTicketForm({ handleSubmit }: NewTicketFormProps) {
           placeholder="Description"
           value={formData.description}
           onChange={handleChange}
-          rows={4}        // optional: control height
-          cols={50}       // optional: control width
+          rows={4}
+          cols={50}
         />
           <input
           type="date"
