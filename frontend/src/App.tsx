@@ -12,7 +12,8 @@ function App() {
   const navigate = useNavigate();
   const { user, isLoading, login } = useAuth();
 
-  const handleLogIn = async (logInDetails: LogInFromData) => {
+  // const handleLogIn = async (logInDetails: LogInFromData) => {
+  const handleLogIn = async () => {
     const formData = new URLSearchParams();
 
     const mockemail = "user@example.com";
@@ -28,6 +29,7 @@ function App() {
       const mockUser = { id: "mock", email: mockemail, name: null, avatar: null, created_at: new Date().toISOString() };
       login(mockUser, data.access_token);
       navigate("/");
+      console.log("Login Successfull")
     } catch (error) {
       console.error("login failed:", error);
     }
