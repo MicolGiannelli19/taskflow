@@ -20,6 +20,7 @@ export default function Home() {
   return (
     <div>
       <h1>Your Boards</h1>
+      <Link to="/new-board"><button>New Board</button></Link>
       <ul>
         {boards.map((board) => (
           <li key={board.id}>

@@ -1,6 +1,7 @@
 import Board from "./pages/Board/Board";
 import NewTicketForm from "./pages/Board/NewTicketForm";
 import Home from "./pages/Home/Home";
+import NewBoardForm from "./pages/Home/NewBoardForm";
 import LogInForm from "./components/LogInForm";
 import "./App.css";
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
@@ -43,6 +44,7 @@ function App() {
     <div className="App">
       <Routes>
         <Route path="/" element={user ? <Home /> : <Navigate to="/login" replace />} />
+        <Route path="/new-board" element={user ? <NewBoardForm /> : <Navigate to="/login" replace />} />
         <Route path="/login" element={<LogInForm handleLogIn={handleLogIn} />} />
         <Route path="/board/:boardId" element={user ? <Board /> : <Navigate to="/login" replace />}>
           <Route path="new-ticket" element={<NewTicketForm />} />
