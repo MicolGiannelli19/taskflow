@@ -2,7 +2,7 @@
 // import React from "react";
 // import { useEffect, useState } from "react";
 import BoardGrid from "./componets/BoardGrid";
-import { Outlet, useNavigate, useParams } from "react-router-dom";
+import { Outlet, useNavigate, useParams, useOutlet } from "react-router-dom";
 import type { ColumnType, TicketTypeSmall, TicketFormData } from "../../types";
 import { useState, useEffect } from "react";
 import instance from "../../api/axios";
@@ -35,26 +35,18 @@ export default function Board() {
     // pass in value of form here
     // should this be the same function to edit a ticket?
     // For now this is a basic function with no optimisitc updates
-    console.log("newTicketData", newTicketData);
-    
-    const response = await instance.post("/tickets", newTicketData);
-    console.log("Response from creating ticket:", response.data);
-
-    // // Set new Global State for tickets
-    // setTickets((prevTickets) => {
-    //   return [
-    //     ...prevTickets,
-    //     {
-    //       // TODO: chack this is good practice
-    //       id: crypto.randomUUID(), // temporary id until we get from backend
-    //       title: newTicketData.title,
-    //       columnID: "234567", // default to TO-DO column
-    //     },
-    //   ];
-    // });
-
-    // Navigate back to board view
-    navigate("/");
+    console.log("submitting ticket", newTicketData, `to /boards/${boardId}/tickets`);
+    const backlogColumn = columns.find((col) => col.name === "Backlog") ?? columns[0];
+    try {
+      const response = await instance.post(`/boards/${boardId}/tickets`, {
+        ...newTicketData,
+        column_id: backlogColumn.id,
+      });
+      console.log("ticket created:", response.data);
+      navigate(`/board/${boardId}`);
+    } catch (error) {
+      console.error("failed to create ticket:", error);
+    }
   };
 
   //  I think we are putting move ticket ehre for optmistic rendering review this pattern
@@ -78,9 +70,11 @@ export default function Board() {
   //   navigate(`/board/${boardId}`);
   // };
 
+  const outlet = useOutlet();
+
   return (
     <>
-      <BoardGrid columns={columns} tickets={tickets} />
+      {!outlet && <BoardGrid columns={columns} tickets={tickets} />}
       <Outlet context={{ handleNewTicket }} />
     </>
   );

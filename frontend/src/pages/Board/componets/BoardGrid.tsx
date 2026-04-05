@@ -25,7 +25,7 @@ export default function BoardGrid({ columns, tickets }: BoardGridProps) {
       <div className={styles.header}>
         <div>~Task Flow</div>
 
-        <Link to="/new-ticket">
+        <Link to="new-ticket">
           <button>Add New Ticket</button>
         </Link>
         <Link to="/login">

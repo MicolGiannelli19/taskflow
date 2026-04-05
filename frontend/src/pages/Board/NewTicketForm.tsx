@@ -1,15 +1,19 @@
 import { useState } from "react";
 import styles from "./NewTicketForm.module.css";
-import { Link, useOutletContext } from "react-router-dom";
+import { useOutletContext, useNavigate, useParams } from "react-router-dom";
 import type { TicketFormData } from "../../types";
 
 interface BoardOutletContext {
   handleNewTicket: (formData: TicketFormData) => void;
 }
 
+// Maybe this should be within a modal not a new page
 export default function NewTicketForm() {
   const { handleNewTicket: handleSubmit } = useOutletContext<BoardOutletContext>();
+  const navigate = useNavigate();
+  const { boardId } = useParams();
   const [formData, setFormData] = useState<TicketFormData>({
+    column_id: "",
     title: "",
     description: "",
     priority: undefined,
@@ -31,9 +35,7 @@ export default function NewTicketForm() {
       <div className={styles.header}>
         <h1>New Ticket</h1>
 
-        <Link to="/">
-          <button>Close</button>
-        </Link>
+        <button onClick={() => navigate(`/board/${boardId}`)}>Close</button>
       </div>
 
       <form

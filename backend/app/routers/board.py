@@ -73,4 +73,11 @@ def create_board(board: BoardCreate, current_user: User = Depends(get_current_us
     db.add(new_board)
     db.commit()
     db.refresh(new_board)
+
+    default_columns = ["Backlog", "In Progress", "Done"]
+    for position, name in enumerate(default_columns):
+        db.add(BoardColumn(board_id=new_board.id, name=name, position=position))
+    db.commit()
+    db.refresh(new_board)
+
     return new_board

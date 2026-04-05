@@ -53,7 +53,7 @@ export interface TicketTypeSmall {
 
 export type TicketFormData = Omit<
   TicketType,
-  "id" | "board_id" | "column_id" | "creator_id" | "assignee_id" | "created_at" | "updated_at" | "assignee_name" | "assignee_avatar"
+  "id" | "board_id" | "creator_id" | "assignee_id" | "created_at" | "updated_at" | "assignee_name" | "assignee_avatar"
 >;
 
 export type LogInFromData = {
