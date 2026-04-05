@@ -1,6 +1,6 @@
 import Ticket from "./Ticket";
 import styles from "./Column.module.css";
-import type { TicketTypeSmall } from "../types";
+import type { TicketTypeSmall } from "../../../types";
 
 interface ColumnProps {
   title: string;

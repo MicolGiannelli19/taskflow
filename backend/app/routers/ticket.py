@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import uuid
 from app.database import get_db
-from app.models import Ticket, User, Comment
+from app.models import Ticket, User, Comment, Board, BoardColumn
 from app.schemas import (TicketCreate, TicketUpdate, TicketDetailed, UserResponse,
                      AttachmentResponse, CommentResponse)
 from app.dependencies import get_current_user
@@ -15,8 +15,8 @@ def get_ticket(board_id: uuid.UUID, ticket_id: uuid.UUID,
                db: Session = Depends(get_db)):
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id, Ticket.board_id == board_id).first()
     if not ticket:
-        raise HTTPException(status_code=404, detail="Ticket not found")
-    
+        raise HTTPException(status_code=404, detail=f"Ticket {ticket_id} not found on board {board_id}")
+
     assignee = db.query(User).filter(User.id == ticket.assignee_id).first() if ticket.assignee_id else None
     creator = db.query(User).filter(User.id == ticket.creator_id).first()
     
@@ -48,8 +48,16 @@ def get_ticket(board_id: uuid.UUID, ticket_id: uuid.UUID,
 
 @router.post("")
 def create_ticket(board_id: uuid.UUID, ticket: TicketCreate,
-                  current_user: User = Depends(get_current_user), 
+                  current_user: User = Depends(get_current_user),
                   db: Session = Depends(get_db)):
+    board = db.query(Board).filter(Board.id == board_id).first()
+    if not board:
+        raise HTTPException(status_code=404, detail=f"Board {board_id} not found")
+
+    column = db.query(BoardColumn).filter(BoardColumn.id == ticket.column_id, BoardColumn.board_id == board_id).first()
+    if not column:
+        raise HTTPException(status_code=404, detail=f"Column {ticket.column_id} not found on board {board_id}")
+
     max_position = db.query(Ticket).filter(Ticket.column_id == ticket.column_id).count()
     
     new_ticket = Ticket(
@@ -74,9 +82,15 @@ def update_ticket(board_id: uuid.UUID, ticket_id: uuid.UUID, ticket_update: Tick
                   db: Session = Depends(get_db)):
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id, Ticket.board_id == board_id).first()
     if not ticket:
-        raise HTTPException(status_code=404, detail="Ticket not found")
-    
+        raise HTTPException(status_code=404, detail=f"Ticket {ticket_id} not found on board {board_id}")
+
     update_data = ticket_update.dict(exclude_unset=True)
+
+    if "column_id" in update_data:
+        column = db.query(BoardColumn).filter(BoardColumn.id == update_data["column_id"], BoardColumn.board_id == board_id).first()
+        if not column:
+            raise HTTPException(status_code=404, detail=f"Column {update_data['column_id']} not found on board {board_id}")
+
     for field, value in update_data.items():
         setattr(ticket, field, value)
     
@@ -90,8 +104,8 @@ def delete_ticket(board_id: uuid.UUID, ticket_id: uuid.UUID,
                   db: Session = Depends(get_db)):
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id, Ticket.board_id == board_id).first()
     if not ticket:
-        raise HTTPException(status_code=404, detail="Ticket not found")
-    
+        raise HTTPException(status_code=404, detail=f"Ticket {ticket_id} not found on board {board_id}")
+
     db.delete(ticket)
     db.commit()
     return {"success": True, "message": "Ticket deleted successfully"}

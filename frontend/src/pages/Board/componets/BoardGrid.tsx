@@ -2,9 +2,9 @@
 // import React from "react";
 // import { useEffect, useState } from "react";
 import Column from "./Column";
-import styles from "./Board.module.css";
+import styles from "./BoardGrid.module.css";
 import { Link } from "react-router-dom";
-import type { ColumnType, TicketTypeSmall } from "../types";
+import type { ColumnType, TicketTypeSmall } from "../../../types";
 
 // import { title } from "process";
 // fetch board API Call
@@ -14,18 +14,18 @@ import type { ColumnType, TicketTypeSmall } from "../types";
 //   const res = await fetch(`${API_BASE}/users`);
 //   return res.json();
 // }
-interface BoardProps {
+interface BoardGridProps {
   columns: ColumnType[];
   tickets: TicketTypeSmall[];
 }
 
-export default function Board({ columns, tickets }: BoardProps) {
+export default function BoardGrid({ columns, tickets }: BoardGridProps) {
   return (
-    <div className={styles.board}>
+    <div className={styles.boardgrid}>
       <div className={styles.header}>
         <div>~Task Flow</div>
 
-        <Link to="/new-ticket">
+        <Link to="new-ticket">
           <button>Add New Ticket</button>
         </Link>
         <Link to="/login">

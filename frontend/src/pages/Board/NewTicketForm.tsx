@@ -1,16 +1,19 @@
-// import { useState } from "react";
-
-import { useState} from "react";
+import { useState } from "react";
 import styles from "./NewTicketForm.module.css";
-import { Link } from "react-router-dom";
-import type { TicketFormData } from "../types";
-interface NewTicketFormProps {
-  handleSubmit: (formData: TicketFormData) => void;
+import { useOutletContext, useNavigate, useParams } from "react-router-dom";
+import type { TicketFormData } from "../../types";
+
+interface BoardOutletContext {
+  handleNewTicket: (formData: TicketFormData) => void;
 }
 
-export default function NewTicketForm({ handleSubmit }: NewTicketFormProps) {
-  // const [newTitle, setNewTitle] = useState("")
+// Maybe this should be within a modal not a new page
+export default function NewTicketForm() {
+  const { handleNewTicket: handleSubmit } = useOutletContext<BoardOutletContext>();
+  const navigate = useNavigate();
+  const { boardId } = useParams();
   const [formData, setFormData] = useState<TicketFormData>({
+    column_id: "",
     title: "",
     description: "",
     priority: undefined,
@@ -32,9 +35,7 @@ export default function NewTicketForm({ handleSubmit }: NewTicketFormProps) {
       <div className={styles.header}>
         <h1>New Ticket</h1>
 
-        <Link to="/">
-          <button>Close</button>
-        </Link>
+        <button onClick={() => navigate(`/board/${boardId}`)}>Close</button>
       </div>
 
       <form
@@ -55,8 +56,8 @@ export default function NewTicketForm({ handleSubmit }: NewTicketFormProps) {
           placeholder="Description"
           value={formData.description}
           onChange={handleChange}
-          rows={4}        // optional: control height
-          cols={50}       // optional: control width
+          rows={4}
+          cols={50}
         />
           <input
           type="date"

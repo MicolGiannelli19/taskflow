@@ -166,3 +166,6 @@ Understand the three main token storage patterns and when to use each, so we can
 # EPIC : Set up the database in a a more scalable and fast API native way
 
 # THINK of a pattern where coloums have the standard names and then these can be changed to new names
+
+
+# Question ammend api design what would be appropiate I only want the user to be able to see the boards he is a part of ? what is correct should the generic /boards api retrun boards based on the user (token id) - or should the specific username be passed in to filter this here
