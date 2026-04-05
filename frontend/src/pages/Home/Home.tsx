@@ -14,7 +14,9 @@ export default function Home() {
   const [boards, setBoards] = useState<Board[]>([]);
 
   useEffect(() => {
-    instance.get("/boards").then((res) => setBoards(res.data));
+    instance.get("/boards")
+      .then((res) => setBoards(res.data))
+      .catch((err) => console.error("failed to fetch boards:", err));
   }, []);
 
   return (

@@ -14,8 +14,12 @@ export default function NewBoardForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await instance.post("/boards", formData);
-    navigate("/");
+    try {
+      await instance.post("/boards", formData);
+      navigate("/");
+    } catch (err) {
+      console.error("failed to create board:", err);
+    }
   };
 
   return (

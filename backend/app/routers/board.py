@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 @router.get("", response_model=List[BoardBase])
 def get_boards(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     boards = db.query(Board).filter(Board.owner_id == current_user.id).all()
+    if boards is None:
+        raise HTTPException(status_code=404, detail=f"No boards found for user {current_user.id}")
     return boards
 
 @router.get("/{board_id}", response_model=BoardWithData)
@@ -26,7 +28,7 @@ def get_board(
     board = db.query(Board).filter(Board.id == board_id).first()
 
     if not board:
-        raise HTTPException(status_code=404, detail="Board not found")
+        raise HTTPException(status_code=404, detail=f"Board {board_id} not found")
 
     columns = (
         db.query(BoardColumn)
@@ -65,6 +67,9 @@ def get_board(
 
 @router.post("", response_model=BoardBase)
 def create_board(board: BoardCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not board.name or not board.name.strip():
+        raise HTTPException(status_code=422, detail="Board name cannot be empty")
+
     new_board = Board(
         name=board.name,
         description=board.description,
