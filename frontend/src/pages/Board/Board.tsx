@@ -12,7 +12,8 @@ export default function Board() {
   const navigate = useNavigate();
   const [columns, setColumns] = useState<ColumnType[]>([]);
   const [tickets, setTickets] = useState<TicketTypeSmall[]>([]);
-  // const [isLoading, setIsLoading] = useState(false);
+  // TODO: replace with React Query — this refetchKey pattern is a temporary solution
+  const [refetchKey, setRefetchKey] = useState(0);
 
   useEffect(() => {
     const fetchBoard = async () => {
@@ -28,7 +29,7 @@ export default function Board() {
     };
 
     fetchBoard();
-  }, []);
+  }, [refetchKey]);
 
   const handleNewTicket = async (newTicketData: TicketFormData) => {
     
@@ -43,6 +44,7 @@ export default function Board() {
         column_id: backlogColumn.id,
       });
       console.log("ticket created:", response.data);
+      setRefetchKey((k) => k + 1);
       navigate(`/board/${boardId}`);
     } catch (error) {
       console.error("failed to create ticket:", error);
