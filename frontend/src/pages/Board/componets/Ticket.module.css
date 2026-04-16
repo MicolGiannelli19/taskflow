@@ -1,9 +1,75 @@
+/* ─── Ticket card ───────────────────────────────────────────────────────────── */
 .ticket {
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 8px 12px;
-  margin-bottom: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  font-size: 14px;
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-radius);
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  box-shadow: var(--shadow-xs);
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  cursor: pointer;
+  transition:
+    box-shadow 0.15s ease,
+    transform  0.12s ease,
+    border-color 0.15s ease;
+  position: relative;
+  max-height: 18vh;
+  overflow: hidden;
+}
+
+.ticket:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--color-border), var(--color-primary) 20%);
+}
+
+/* ─── Ticket header (title + move button) ───────────────────────────────────── */
+.ticket header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.ticket h1 {
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1.45;
+  flex: 1;
+}
+
+/* ─── Move button inside ticket ─────────────────────────────────────────────── */
+.ticket header button {
+  flex-shrink: 0;
+  padding: 2px 7px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+  white-space: nowrap;
+  opacity: 0;
+}
+
+.ticket:hover header button {
+  opacity: 1;
+}
+
+.ticket header button:hover:not(:disabled) {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: var(--priority-medium-bg);
+}
+
+.ticket header button:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
 }

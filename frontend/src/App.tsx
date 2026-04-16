@@ -5,7 +5,6 @@ import NewBoardForm from "./pages/Home/NewBoardForm";
 import LogInForm from "./components/LogInForm";
 import "./App.css";
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
-import type { LogInFromData } from "./types";
 import instance from "./api/axios";
 import { useAuth } from "./hooks/useAuth";
 
