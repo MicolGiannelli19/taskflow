@@ -1,29 +1,69 @@
+/* ─── Board container ───────────────────────────────────────────────────────── */
 .boardgrid {
   display: grid;
-  width: 90vw;
-  height: 90vh;
-  grid-template-rows: 10% auto;
-  /* This doesn't work because the main board goes beyond */
-  grid-template-columns: auto;
-  border: 5px black solid;
-  border-radius: 10px;
-  background-color: green;
-}
-
-.mainBoard {
-  display: flex;
-  gap: 10px;
-  flex-direction: row;
-  align-items: stretch;
-  padding: 10px;
+  width: 100vw;
+  height: 100vh;
+  grid-template-rows: 52px 1fr;
+  grid-template-columns: 1fr;
+  background-color: var(--color-background);
   overflow: hidden;
 }
 
-/* TODO: center content vertically within this do something like flex */
+/* ─── Top navigation bar ─────────────────────────────────────────────────────  */
 .header {
   display: flex;
-  justify-content: flex-end;
-  gap: 20px;
+  justify-content: space-between;
   align-items: center;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-card);
+  box-shadow: var(--shadow-xs);
+  position: relative;
+  z-index: 10;
+}
+
+.header > div:first-child {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+/* Push all links to the right as a group */
+.header > a:first-of-type {
+  margin-left: auto;
+}
+
+.header > a {
+  display: flex;
+  align-items: center;
+}
+
+/* ─── Columns scroll area ───────────────────────────────────────────────────── */
+.mainBoard {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: var(--column-gap);
   padding: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 2px dashed var(--color-border);
+
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.mainBoard::-webkit-scrollbar {
+  height: 6px;
+}
+.mainBoard::-webkit-scrollbar-track {
+  background: transparent;
+}
+.mainBoard::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
 }
