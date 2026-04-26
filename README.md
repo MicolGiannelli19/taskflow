@@ -30,6 +30,10 @@ The objective of this project is to create a full end-to-end application, focusi
 
 ## Running Locally
 
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) and Docker Compose
+
 ### Start all services
 
 From the project root:
@@ -43,15 +47,35 @@ This starts:
 * **Backend API** → http://localhost:8000
 * **PostgreSQL** → localhost:5432
 
-The database is automatically initialised with the schema and seeded with mock data on first run.
+On first run, the database is automatically initialised with the schema (`database/init.sql`) and seeded with mock data (`database/seed.sql`) — no manual steps needed. This creates three test users, a sample board with four columns (Backlog, In Progress, In Review, Done), six tickets, and a few comments.
+
+### Log in
+
+Use any of the seeded test accounts:
+
+| Email | Password |
+|-------|----------|
+| `alice@example.com` | `password123` |
+| `bob@example.com` | `password123` |
+| `carol@example.com` | `password123` |
+
+Alice is the board owner; Bob and Carol are members.
+
+### Rebuild after dependency changes
+
+```bash
+docker compose up --build
+```
 
 ### Reset the database
 
-To wipe and re-seed the database:
+To wipe and re-seed the database from scratch:
 
 ```bash
 docker compose down -v && docker compose up
 ```
+
+The `-v` flag removes the PostgreSQL data volume, so `init.sql` and `seed.sql` run again on the next start.
 
 ### Stop services
 
