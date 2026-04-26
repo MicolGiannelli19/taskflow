@@ -77,6 +77,7 @@ export default function Board() {
   return (
     <>
       {!outlet && <BoardGrid columns={columns} tickets={tickets} />}
+      {/* TODO: probably not the correct way to manage outlets and modals generically */}
       <Outlet context={{ handleNewTicket }} />
     </>
   );

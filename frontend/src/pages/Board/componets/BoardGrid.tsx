@@ -31,6 +31,9 @@ export default function BoardGrid({ columns, tickets }: BoardGridProps) {
         <Link to="/login">
           <button>Log in</button>
         </Link>
+        <Link to="/">
+          <button>Home</button>
+        </Link>
       </div>
 
       {/* TODO: change this so that it displays the correct thing */}
