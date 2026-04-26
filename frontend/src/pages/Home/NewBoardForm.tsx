@@ -23,6 +23,7 @@ export default function NewBoardForm() {
   };
 
   return (
+    <div className={styles.page}>
     <div className={styles.NewBoardForm}>
       <div className={styles.header}>
         <h2>New Board</h2>
@@ -46,6 +47,7 @@ export default function NewBoardForm() {
         />
         <button type="submit">Create</button>
       </form>
+    </div>
     </div>
   );
 }
