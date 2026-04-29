@@ -12,6 +12,7 @@ export default function Board() {
   const navigate = useNavigate();
   const [columns, setColumns] = useState<ColumnType[]>([]);
   const [tickets, setTickets] = useState<TicketTypeSmall[]>([]);
+
   // TODO: replace with React Query — this refetchKey pattern is a temporary solution
   const [refetchKey, setRefetchKey] = useState(0);
 
@@ -20,11 +21,11 @@ export default function Board() {
       console.log("fetching data for board id: ", boardId)
       try {
         const { data } = await instance.get(`/boards/${boardId}`);
-        console.log(data)
         setColumns(data.columns);
         setTickets(data.tickets);
       } catch (error) {
         console.error("Error fetching board:", error);
+        // TODO: handle error (e.g., show error message, navigate away, etc.)
       }
     };
 
@@ -37,6 +38,7 @@ export default function Board() {
     // should this be the same function to edit a ticket?
     // For now this is a basic function with no optimisitc updates
     console.log("submitting ticket", newTicketData, `to /boards/${boardId}/tickets`);
+    console.log("columns available for ticket assignment:", columns);
     const backlogColumn = columns.find((col) => col.name === "Backlog") ?? columns[0];
     try {
       const response = await instance.post(`/boards/${boardId}/tickets`, {
@@ -48,16 +50,19 @@ export default function Board() {
       navigate(`/board/${boardId}`);
     } catch (error) {
       console.error("failed to create ticket:", error);
+      // TODO: error handling (e.g., show error message)
     }
   };
 
-  //  I think we are putting move ticket ehre for optmistic rendering review this pattern
+  // //  I think we are putting move ticket here for optmistic rendering review this pattern
+  // TODO: I am writign this here for now but should be moved to some shared context
   // const moveTicket = (ticetId, columnId) => {
-  //   // make post request ???
+  //   // This shouldn't re-fetch the whole board just update the ticket's column id in the frontend and then make the API call to update the backend if it fails we can re fetch the board data to ensure consistency
+  //   instance.post(`/tickets/${ticetId}/move`, { column_id: columnId })
   //   setBoardData( (prevBoardData) => {
 
   //   }
-  // }
+  // // }
 
   // TODO: Fix syntax
   // TODO: add logic to re introduce ticket in backend and look up how this should be done

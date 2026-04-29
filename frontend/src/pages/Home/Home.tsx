@@ -19,7 +19,7 @@ export default function Home() {
   };
 
   const handleDelete = (id: string) => {
-    // TODO: confirm + delete request
+
     console.log("delete", id);
   };
 
