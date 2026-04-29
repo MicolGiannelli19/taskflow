@@ -19,8 +19,10 @@ export default function Home() {
   };
 
   const handleDelete = (id: string) => {
-
-    console.log("delete", id);
+    // TODO: add optimistic ui update and error handling
+    instance.delete(`/boards/${id}`)
+      .then(() => setBoards(boards.filter((b) => b.id !== id)))
+      .catch((err) => console.error("failed to delete board:", err));
   };
 
   return (
