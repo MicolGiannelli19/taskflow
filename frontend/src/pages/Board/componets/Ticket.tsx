@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import styles from "./Ticket.module.css";
 import type { TicketTypeSmall } from "../../../types";
+import instance from "@/api/axios";
 
 interface TicketProps {
   ticket: TicketTypeSmall;
@@ -13,8 +14,10 @@ export default function Ticket({ ticket }: TicketProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ top: 0, left: 0 });
 
+  // TODO: mock currently not working
   function onMove(columnId: string) {
-    // This shouldn't re-fetch the whole board just update the ticket's column id in the frontend and then make the API call to update the backend if it fails we can re fetch the board data to ensure consistency
+    //hardcoded board id for now, should be passed as prop or derived from context
+    instance.patch(`/tickets/94439b8f-36d8-44d5-b813-51c64bddef21/tickets/${ticket.id}`, { column_id: columnId })
     console.log("move", ticket.id, columnId);
   }
 
@@ -45,9 +48,9 @@ export default function Ticket({ ticket }: TicketProps) {
 
   // TODO: replace with real columns passed as prop
   const MOCK_COLUMNS = [
-    { id: "mock-1", name: "Backlog" },
-    { id: "mock-2", name: "In Progress" },
-    { id: "mock-3", name: "Done" },
+    { id: "dc8d11e1-3099-48fd-937f-ab3da975d23a", name: "Backlog" },
+    { id: "3fd27f14-2b19-447a-860e-b46d5d95d6cd", name: "In Progress" },
+    { id: "585ab7e8-58f3-4415-8b8d-e912b36875b1", name: "Done" },
   ];
 
   return (
