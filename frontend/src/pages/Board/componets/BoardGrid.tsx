@@ -2,6 +2,7 @@
 // import React from "react";
 // import { useEffect, useState } from "react";
 import Column from "./Column";
+import BoardSwitcher from "./BoardSwitcher";
 import styles from "./BoardGrid.module.css";
 import { Link } from "react-router-dom";
 import type { ColumnType, TicketTypeSmall } from "../../../types";
@@ -24,8 +25,9 @@ export default function BoardGrid({ boardId, columns, tickets }: BoardGridProps)
   return (
     <div className={styles.boardgrid}>
       <div className={styles.header}>
-        <div>~Task Flow</div>
+        <div>Task Flow</div>
 
+        <BoardSwitcher />
         <Link to="new-ticket">
           <button>Add New Ticket</button>
         </Link>

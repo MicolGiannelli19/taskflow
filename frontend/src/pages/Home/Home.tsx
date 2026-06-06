@@ -1,16 +1,14 @@
 import { Link } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import instance from "../../api/axios";
+import { useBoards } from "../../hooks/useBoards";
 import BoardElement from "./components/BoardElemnet";
 import type { BoardSummary } from "../../types";
 
 export default function Home() {
   const queryClient = useQueryClient();
 
-  const { data: boards = [], isLoading, isError } = useQuery({
-    queryKey: ["boards"],
-    queryFn: () => instance.get<BoardSummary[]>("/boards").then((r) => r.data),
-  });
+  const { data: boards = [], isLoading, isError } = useBoards();
 
   const deleteBoard = useMutation({
     mutationFn: (id: string) => instance.delete(`/boards/${id}`),
