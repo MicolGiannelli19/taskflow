@@ -14,8 +14,23 @@ export default function Home() {
 
   const deleteBoard = useMutation({
     mutationFn: (id: string) => instance.delete(`/boards/${id}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["boards"] }),
-    onError: (err) => console.error("failed to delete board:", err),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["boards"] });
+      const previous = queryClient.getQueryData<BoardSummary[]>(["boards"]);
+      queryClient.setQueryData<BoardSummary[]>(["boards"], (old) =>
+        old?.filter((b) => b.id !== id) ?? []
+      );
+      return { previous };
+    },
+    onError: (err, _id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["boards"], context.previous);
+      }
+      console.error("failed to delete board, rolled back:", err);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+    },
   });
 
   const handleEdit = (board: BoardSummary) => {

@@ -15,11 +15,12 @@ import type { ColumnType, TicketTypeSmall } from "../../../types";
 //   return res.json();
 // }
 interface BoardGridProps {
+  boardId: string;
   columns: ColumnType[];
   tickets: TicketTypeSmall[];
 }
 
-export default function BoardGrid({ columns, tickets }: BoardGridProps) {
+export default function BoardGrid({ boardId, columns, tickets }: BoardGridProps) {
   return (
     <div className={styles.boardgrid}>
       <div className={styles.header}>
@@ -42,7 +43,9 @@ export default function BoardGrid({ columns, tickets }: BoardGridProps) {
           // TODO: ticket proably shouldn't be a child of board ticket should just be displayed in the board it is assigned in ?
           <Column
             key={col.id}
-            title={col.name} // QUESTION: should the json be unpacked defining the props here or wihtin column
+            boardId={boardId}
+            title={col.name}
+            columns={columns}
             tickets={tickets.filter((t) => t.column_id === col.id)}
           />
 
