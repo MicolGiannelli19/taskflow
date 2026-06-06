@@ -37,6 +37,8 @@ export default function Board() {
     // pass in value of form here
     // should this be the same function to edit a ticket?
     // For now this is a basic function with no optimisitc updates
+    
+    // Lets start with replacing this with react query
     console.log("submitting ticket", newTicketData, `to /boards/${boardId}/tickets`);
     console.log("columns available for ticket assignment:", columns);
     const backlogColumn = columns.find((col) => col.name === "Backlog") ?? columns[0];
