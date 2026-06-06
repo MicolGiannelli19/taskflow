@@ -1,25 +1,32 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import styles from "./NewBoardForm.module.css";
 import instance from "../../api/axios";
-import { useNavigate } from "react-router-dom";
 
 export default function NewBoardForm() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({ name: "", description: "" });
+
+  const createBoard = useMutation({
+    mutationFn: (data: { name: string; description: string }) =>
+      instance.post("/boards", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+      navigate("/");
+    },
+    onError: (err) => console.error("failed to create board:", err),
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await instance.post("/boards", formData);
-      navigate("/");
-    } catch (err) {
-      console.error("failed to create board:", err);
-    }
+    createBoard.mutate(formData);
   };
 
   return (
@@ -45,7 +52,9 @@ export default function NewBoardForm() {
           onChange={handleChange}
           rows={3}
         />
-        <button type="submit">Create</button>
+        <button type="submit" disabled={createBoard.isPending}>
+          {createBoard.isPending ? "Creating…" : "Create"}
+        </button>
       </form>
     </div>
     </div>
