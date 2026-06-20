@@ -1,50 +1,35 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import styles from "./Ticket.module.css";
 import type { ColumnType, TicketTypeSmall } from "../../../types";
-import instance from "@/api/axios";
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 
 interface TicketProps {
-  boardId: string;
   columns: ColumnType[];
   ticket: TicketTypeSmall;
+  moveTicket: (vars: { ticketId: string; columnId: string }) => void;
 }
 
-export default function Ticket({ boardId, columns, ticket }: TicketProps) {
+export default function Ticket({ columns, ticket, moveTicket }: TicketProps) {
   const [isOpen, setIsOpen] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ top: 0, left: 0 });
-  const queryClient = useQueryClient();
 
-  const ref = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLDivElement>(null);
 
   // TODO implement changed style when dragging is being used
-  const [dragging, setDragging] = useState<boolean>(false)
+  const [dragging, setDragging] = useState<boolean>(false);
 
-  useEffect( () =>{
-    const el = ref.current
-    if (!el) return
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
 
     return draggable({
       element: el,
       onDragStart: () => console.log("dragging of ticket", ticket.title),
     });
-  }, []
-  )
-
-  // 
-  const moveTicket = useMutation({
-    mutationFn: (columnId: string) =>
-      instance.patch(`/boards/${boardId}/tickets/${ticket.id}`, {
-        column_id: columnId,
-      }),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["board", boardId] }),
-    onError: (err) => console.error("failed to move ticket:", err),
-  });
+  }, []);
 
   useEffect(() => {
     if (isOpen && btnRef.current) {
@@ -90,7 +75,7 @@ export default function Ticket({ boardId, columns, ticket }: TicketProps) {
                   <button
                     key={col.id}
                     onClick={() => {
-                      moveTicket.mutate(col.id);
+                      moveTicket({ ticketId: ticket.id, columnId: col.id });
                       setIsOpen(false);
                     }}
                   >

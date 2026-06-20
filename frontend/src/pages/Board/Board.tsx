@@ -1,8 +1,9 @@
 import BoardGrid from "./componets/BoardGrid";
 import { Outlet, useNavigate, useParams, useOutlet } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { ColumnType, TicketTypeSmall, TicketFormData } from "../../types";
 import instance from "../../api/axios";
+import { useCreateTicket } from "../../hooks/useCreateTicket";
 
 interface BoardData {
   columns: ColumnType[];
@@ -12,7 +13,6 @@ interface BoardData {
 export default function Board() {
   const { boardId } = useParams();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["board", boardId],
@@ -24,24 +24,16 @@ export default function Board() {
   const columns = data?.columns ?? [];
   const tickets = data?.tickets ?? [];
 
-  const createTicket = useMutation({
-    mutationFn: (newTicketData: TicketFormData) => {
-      const backlogColumn =
-        columns.find((col) => col.name === "Backlog") ?? columns[0];
-      return instance.post(`/boards/${boardId}/tickets`, {
-        ...newTicketData,
-        column_id: backlogColumn.id,
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["board", boardId] });
-      navigate(`/board/${boardId}`);
-    },
-    onError: (err) => console.error("failed to create ticket:", err),
-  });
+  const createTicket = useCreateTicket(boardId!);
 
-  const handleNewTicket = (newTicketData: TicketFormData) =>
-    createTicket.mutate(newTicketData);
+  const handleNewTicket = (newTicketData: TicketFormData) => {
+    const backlogColumn =
+      columns.find((col) => col.name === "Backlog") ?? columns[0];
+    createTicket.mutate(
+      { ...newTicketData, column_id: backlogColumn.id },
+      { onSuccess: () => navigate(`/board/${boardId}`) }
+    );
+  };
 
   const outlet = useOutlet();
 
