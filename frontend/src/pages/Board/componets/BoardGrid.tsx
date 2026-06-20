@@ -46,6 +46,7 @@ export default function BoardGrid({ boardId, columns, tickets }: BoardGridProps)
           <Column
             key={col.id}
             boardId={boardId}
+            columnId={col.id}
             title={col.name}
             columns={columns}
             tickets={tickets.filter((t) => t.column_id === col.id)}

@@ -1,23 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import styles from "./NewBoardForm.module.css";
-import instance from "../../api/axios";
+import { useCreateBoard } from "../../hooks/useCreateBoard";
 
 export default function NewBoardForm() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({ name: "", description: "" });
 
-  const createBoard = useMutation({
-    mutationFn: (data: { name: string; description: string }) =>
-      instance.post("/boards", data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["boards"] });
-      navigate("/");
-    },
-    onError: (err) => console.error("failed to create board:", err),
-  });
+  const createBoard = useCreateBoard();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -26,7 +16,9 @@ export default function NewBoardForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createBoard.mutate(formData);
+    createBoard.mutate(formData, {
+      onSuccess: () => navigate("/"),
+    });
   };
 
   return (

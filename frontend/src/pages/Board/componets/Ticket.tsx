@@ -27,6 +27,7 @@ export default function Ticket({ columns, ticket, moveTicket }: TicketProps) {
 
     return draggable({
       element: el,
+      getInitialData: () => ({ ticketId: ticket.id, fromColumnId: ticket.column_id }),
       onDragStart: () => console.log("dragging of ticket", ticket.title),
     });
   }, []);

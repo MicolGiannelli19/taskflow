@@ -1,35 +1,12 @@
 import { Link } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import instance from "../../api/axios";
 import { useBoards } from "../../hooks/useBoards";
+import { useDeleteBoard } from "../../hooks/useDeleteBoard";
 import BoardElement from "./components/BoardElemnet";
 import type { BoardSummary } from "../../types";
 
 export default function Home() {
-  const queryClient = useQueryClient();
-
   const { data: boards = [], isLoading, isError } = useBoards();
-
-  const deleteBoard = useMutation({
-    mutationFn: (id: string) => instance.delete(`/boards/${id}`),
-    onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: ["boards"] });
-      const previous = queryClient.getQueryData<BoardSummary[]>(["boards"]);
-      queryClient.setQueryData<BoardSummary[]>(["boards"], (old) =>
-        old?.filter((b) => b.id !== id) ?? []
-      );
-      return { previous };
-    },
-    onError: (err, _id, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(["boards"], context.previous);
-      }
-      console.error("failed to delete board, rolled back:", err);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["boards"] });
-    },
-  });
+  const deleteBoard = useDeleteBoard();
 
   const handleEdit = (board: BoardSummary) => {
     // TODO: open edit modal
