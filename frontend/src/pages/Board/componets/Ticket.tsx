@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import styles from "./Ticket.module.css";
 import type { ColumnType, TicketTypeSmall } from "../../../types";
 import instance from "@/api/axios";
+import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 
 interface TicketProps {
   boardId: string;
@@ -18,6 +19,23 @@ export default function Ticket({ boardId, columns, ticket }: TicketProps) {
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const queryClient = useQueryClient();
 
+  const ref = useRef<HTMLDivElement>(null)
+
+  // TODO implement changed style when dragging is being used
+  const [dragging, setDragging] = useState<boolean>(false)
+
+  useEffect( () =>{
+    const el = ref.current
+    if (!el) return
+
+    return draggable({
+      element: el,
+      onDragStart: () => console.log("dragging of ticket", ticket.title),
+    });
+  }, []
+  )
+
+  // 
   const moveTicket = useMutation({
     mutationFn: (columnId: string) =>
       instance.patch(`/boards/${boardId}/tickets/${ticket.id}`, {
@@ -52,7 +70,7 @@ export default function Ticket({ boardId, columns, ticket }: TicketProps) {
   }, [isOpen]);
 
   return (
-    <div className={styles.ticket}>
+    <div className={styles.ticket} ref={ref}>
       <header>
         <h1>{ticket.title}</h1>
 
