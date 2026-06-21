@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.routers import auth, board, ticket
-from app.exceptions import NotFoundError, ConflictError, ValidationError
+from app.exceptions import NotFoundError, ConflictError, ValidationError, ForbiddenError
 
 logging.basicConfig(
     level=logging.INFO,
@@ -52,6 +52,14 @@ async def validation_error_handler(request: Request, exc: ValidationError):
     return JSONResponse(
         status_code=422,
         content={"error": "Validation Error", "detail": exc.detail},
+    )
+
+
+@app.exception_handler(ForbiddenError)
+async def forbidden_handler(request: Request, exc: ForbiddenError):
+    return JSONResponse(
+        status_code=403,
+        content={"error": "Forbidden", "detail": exc.detail},
     )
 
 

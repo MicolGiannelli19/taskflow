@@ -1,7 +1,7 @@
 import logging
 import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -9,7 +9,7 @@ from app.database import get_db
 from app.models import Board, BoardColumn, Ticket, User
 from app.schemas import BoardCreate, BoardBase, BoardWithData, TicketBasic, ColumnResponse
 from app.dependencies import get_current_user
-from app.exceptions import NotFoundError, ValidationError
+from app.exceptions import NotFoundError, ValidationError, ForbiddenError
 
 router = APIRouter(prefix="/api/boards", tags=["boards"])
 logger = logging.getLogger(__name__)
@@ -89,3 +89,22 @@ def create_board(board: BoardCreate, current_user: User = Depends(get_current_us
 
     logger.info("User %s created board %s ('%s')", current_user.id, new_board.id, new_board.name)
     return new_board
+
+
+@router.delete("/{board_id}", status_code=204)
+def delete_board(
+    board_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    board = db.query(Board).filter(Board.id == board_id).first()
+    if not board:
+        raise NotFoundError(f"Board {board_id} not found")
+
+    if board.owner_id != current_user.id:
+        raise ForbiddenError("Only the board owner can delete this board")
+
+    db.delete(board)
+    db.commit()
+    logger.info("User %s deleted board %s", current_user.id, board_id)
+    return Response(status_code=204)

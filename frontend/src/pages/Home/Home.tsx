@@ -1,33 +1,32 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import instance from "../../api/axios";
-
-interface Board {
-  id: string;
-  name: string;
-  description: string;
-  owner_id: string;
-  created_at: string;
-}
+import { useBoards } from "../../hooks/useBoards";
+import { useDeleteBoard } from "../../hooks/useDeleteBoard";
+import BoardElement from "./components/BoardElemnet";
+import type { BoardSummary } from "../../types";
 
 export default function Home() {
-  const [boards, setBoards] = useState<Board[]>([]);
+  const { data: boards = [], isLoading, isError } = useBoards();
+  const deleteBoard = useDeleteBoard();
 
-  useEffect(() => {
-    instance.get("/boards")
-      .then((res) => setBoards(res.data))
-      .catch((err) => console.error("failed to fetch boards:", err));
-  }, []);
+  const handleEdit = (board: BoardSummary) => {
+    // TODO: open edit modal
+    console.log("edit", board);
+  };
 
   return (
     <div>
       <h1>Your Boards</h1>
       <Link to="/new-board"><button>New Board</button></Link>
+      {isLoading && <p>Loading…</p>}
+      {isError && <p>Failed to load boards.</p>}
       <ul>
         {boards.map((board) => (
-          <li key={board.id}>
-            <Link to={`/board/${board.id}`}>{board.name}</Link>
-          </li>
+          <BoardElement
+            key={board.id}
+            board={board}
+            onEdit={handleEdit}
+            onDelete={(id) => deleteBoard.mutate(id)}
+          />
         ))}
       </ul>
     </div>

@@ -157,6 +157,29 @@ Understand the three main token storage patterns and when to use each, so we can
 
 ---
 
+# EPIC: Drag-and-drop Phase 2 — within-column reordering
+
+Phase 1 (drag between columns) is complete. Within-column reordering was deliberately deferred.
+
+**Backend first:**
+- Add a `position` field to the `tickets` table
+- Decide on the position scheme before writing the migration:
+  - **Integer indexes** — simple, but every reorder rewrites N rows in the column
+  - **Fractional / sparse positions** (or LexoRank-style string ranks) — insert between two items by averaging, touches only one row. Recommended.
+- Backfill existing rows with positions
+- Update PATCH ticket endpoint to accept `position`
+- Order tickets by `position` in the GET board response
+
+**Frontend:**
+- Register each `Ticket` as a drop target (not just `Column`)
+- Use `@atlaskit/pragmatic-drag-and-drop-hitbox` for above/below edge detection on tickets
+- Extend `useMoveTicket` to send `position` alongside `column_id`, including in the optimistic update
+- Visual feedback for the insertion point (drop indicator line between tickets)
+
+**See:** `frontend/docs/drag-and-drop.md` for Phase 1 reference
+
+---
+
 # EPIC: DESIGN A WAY TO MAKE SHORT CUTS A CENTRAL FEATURE OF THIS
 
 # EPIC : Add tests to fast api application 

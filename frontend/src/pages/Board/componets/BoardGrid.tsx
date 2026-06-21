@@ -2,6 +2,7 @@
 // import React from "react";
 // import { useEffect, useState } from "react";
 import Column from "./Column";
+import BoardSwitcher from "./BoardSwitcher";
 import styles from "./BoardGrid.module.css";
 import { Link } from "react-router-dom";
 import type { ColumnType, TicketTypeSmall } from "../../../types";
@@ -15,21 +16,26 @@ import type { ColumnType, TicketTypeSmall } from "../../../types";
 //   return res.json();
 // }
 interface BoardGridProps {
+  boardId: string;
   columns: ColumnType[];
   tickets: TicketTypeSmall[];
 }
 
-export default function BoardGrid({ columns, tickets }: BoardGridProps) {
+export default function BoardGrid({ boardId, columns, tickets }: BoardGridProps) {
   return (
     <div className={styles.boardgrid}>
       <div className={styles.header}>
-        <div>~Task Flow</div>
+        <div>Task Flow</div>
 
+        <BoardSwitcher />
         <Link to="new-ticket">
           <button>Add New Ticket</button>
         </Link>
         <Link to="/login">
           <button>Log in</button>
+        </Link>
+        <Link to="/">
+          <button>Home</button>
         </Link>
       </div>
 
@@ -39,7 +45,10 @@ export default function BoardGrid({ columns, tickets }: BoardGridProps) {
           // TODO: ticket proably shouldn't be a child of board ticket should just be displayed in the board it is assigned in ?
           <Column
             key={col.id}
-            title={col.name} // QUESTION: should the json be unpacked defining the props here or wihtin column
+            boardId={boardId}
+            columnId={col.id}
+            title={col.name}
+            columns={columns}
             tickets={tickets.filter((t) => t.column_id === col.id)}
           />
 

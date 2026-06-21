@@ -27,10 +27,10 @@ Test credentials (from seed data): `alice@example.com` / `password123`
 
 ```bash
 cd frontend
-npm install
-npm run dev      # dev server
-npm run build    # production build (runs tsc first)
-npm run lint     # ESLint
+yarn install
+yarn dev         # dev server
+yarn build       # production build (runs tsc first)
+yarn lint        # ESLint
 ```
 
 ## Backend (FastAPI + Python)

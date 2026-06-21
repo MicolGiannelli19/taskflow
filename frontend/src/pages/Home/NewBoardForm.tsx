@@ -1,28 +1,28 @@
 import { useState } from "react";
-import styles from "./NewBoardForm.module.css";
-import instance from "../../api/axios";
 import { useNavigate } from "react-router-dom";
+import styles from "./NewBoardForm.module.css";
+import { useCreateBoard } from "../../hooks/useCreateBoard";
 
 export default function NewBoardForm() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ name: "", description: "" });
+
+  const createBoard = useCreateBoard();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await instance.post("/boards", formData);
-      navigate("/");
-    } catch (err) {
-      console.error("failed to create board:", err);
-    }
+    createBoard.mutate(formData, {
+      onSuccess: () => navigate("/"),
+    });
   };
 
   return (
+    <div className={styles.page}>
     <div className={styles.NewBoardForm}>
       <div className={styles.header}>
         <h2>New Board</h2>
@@ -44,8 +44,11 @@ export default function NewBoardForm() {
           onChange={handleChange}
           rows={3}
         />
-        <button type="submit">Create</button>
+        <button type="submit" disabled={createBoard.isPending}>
+          {createBoard.isPending ? "Creating…" : "Create"}
+        </button>
       </form>
+    </div>
     </div>
   );
 }

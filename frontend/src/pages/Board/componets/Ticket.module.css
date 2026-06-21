@@ -12,10 +12,15 @@
   transition:
     box-shadow 0.15s ease,
     transform  0.12s ease,
-    border-color 0.15s ease;
+    border-color 0.15s ease,
+    opacity 0.12s ease;
   position: relative;
   max-height: 18vh;
   overflow: hidden;
+}
+
+.dragging {
+  opacity: 0.4;
 }
 
 .ticket:hover {
@@ -42,6 +47,43 @@
   flex: 1;
 }
 
+/* ─── Move wrapper + dropdown ───────────────────────────────────────────────── */
+.moveWrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.dropdown {
+  position: fixed;
+  z-index: 100;
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: var(--shadow-md);
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dropdown button {
+  width: 100%;
+  text-align: left;
+  padding: 7px 12px;
+  font-size: 12.5px;
+  border: none;
+  border-radius: 0;
+  color: var(--color-text);
+  background: transparent;
+  opacity: 1;
+}
+
+.dropdown button:hover {
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  border: none;
+}
+
 /* ─── Move button inside ticket ─────────────────────────────────────────────── */
 .ticket header button {
   flex-shrink: 0;
@@ -59,7 +101,8 @@
   opacity: 0;
 }
 
-.ticket:hover header button {
+.ticket:hover header button,
+.ticket header button.active {
   opacity: 1;
 }
 

@@ -6,6 +6,15 @@ export interface BoardType {
   tickets: TicketType[];
 }
 
+// Board summary as returned by GET /boards
+export interface BoardSummary {
+  id: string;
+  name: string;
+  description: string;
+  owner_id: string;
+  created_at: string;
+}
+
 // Incomplete to be edited as I scope out more completly what this needs
 export interface UserType {
   id : string;
