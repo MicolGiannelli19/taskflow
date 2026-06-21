@@ -1,0 +1,20 @@
+{
+  "projectId": "232e452b-7b3f-4905-8959-824cb9ae2e46",
+  "shape": "package",
+  "pkg": "taskflow",
+  "globalName": "TaskFlow",
+  "srcDir": "src/components/ui",
+  "tsconfig": "tsconfig.app.json",
+  "cssEntry": "ds-theme.gen.css",
+  "readmeHeader": ".design-sync/conventions.md",
+  "overrides": {
+    "Select": { "cardMode": "single", "primaryStory": "Open" },
+    "SelectContent": { "cardMode": "single", "primaryStory": "Open" },
+    "SelectGroup": { "cardMode": "single", "primaryStory": "Open" },
+    "SelectItem": { "cardMode": "single", "primaryStory": "Open" },
+    "SelectLabel": { "cardMode": "single", "primaryStory": "Open" },
+    "SelectSeparator": { "cardMode": "single", "primaryStory": "Open" },
+    "SelectScrollDownButton": { "cardMode": "single", "primaryStory": "Overflowing" },
+    "SelectScrollUpButton": { "cardMode": "single", "primaryStory": "Overflowing" }
+  }
+}
