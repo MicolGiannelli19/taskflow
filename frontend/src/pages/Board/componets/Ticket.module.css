@@ -12,10 +12,15 @@
   transition:
     box-shadow 0.15s ease,
     transform  0.12s ease,
-    border-color 0.15s ease;
+    border-color 0.15s ease,
+    opacity 0.12s ease;
   position: relative;
   max-height: 18vh;
   overflow: hidden;
+}
+
+.dragging {
+  opacity: 0.4;
 }
 
 .ticket:hover {

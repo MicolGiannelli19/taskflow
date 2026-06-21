@@ -17,8 +17,6 @@ export default function Ticket({ columns, ticket, moveTicket }: TicketProps) {
   const [pos, setPos] = useState({ top: 0, left: 0 });
 
   const ref = useRef<HTMLDivElement>(null);
-
-  // TODO implement changed style when dragging is being used
   const [dragging, setDragging] = useState<boolean>(false);
 
   useEffect(() => {
@@ -28,9 +26,10 @@ export default function Ticket({ columns, ticket, moveTicket }: TicketProps) {
     return draggable({
       element: el,
       getInitialData: () => ({ ticketId: ticket.id, fromColumnId: ticket.column_id }),
-      onDragStart: () => console.log("dragging of ticket", ticket.title),
+      onDragStart: () => setDragging(true),
+      onDrop: () => setDragging(false),
     });
-  }, []);
+  }, [ticket.id, ticket.column_id]);
 
   useEffect(() => {
     if (isOpen && btnRef.current) {
@@ -56,7 +55,7 @@ export default function Ticket({ columns, ticket, moveTicket }: TicketProps) {
   }, [isOpen]);
 
   return (
-    <div className={styles.ticket} ref={ref}>
+    <div className={`${styles.ticket} ${dragging ? styles.dragging : ""}`} ref={ref}>
       <header>
         <h1>{ticket.title}</h1>
 
@@ -72,7 +71,7 @@ export default function Ticket({ columns, ticket, moveTicket }: TicketProps) {
                 className={styles.dropdown}
                 style={{ top: pos.top, right: window.innerWidth - pos.left }}
               >
-                {columns.map((col) => (
+                {columns.filter((col) => col.id !== ticket.column_id).map((col) => (
                   <button
                     key={col.id}
                     onClick={() => {
