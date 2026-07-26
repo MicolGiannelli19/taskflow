@@ -123,6 +123,16 @@ body {
   color: var(--color-text);
 }
 
+/* ============================================================================
+   BASE ELEMENT STYLES  →  Tailwind `base` layer
+   These global element rules are wrapped in @layer base so component utility
+   classes (bg-primary, border-input, rounded-md — emitted into the `utilities`
+   layer, which the cascade ranks above `base`) win whenever a shadcn component
+   opts in. Raw <button>/<input>/<select> elements carry no utilities and are
+   still fully styled here. Do NOT move these outside the layer: unlayered rules
+   beat every layer and would shadow all shadcn variants (the bug this fixes).
+   ============================================================================ */
+@layer base {
 /* ─── Base element reset ────────────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -253,6 +263,7 @@ a {
 a:hover {
   color: var(--color-primary-hover);
 }
+} /* end @layer base */
 
 /* ─── Home page layout ──────────────────────────────────────────────────────── */
 .App > div:not([class]) {

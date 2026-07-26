@@ -2,6 +2,7 @@ import { useState } from "react";
 import styles from "./NewTicketForm.module.css";
 import { useOutletContext, useNavigate, useParams } from "react-router-dom";
 import type { TicketFormData } from "../../types";
+import { Button } from "@/components/ui/button";
 
 interface BoardOutletContext {
   handleNewTicket: (formData: TicketFormData) => void;
@@ -35,7 +36,7 @@ export default function NewTicketForm() {
       <div className={styles.header}>
         <h1>New Ticket</h1>
 
-        <button onClick={() => navigate(`/board/${boardId}`)}>Close</button>
+        <Button variant="ghost" onClick={() => navigate(`/board/${boardId}`)}>Close</Button>
       </div>
 
       <form
@@ -77,7 +78,7 @@ export default function NewTicketForm() {
           <option value="high">High</option>
         </select>
 
-        <button type="submit">Submit</button>
+        <Button type="submit">Submit</Button>
       </form>
     </div>
   );
