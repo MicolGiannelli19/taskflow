@@ -1,7 +1,16 @@
+// TaskFlow schema — visual model for https://dbdiagram.io
+//
+// SOURCE OF TRUTH: the SQLAlchemy ORM models in backend/app/database/models/.
+// The schema is created by the app on startup (Base.metadata.create_all) and
+// seeded by app/seed.py — there are no raw SQL setup scripts. This file is
+// documentation only; keep it in sync with the models by hand.
+//
+// Authorization design: docs/specs/authorization-data-model.md
+
 Table users {
   id uuid [pk]
   email varchar(255) [unique, not null]
-  name varchar(255) [not null]
+  name varchar(255)
   avatar varchar(500)
   created_at timestamptz
   updated_at timestamptz
@@ -21,17 +30,25 @@ Table boards {
   id uuid [pk]
   name varchar(255) [not null]
   description text
-  owner_id uuid [not null, ref: > users.id]
   created_at timestamptz
   updated_at timestamptz
+  // No owner_id: ownership is a board_members row with role='owner' — the
+  // single source of truth for access (spec Decision 1).
 }
 
 Table board_members {
   id uuid [pk]
   board_id uuid [not null, ref: > boards.id]
   user_id uuid [not null, ref: > users.id]
-  role varchar(50) [not null, default: 'member', note: "'owner', 'admin', 'member', 'viewer'"]
+  role varchar(20) [not null, default: 'member', note: "CHECK: 'owner' | 'admin' | 'member' | 'viewer'"]
   created_at timestamptz
+
+  indexes {
+    (board_id, user_id) [unique, name: 'uq_board_members_user_board']
+    // Partial unique index (not expressible in DBML): UNIQUE (board_id)
+    // WHERE role = 'owner' — enforces at most one owner per board.
+    board_id [name: 'one_owner_per_board', note: 'partial unique WHERE role=owner']
+  }
 }
 
 Table columns {
@@ -56,6 +73,8 @@ Table tickets {
   due_date timestamptz
   created_at timestamptz
   updated_at timestamptz
+  // PLANNED (spec §11, not yet implemented): completed_at timestamptz,
+  // completed_by uuid ref users.id — powers the board progress bar.
 }
 
 Table comments {

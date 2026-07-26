@@ -14,8 +14,21 @@ curl http://localhost:8000/api/boards/550e8400-e29b-41d4-a716-446655440001
 # Fix Data model defenition
 # TODO: Migrate from init.sql to Alembic Migrations
 
+## ✅ DONE as of 2026-07-26 (the init.sql → ORM half)
+The move *off* raw SQL is complete — the SQLAlchemy ORM models are now the
+single source of truth:
+- `init.sql` / `seed.sql` deleted; schema is built by `Base.metadata.create_all`
+  and data by `app/seed.py` on startup (see steps 2, 3, and most of 5 below).
+- Code reorganized into `app/database/models/` (one file per model) + `schemas.py`.
+- Docker Compose no longer mounts an init script; README updated.
+
+**Still NOT started: adopting Alembic itself** (steps 1, 4, 6, 7). Until then,
+schema changes are applied by recreating the volume (`docker compose down -v`).
+
 ## Context
-Currently using `init.sql` for rapid MVP iteration. Need to transition to proper migration management before production.
+Was using `init.sql` for rapid MVP iteration; now on ORM `create_all`. Still
+need proper migration management (Alembic) before production so schema changes
+can be applied without wiping data.
 
 ## When to Start This Task
 - [ ] Schema changes are becoming less frequent (< 1 change per week)
@@ -37,18 +50,18 @@ Currently using `init.sql` for rapid MVP iteration. Need to transition to proper
 - [ ] Initialize Alembic: `alembic init alembic`
 - [ ] Configure `alembic.ini` with database URL
 
-### 2. Organize Code Structure
-- [ ] Create `backend/app/models/` directory
-- [ ] Split models into:
-  - [ ] `database.py` - SQLAlchemy ORM models (source of truth)
-  - [ ] `schemas.py` - Pydantic models (API validation)
-- [ ] Update imports across the application
+### 2. Organize Code Structure ✅
+- [x] Create models directory (`backend/app/database/models/`, one file per model)
+- [x] Split models into:
+  - [x] SQLAlchemy ORM models (source of truth) — `app/database/models/`
+  - [x] `schemas.py` - Pydantic models (API validation)
+- [x] Update imports across the application
 
-### 3. Convert init.sql to SQLAlchemy Models
-- [ ] Create SQLAlchemy Base model
-- [ ] Convert each table in `init.sql` to SQLAlchemy model class
-- [ ] Add relationships, indexes, and constraints
-- [ ] Test models can create expected schema
+### 3. Convert init.sql to SQLAlchemy Models ✅
+- [x] Create SQLAlchemy Base model
+- [x] Convert each table in `init.sql` to SQLAlchemy model class
+- [x] Add relationships, indexes, and constraints
+- [x] Test models can create expected schema
 
 ### 4. Create Initial Migration
 - [ ] Generate initial migration: `alembic revision --autogenerate -m "Initial schema"`
@@ -56,12 +69,12 @@ Currently using `init.sql` for rapid MVP iteration. Need to transition to proper
 - [ ] Test migration on fresh database: `alembic upgrade head`
 - [ ] Verify schema matches old `init.sql`
 
-### 5. Update Development Workflow
-- [ ] Remove `init.sql` or move to `database/archive/`
-- [ ] Update Docker Compose to not use `init.sql`
-- [ ] Update README with new migration commands
-- [ ] Create script for running migrations in development
-- [ ] Document migration workflow for team
+### 5. Update Development Workflow (partly done)
+- [x] Remove `init.sql` (deleted, along with seed.sql / set_up_mock_data.sql)
+- [x] Update Docker Compose to not use `init.sql`
+- [x] Update README with the current DB workflow (`down -v` reset)
+- [ ] Create script for running migrations in development (needs Alembic)
+- [ ] Document migration workflow for team (needs Alembic)
 
 ### 6. Update CI/CD (if applicable)
 - [ ] Add migration step to deployment pipeline
@@ -99,15 +112,15 @@ alembic current
 - [ ] Bookmark FastAPI with SQLAlchemy guide: https://fastapi.tiangolo.com/tutorial/sql-databases/
 
 ## Notes
-- Keep `init.sql` in git history for reference
+- `init.sql` remains in git history for reference (deleted from the working tree)
 - Consider creating a backup before first production migration
 - Test migrations thoroughly in staging environment first
 
 ---
 
-**Status**: Not Started  
+**Status**: ORM migration done; Alembic adoption not started  
 **Priority**: Medium (do before production)  
-**Estimated Time**: 3-4 hours  
+**Estimated Time**: ~2 hours remaining (Alembic setup + initial migration)  
 **Dependencies**: Schema stabilization
 
 
@@ -192,3 +205,11 @@ Phase 1 (drag between columns) is complete. Within-column reordering was deliber
 
 
 # Question ammend api design what would be appropiate I only want the user to be able to see the boards he is a part of ? what is correct should the generic /boards api retrun boards based on the user (token id) - or should the specific username be passed in to filter this here
+
+
+# Other ui features
+I am very visual and on a normal jira board I usually loose track of tickets I want all tickets to be saved with a random pixel icon next them so they are visually easy to recognise - i.e. its easier for my brain to work on the "blue frog ticket" then rember a ticket number
+
+I want to easily be able to move arround the page with keyboard short cuts only
+
+I want to have a widget that reminds me what ticket I am working on 
