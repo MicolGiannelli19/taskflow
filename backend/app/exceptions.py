@@ -18,3 +18,7 @@ class ValidationError(AppError):
 
 class ForbiddenError(AppError):
     pass
+
+
+class UnauthorizedError(AppError):
+    pass

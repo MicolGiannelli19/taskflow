@@ -1,0 +1,146 @@
+/*
+ * Design-sync bundle stylesheet (input for the Tailwind v4 CLI).
+ *
+ * This is a copy of frontend/src/index.css with two differences: the same
+ * `@theme inline` block that bridges the shadcn HSL design tokens into Tailwind's
+ * color theme (so utilities like `bg-primary` / `text-muted-foreground` /
+ * `border-input` are generated), plus `@source` directives and the dropped global
+ * element overrides so shadcn variant classes drive the look in the bundle.
+ *
+ * NOTE: frontend/src/index.css now carries the same `@theme inline` block, so the
+ * app build generates these utilities on its own — this bundle-only stylesheet is
+ * now redundant and can be retired in favor of the app's compiled CSS. See
+ * .design-sync/NOTES.md ("The DS-bundle workaround is now redundant").
+ *
+ * Compile:  .ds-sync/node_modules/.bin/tailwindcss -i .design-sync/ds-theme.css -o frontend/ds-theme.gen.css
+ * cfg.cssEntry points at the compiled output (frontend/ds-theme.gen.css, gitignored).
+ */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&display=swap');
+@import "tailwindcss";
+
+/* Scan the design-system components and authored previews for utility classes. */
+@source "../frontend/src/components/ui";
+@source "./previews";
+
+/* ─── Bridge shadcn HSL tokens → Tailwind color theme (the missing wiring) ──── */
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --radius: var(--radius);
+}
+
+/* ============================================================================
+   DESIGN TOKENS  (mirror of frontend/src/index.css — keep in sync)
+   Grouped by system: color scheme · typography · border radius · spacing · shadows
+   ============================================================================ */
+:root {
+  /* ─── Color scheme · semantic (shadcn) ──────────────────────────────────────
+     HSL channels, consumed as hsl(var(--token)). */
+  --background:             270 20% 98%;
+  --foreground:             270 10% 14%;
+  --card:                   0 0% 100%;
+  --card-foreground:        270 10% 14%;
+  --popover:                0 0% 100%;
+  --popover-foreground:     270 10% 14%;
+  --primary:                11 82% 41%;
+  --primary-foreground:     0 0% 98%;
+  --secondary:              270 14% 94%;
+  --secondary-foreground:   270 10% 26%;
+  --muted:                  270 14% 93%;
+  --muted-foreground:       270 6% 46%;
+  --accent:                 244 40% 94%;
+  --accent-foreground:      244 40% 30%;
+  --destructive:            11 80% 45%;
+  --destructive-foreground: 0 0% 98%;
+  --border:                 270 10% 82%;
+  --input:                  270 10% 82%;
+  --ring:                   11 82% 41%;
+
+  /* ─── Color scheme · brand palette (raw hex) ─── */
+  --color-background:    #FAFAFB;
+  --color-surface:       #EEEDF1;
+  --color-card:          #FFFFFF;
+  --color-border:        #D6D3DB;
+  --color-text:          #201F24;
+  --color-text-muted:    #6D6A73;
+  --color-primary:       #BC3113;
+  --color-primary-hover: #9A2810;
+
+  /* ─── Color scheme · priority palette ─── */
+  --priority-low-color:    #008B7F;
+  --priority-low-bg:       #E4F3F1;
+  --priority-medium-color: #8F9000;
+  --priority-medium-bg:    #F4F4E0;
+  --priority-high-color:   #BC3113;
+  --priority-high-bg:      #FBE9E5;
+
+  /* ─── Color scheme · charts ─── */
+  --chart-1: 11 82% 41%;   /* Once Bitten */
+  --chart-2: 175 100% 27%; /* Go Go Green */
+  --chart-3: 244 100% 74%; /* Orchid */
+  --chart-4: 60 100% 28%;  /* BioShock */
+  --chart-5: 270 7% 77%;   /* Weathered Stone */
+
+  /* ─── Typography ─── */
+  --font-sans:    'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+
+  /* ─── Border radius ─── */
+  --radius:      0.5rem; /* shadcn/ui components */
+  --card-radius: 8px;    /* app cards */
+
+  /* ─── Spacing / layout ─── */
+  --column-width:     272px; /* preferred / max column width */
+  --column-min-width: 200px; /* columns shrink to this before the board scrolls */
+  --column-gap:       12px;
+
+  /* ─── Shadows ─── */
+  --shadow-xs: 0 1px 2px rgba(32, 31, 36, 0.04);
+  --shadow-sm: 0 2px 6px rgba(32, 31, 36, 0.06);
+  --shadow-md: 0 4px 16px rgba(32, 31, 36, 0.09);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+body {
+  font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  font-optical-sizing: auto;
+  margin: 0;
+  background-color: #FAFAF7;
+  color: #2D2A26;
+}
+
+/* ─── Base element reset ────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+code {
+  font-family: 'Geist Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.875em;
+}
+
+label {
+  font-family: var(--font-sans);
+}

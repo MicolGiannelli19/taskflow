@@ -20,7 +20,10 @@ instance.interceptors.request.use((config) => {
 instance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // A 401 from the login request itself is a bad-credentials response, not an
+    // expired session — let the login page handle it instead of redirecting.
+    const isLoginRequest = error.config?.url?.includes("/auth/token");
+    if (error.response?.status === 401 && !isLoginRequest) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "/login";

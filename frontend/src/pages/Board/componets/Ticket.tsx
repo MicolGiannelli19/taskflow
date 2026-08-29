@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import styles from "./Ticket.module.css";
+import { Button } from "@/components/ui/button";
 import type { ColumnType, TicketTypeSmall } from "../../../types";
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 
@@ -60,9 +61,15 @@ export default function Ticket({ columns, ticket, moveTicket }: TicketProps) {
         <h1>{ticket.title}</h1>
 
         <div className={styles.moveWrapper}>
-          <button ref={btnRef} className={isOpen ? styles.active : ""} onClick={() => setIsOpen((o) => !o)}>
+          <Button
+            ref={btnRef}
+            variant="ghost"
+            size="sm"
+            className={isOpen ? styles.active : undefined}
+            onClick={() => setIsOpen((o) => !o)}
+          >
             move →
-          </button>
+          </Button>
 
           {isOpen &&
             createPortal(
@@ -72,15 +79,18 @@ export default function Ticket({ columns, ticket, moveTicket }: TicketProps) {
                 style={{ top: pos.top, right: window.innerWidth - pos.left }}
               >
                 {columns.filter((col) => col.id !== ticket.column_id).map((col) => (
-                  <button
+                  <Button
                     key={col.id}
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start"
                     onClick={() => {
                       moveTicket({ ticketId: ticket.id, columnId: col.id });
                       setIsOpen(false);
                     }}
                   >
                     {col.name}
-                  </button>
+                  </Button>
                 ))}
               </div>,
               document.body

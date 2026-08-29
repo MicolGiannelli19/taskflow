@@ -86,7 +86,15 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 ### 4. Set Up Database
 
-See the [database README](../database/README.md) for schema and seed setup instructions.
+No manual schema step is needed — the app creates all tables on startup
+(`Base.metadata.create_all`, from the ORM models in `app/database/models/`) and
+loads demo data via `app/seed.py`. Just ensure the database exists and
+`DATABASE_URL` points at it. A visual model lives in
+[`database/schema.dbml`](../database/schema.dbml); the authorization design is
+in [`docs/specs/authorization-data-model.md`](../docs/specs/authorization-data-model.md).
+
+> Schema changes: since there are no migrations during the MVP, apply them by
+> recreating the volume — `docker compose down -v && docker compose up`.
 
 ### 5. Run the Server
 
@@ -146,6 +154,12 @@ curl -X POST "http://localhost:8000/api/auth/token" \
 curl -X GET "http://localhost:8000/api/boards" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
+
+---
+
+## Authorization
+
+Access to a board is governed by membership-based, role-scoped authorization. Every board-scoped request — reads included — is checked live against the `board_members` table, which is the single source of truth for who can do what: each membership carries one of four roles (`owner`, `admin`, `member`, `viewer`), and non-members get a `404` so a board's existence is never leaked. The check is enforced through a reusable FastAPI dependency so every route re-invokes the same logic rather than reimplementing it. See [docs/specs/authorization-data-model.md](../docs/specs/authorization-data-model.md) for the full data model, permission matrix, and design rationale.
 
 ---
 

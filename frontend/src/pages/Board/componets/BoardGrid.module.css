@@ -1,20 +1,11 @@
-/* ─── Board container ───────────────────────────────────────────────────────── */
-.boardgrid {
-  display: grid;
-  width: 100vw;
-  height: 100vh;
-  grid-template-rows: 52px 1fr;
-  grid-template-columns: 1fr;
-  background-color: var(--color-background);
-  overflow: hidden;
-}
-
-/* ─── Top navigation bar ─────────────────────────────────────────────────────  */
+/* ─── Top bar (inside SidebarInset) ──────────────────────────────────────────  */
 .header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
+  gap: 10px;
+  height: 52px;
+  flex-shrink: 0;
+  padding: 0 16px;
   border-bottom: 1px solid var(--color-border);
   background-color: var(--color-card);
   box-shadow: var(--shadow-xs);
@@ -22,7 +13,7 @@
   z-index: 10;
 }
 
-.header > div:first-child {
+.header > div {
   font-family: var(--font-display);
   font-size: 16px;
   font-weight: 600;
@@ -31,26 +22,41 @@
   letter-spacing: -0.02em;
 }
 
-/* Push all links to the right as a group */
-.header > a:first-of-type {
-  margin-left: auto;
+.separator {
+  color: var(--color-border);
+  font-size: 16px;
+  user-select: none;
 }
 
-.header > a {
-  display: flex;
-  align-items: center;
+.boardName {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+
+/* Push the login button to the far right of the header */
+.loginBtn {
+  margin-left: auto;
 }
 
 /* ─── Columns scroll area ───────────────────────────────────────────────────── */
 .mainBoard {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: row;
   align-items: stretch;
   gap: var(--column-gap);
   padding: 20px;
+  background-color: var(--color-background);
   overflow-x: auto;
   overflow-y: hidden;
-  border: 2px dashed var(--color-border);
 
   /* Custom scrollbar */
   scrollbar-width: thin;

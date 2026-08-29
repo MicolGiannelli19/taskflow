@@ -1,20 +1,16 @@
-// Board.jsx
-// import React from "react";
-// import { useEffect, useState } from "react";
 import Column from "./Column";
-import BoardSwitcher from "./BoardSwitcher";
+import AppSidebar from "./AppSidebar";
 import styles from "./BoardGrid.module.css";
-import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { useAuth } from "../../../hooks/useAuth";
+import { useBoards } from "../../../hooks/useBoards";
 import type { ColumnType, TicketTypeSmall } from "../../../types";
 
-// import { title } from "process";
-// fetch board API Call
-// Create ticket api call
-
-// export async function fetchUsers() {
-//   const res = await fetch(`${API_BASE}/users`);
-//   return res.json();
-// }
 interface BoardGridProps {
   boardId: string;
   columns: ColumnType[];
@@ -22,40 +18,45 @@ interface BoardGridProps {
 }
 
 export default function BoardGrid({ boardId, columns, tickets }: BoardGridProps) {
+  const { logout } = useAuth();
+  const { data: boards } = useBoards();
+  const boardName = boards?.find((b) => String(b.id) === String(boardId))?.name;
+
   return (
-    <div className={styles.boardgrid}>
-      <div className={styles.header}>
-        <div>Task Flow</div>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className={styles.header}>
+          <SidebarTrigger />
+          <div>Task Flow</div>
+          {boardName && (
+            <>
+              <span className={styles.separator} aria-hidden="true">/</span>
+              <span className={styles.boardName}>{boardName}</span>
+            </>
+          )}
+          <Button
+            variant="destructive"
+            className={styles.loginBtn}
+            onClick={logout}
+          >
+            Log out
+          </Button>
+        </header>
 
-        <BoardSwitcher />
-        <Link to="new-ticket">
-          <button>Add New Ticket</button>
-        </Link>
-        <Link to="/login">
-          <button>Log in</button>
-        </Link>
-        <Link to="/">
-          <button>Home</button>
-        </Link>
-      </div>
-
-      {/* TODO: change this so that it displays the correct thing */}
-      <div className={styles.mainBoard}>
-        {columns.map((col) => (
-          // TODO: ticket proably shouldn't be a child of board ticket should just be displayed in the board it is assigned in ?
-          <Column
-            key={col.id}
-            boardId={boardId}
-            columnId={col.id}
-            title={col.name}
-            columns={columns}
-            tickets={tickets.filter((t) => t.column_id === col.id)}
-          />
-
-        ))}
-      </div>
-    </div>
+        <div className={styles.mainBoard}>
+          {columns.map((col) => (
+            <Column
+              key={col.id}
+              boardId={boardId}
+              columnId={col.id}
+              title={col.name}
+              columns={columns}
+              tickets={tickets.filter((t) => t.column_id === col.id)}
+            />
+          ))}
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
-
-// I need to investigate the relationship between doing things in the frontend and in the backend in things such as column renaming

@@ -11,11 +11,37 @@ curl http://localhost:8000/api/boards/550e8400-e29b-41d4-a716-446655440001
 - Fix the issue where I changed the name of the coloumn table to avoid conflict 
 
 
+# STORY: Auth/login functional fixes (2026-08-29)
+
+Bugs found while tracing the login flow. Login currently "works" only because it
+sends hardcoded mock credentials — real form input never reaches the API. Capture
+here so they survive the branch merges. Some may already be fixed on a branch
+being merged in — check them off if so.
+
+**Login sends mock values instead of the real form input**
+- `frontend/src/App.tsx` → `handleLogIn` ignores the form: it hardcodes
+  `mockemail`/`mockpassword` and builds a fake `mockUser` with `id: "mock"`.
+- Fix: take the real `LogInFromData`, POST the typed email/password (as
+  `username`/`password`, x-www-form-urlencoded), then load the real user (below).
+- [ ] Use real credentials from the form
+- [ ] Stop constructing a `mockUser`
+
+**Data-model drift to reconcile (related, lower urgency)**
+- [ ] `frontend/src/types.ts` `BoardSummary.owner_id` references a column that no
+      longer exists — `boards` dropped `owner_id` for the membership model. Will
+      break board-list wiring; update the type.
+- [ ] `tickets.creator_id` and `comments.user_id` use `ON DELETE CASCADE`, so
+      deleting a user wipes their tickets/comments. The spec left this TBD and did
+      not cascade — reconcile (likely `SET NULL` + a "deleted user" placeholder,
+      matching `assignee_id`).
+
+**Priority:** High for the login items (auth is broken for real users); Medium for the drift items.
+
+---
+
 # Fix Data model defenition
 # TODO: Migrate from init.sql to Alembic Migrations
 
-## Context
-Currently using `init.sql` for rapid MVP iteration. Need to transition to proper migration management before production.
 
 ## When to Start This Task
 - [ ] Schema changes are becoming less frequent (< 1 change per week)
@@ -31,37 +57,13 @@ Currently using `init.sql` for rapid MVP iteration. Need to transition to proper
 
 ## Migration Steps
 
-### 1. Setup Alembic
-- [ ] Install Alembic: `pip install alembic`
-- [ ] Add to `requirements.txt`
-- [ ] Initialize Alembic: `alembic init alembic`
-- [ ] Configure `alembic.ini` with database URL
 
-### 2. Organize Code Structure
-- [ ] Create `backend/app/models/` directory
-- [ ] Split models into:
-  - [ ] `database.py` - SQLAlchemy ORM models (source of truth)
-  - [ ] `schemas.py` - Pydantic models (API validation)
-- [ ] Update imports across the application
-
-### 3. Convert init.sql to SQLAlchemy Models
-- [ ] Create SQLAlchemy Base model
-- [ ] Convert each table in `init.sql` to SQLAlchemy model class
-- [ ] Add relationships, indexes, and constraints
-- [ ] Test models can create expected schema
-
-### 4. Create Initial Migration
-- [ ] Generate initial migration: `alembic revision --autogenerate -m "Initial schema"`
-- [ ] Review generated migration file
-- [ ] Test migration on fresh database: `alembic upgrade head`
-- [ ] Verify schema matches old `init.sql`
-
-### 5. Update Development Workflow
-- [ ] Remove `init.sql` or move to `database/archive/`
-- [ ] Update Docker Compose to not use `init.sql`
-- [ ] Update README with new migration commands
-- [ ] Create script for running migrations in development
-- [ ] Document migration workflow for team
+### 5. Update Development Workflow (partly done)
+- [x] Remove `init.sql` (deleted, along with seed.sql / set_up_mock_data.sql)
+- [x] Update Docker Compose to not use `init.sql`
+- [x] Update README with the current DB workflow (`down -v` reset)
+- [ ] Create script for running migrations in development (needs Alembic)
+- [ ] Document migration workflow for team (needs Alembic)
 
 ### 6. Update CI/CD (if applicable)
 - [ ] Add migration step to deployment pipeline
@@ -99,15 +101,15 @@ alembic current
 - [ ] Bookmark FastAPI with SQLAlchemy guide: https://fastapi.tiangolo.com/tutorial/sql-databases/
 
 ## Notes
-- Keep `init.sql` in git history for reference
+- `init.sql` remains in git history for reference (deleted from the working tree)
 - Consider creating a backup before first production migration
 - Test migrations thoroughly in staging environment first
 
 ---
 
-**Status**: Not Started  
+**Status**: ORM migration done; Alembic adoption not started  
 **Priority**: Medium (do before production)  
-**Estimated Time**: 3-4 hours  
+**Estimated Time**: ~2 hours remaining (Alembic setup + initial migration)  
 **Dependencies**: Schema stabilization
 
 
@@ -180,6 +182,50 @@ Phase 1 (drag between columns) is complete. Within-column reordering was deliber
 
 ---
 
+# STORY: Better debugger setup for the backend
+
+**Type:** Dev-experience / tooling
+**Status:** Not started (paused 2026-08-29 — decided approach, deferred the work)
+
+**Context:**
+There's currently no way to run the VS Code debugger against the backend. There's
+no `.vscode/launch.json`, the backend only runs inside the `backend` container
+(`command: uvicorn app.main:app --reload`), and `debugpy` isn't in
+`requirements.txt`. So today debugging = print statements / logs only. Want proper
+breakpoints for stepping through the new authz + service-layer code.
+
+**Two approaches evaluated:**
+
+1. **Debug locally, Postgres in Docker (RECOMMENDED — least friction):**
+   Run only the DB in Docker (`docker compose up db`, already published on
+   `localhost:5432`) and launch the backend on the host under the debugger.
+   - Add a `launch.json` "Python: FastAPI" config running
+     `uvicorn app.main:app --reload` with `cwd: backend`.
+   - **Gotcha:** `config.py`'s default `database_url` is wrong for the compose DB
+     (`user:password@localhost/taskflow_db`). Must pass the real one:
+     `postgresql://taskflow_user:taskflow_pass@localhost:5432/taskflow_db`.
+   - **Gotcha:** deps must be installed in a local venv
+     (`pip install -r requirements.txt`) — the container's are isolated.
+   - Bonus: `seed_on_startup=True` seeds on launch; same config pattern also
+     enables debugging `pytest`.
+
+2. **Attach to the container via `debugpy`:** add `debugpy` to
+   `requirements.txt`, change the backend command to
+   `python -m debugpy --listen 0.0.0.0:5678 -m uvicorn ...`, expose port `5678`
+   in compose, add an "attach" `launch.json`. Closest to prod parity, more moving
+   parts.
+
+**Acceptance criteria:**
+- [ ] Can set a breakpoint in a router/service and hit it on a real request
+- [ ] `.vscode/launch.json` committed with a FastAPI debug config (Option A)
+- [ ] A `pytest` debug config so tests can be stepped through too
+- [ ] Quick note in `backend/README.md` on how to start a debug session
+
+**Priority:** Low–Medium (quality of life; do before the big authz test-writing push)
+**Dependencies:** local venv with requirements installed
+
+---
+
 # EPIC: DESIGN A WAY TO MAKE SHORT CUTS A CENTRAL FEATURE OF THIS
 
 # EPIC : Add tests to fast api application 
@@ -192,3 +238,11 @@ Phase 1 (drag between columns) is complete. Within-column reordering was deliber
 
 
 # Question ammend api design what would be appropiate I only want the user to be able to see the boards he is a part of ? what is correct should the generic /boards api retrun boards based on the user (token id) - or should the specific username be passed in to filter this here
+
+
+# Other ui features
+I am very visual and on a normal jira board I usually loose track of tickets I want all tickets to be saved with a random pixel icon next them so they are visually easy to recognise - i.e. its easier for my brain to work on the "blue frog ticket" then rember a ticket number
+
+I want to easily be able to move arround the page with keyboard short cuts only
+
+I want to have a widget that reminds me what ticket I am working on 
