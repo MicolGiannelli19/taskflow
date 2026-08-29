@@ -5,6 +5,7 @@ import Column from "./Column";
 import BoardSwitcher from "./BoardSwitcher";
 import styles from "./BoardGrid.module.css";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import type { ColumnType, TicketTypeSmall } from "../../../types";
 
 // import { title } from "process";
@@ -28,15 +29,15 @@ export default function BoardGrid({ boardId, columns, tickets }: BoardGridProps)
         <div>Task Flow</div>
 
         <BoardSwitcher />
-        <Link to="new-ticket">
-          <button>Add New Ticket</button>
-        </Link>
-        <Link to="/login">
-          <button>Log in</button>
-        </Link>
-        <Link to="/">
-          <button>Home</button>
-        </Link>
+        <Button asChild>
+          <Link to="new-ticket">Add New Ticket</Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link to="/login">Log in</Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link to="/">Home</Link>
+        </Button>
       </div>
 
       {/* TODO: change this so that it displays the correct thing */}

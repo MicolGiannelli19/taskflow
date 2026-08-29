@@ -35,9 +35,26 @@ class BoardBase(BaseModel):
     id: uuid.UUID
     name: str
     description: Optional[str] = None
-    owner_id: uuid.UUID
     created_at: datetime
-    
+
+    class Config:
+        from_attributes = True
+
+# Board membership schemas
+class MemberAdd(BaseModel):
+    email: EmailStr
+    role: str = "member"
+
+class MemberRoleUpdate(BaseModel):
+    role: str
+
+class MemberResponse(BaseModel):
+    user_id: uuid.UUID
+    email: EmailStr
+    name: Optional[str] = None
+    avatar: Optional[str] = None
+    role: str
+
     class Config:
         from_attributes = True
 

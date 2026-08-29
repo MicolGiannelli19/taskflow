@@ -12,8 +12,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/01_init.sql
-      - ./database/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
+      # Schema + seed are now owned by the FastAPI app on startup
+      # (Base.metadata.create_all + app.seed), not the Postgres init scripts.
     networks:
       - taskflow-network
     healthcheck:

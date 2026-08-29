@@ -1,14 +1,16 @@
 import type { LogInFromData } from "../types";
 import styles from "./LogInForm.module.css";
 import { useState } from "react"
+import { Button } from "@/components/ui/button"
 
 // This is a Controlled form example
 // this is wrong email 
 interface LogInFormProps {
     handleLogIn: (FormData: LogInFromData) => void;
+    error?: string | null;
 }
 
-export default function LogInForm({handleLogIn}: LogInFormProps){
+export default function LogInForm({handleLogIn, error}: LogInFormProps){
 
     const [formData, setFromData] = useState<LogInFromData>({
         email: "",
@@ -45,7 +47,7 @@ export default function LogInForm({handleLogIn}: LogInFormProps){
             placeholder="password"
             value={formData.password}
             onChange={handleInputChange}/>
-            <button type="submit">Log In</button>
+            <Button type="submit">Log In</Button>
         </form>
     </div>
     )

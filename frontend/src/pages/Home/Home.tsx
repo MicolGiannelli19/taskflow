@@ -3,6 +3,7 @@ import { useBoards } from "../../hooks/useBoards";
 import { useDeleteBoard } from "../../hooks/useDeleteBoard";
 import BoardElement from "./components/BoardElemnet";
 import type { BoardSummary } from "../../types";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const { data: boards = [], isLoading, isError } = useBoards();
@@ -16,7 +17,7 @@ export default function Home() {
   return (
     <div>
       <h1>Your Boards</h1>
-      <Link to="/new-board"><button>New Board</button></Link>
+      <Button asChild><Link to="/new-board">New Board</Link></Button>
       {isLoading && <p>Loading…</p>}
       {isError && <p>Failed to load boards.</p>}
       <ul>

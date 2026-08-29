@@ -5,32 +5,40 @@ import NewBoardForm from "./pages/Home/NewBoardForm";
 import LogInForm from "./components/LogInForm";
 import "./App.css";
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
+import axios from "axios";
+import { useState } from "react";
 import instance from "./api/axios";
 import { useAuth } from "./hooks/useAuth";
+import type { LogInFromData, UserType } from "./types";
 
 function App() {
   const navigate = useNavigate();
   const { user, isLoading, login } = useAuth();
+  const [loginError, setLoginError] = useState<string | null>(null);
 
-  // const handleLogIn = async (logInDetails: LogInFromData) => {
-  const handleLogIn = async () => {
+  const handleLogIn = async (logInDetails: LogInFromData) => {
+    setLoginError(null);
+
+    // OAuth2PasswordRequestForm expects x-www-form-urlencoded `username`/`password`.
     const formData = new URLSearchParams();
-
-    const mockemail = "user@example.com";
-    const mockpassword = "string";
-
-    formData.append("username", mockemail);
-    formData.append("password", mockpassword);
+    formData.append("username", logInDetails.email);
+    formData.append("password", logInDetails.password);
 
     try {
       const { data } = await instance.post("/auth/token", formData, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
-      const mockUser = { id: "mock", email: mockemail, name: null, avatar: null, created_at: new Date().toISOString() };
-      login(mockUser, data.access_token);
+      // Persist the token first so the request interceptor attaches it to /auth/me.
+      localStorage.setItem("token", data.access_token);
+      const { data: currentUser } = await instance.get<UserType>("/auth/me");
+      login(currentUser, data.access_token);
       navigate("/");
-      console.log("Login Successfull")
     } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        setLoginError("Incorrect email or password");
+      } else {
+        setLoginError("Something went wrong. Please try again.");
+      }
       console.error("login failed:", error);
     }
   };
@@ -44,7 +52,7 @@ function App() {
       <Routes>
         <Route path="/" element={user ? <Home /> : <Navigate to="/login" replace />} />
         <Route path="/new-board" element={user ? <NewBoardForm /> : <Navigate to="/login" replace />} />
-        <Route path="/login" element={<LogInForm handleLogIn={handleLogIn} />} />
+        <Route path="/login" element={<LogInForm handleLogIn={handleLogIn} error={loginError} />} />
         <Route path="/board/:boardId" element={user ? <Board /> : <Navigate to="/login" replace />}>
           <Route path="new-ticket" element={<NewTicketForm />} />
         </Route>
