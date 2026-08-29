@@ -1,14 +1,16 @@
 /*
  * Design-sync bundle stylesheet (input for the Tailwind v4 CLI).
  *
- * This is a copy of frontend/src/index.css with one addition: an `@theme inline`
- * block that bridges the shadcn HSL design tokens into Tailwind's color theme so
- * utilities like `bg-primary` / `text-muted-foreground` / `border-input` are
- * generated. The app's own src/index.css lacks this block, so those utilities
- * are absent from the app build — the shadcn components fall back to the global
- * element styles below and every variant renders identically. This file fixes
- * that for the design-system bundle ONLY; the app source is intentionally left
- * unchanged (user decision, 2026-06-21).
+ * This is a copy of frontend/src/index.css with two differences: the same
+ * `@theme inline` block that bridges the shadcn HSL design tokens into Tailwind's
+ * color theme (so utilities like `bg-primary` / `text-muted-foreground` /
+ * `border-input` are generated), plus `@source` directives and the dropped global
+ * element overrides so shadcn variant classes drive the look in the bundle.
+ *
+ * NOTE: frontend/src/index.css now carries the same `@theme inline` block, so the
+ * app build generates these utilities on its own — this bundle-only stylesheet is
+ * now redundant and can be retired in favor of the app's compiled CSS. See
+ * .design-sync/NOTES.md ("The DS-bundle workaround is now redundant").
  *
  * Compile:  .ds-sync/node_modules/.bin/tailwindcss -i .design-sync/ds-theme.css -o frontend/ds-theme.gen.css
  * cfg.cssEntry points at the compiled output (frontend/ds-theme.gen.css, gitignored).
