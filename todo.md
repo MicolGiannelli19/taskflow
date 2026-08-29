@@ -11,6 +11,48 @@ curl http://localhost:8000/api/boards/550e8400-e29b-41d4-a716-446655440001
 - Fix the issue where I changed the name of the coloumn table to avoid conflict 
 
 
+# STORY: Auth/login functional fixes (2026-08-29)
+
+Bugs found while tracing the login flow. Login currently "works" only because it
+sends hardcoded mock credentials — real form input never reaches the API. Capture
+here so they survive the branch merges. Some may already be fixed on a branch
+being merged in — check them off if so.
+
+**Login sends mock values instead of the real form input**
+- `frontend/src/App.tsx` → `handleLogIn` ignores the form: it hardcodes
+  `mockemail`/`mockpassword` and builds a fake `mockUser` with `id: "mock"`.
+- Fix: take the real `LogInFromData`, POST the typed email/password (as
+  `username`/`password`, x-www-form-urlencoded), then load the real user (below).
+- [ ] Use real credentials from the form
+- [ ] Stop constructing a `mockUser`
+
+**No way to fetch the real logged-in user**
+- `POST /api/auth/token` only returns a token — there is no `GET /api/auth/me`,
+  which is *why* the frontend fakes the user object.
+- [ ] Add `GET /api/auth/me` (returns current user via `get_current_user`)
+- [ ] After token, call `/auth/me` and store the real user
+
+**A failed login gets swallowed / redirected**
+- `frontend/src/api/axios.ts` response interceptor redirects to `/login` on ANY
+  401 — including the login request itself — so a bad-credentials error can never
+  be shown (the page reloads first).
+- [ ] Exclude the `/auth/token` request from the 401 redirect
+- [ ] Surface the 401 in the UI ("Incorrect email or password") — pass an
+      `error` prop into `LogInForm` and render it
+
+**Data-model drift to reconcile (related, lower urgency)**
+- [ ] `frontend/src/types.ts` `BoardSummary.owner_id` references a column that no
+      longer exists — `boards` dropped `owner_id` for the membership model. Will
+      break board-list wiring; update the type.
+- [ ] `tickets.creator_id` and `comments.user_id` use `ON DELETE CASCADE`, so
+      deleting a user wipes their tickets/comments. The spec left this TBD and did
+      not cascade — reconcile (likely `SET NULL` + a "deleted user" placeholder,
+      matching `assignee_id`).
+
+**Priority:** High for the login items (auth is broken for real users); Medium for the drift items.
+
+---
+
 # Fix Data model defenition
 # TODO: Migrate from init.sql to Alembic Migrations
 

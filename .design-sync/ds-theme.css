@@ -1,19 +1,16 @@
 /*
  * Design-sync bundle stylesheet (input for the Tailwind v4 CLI).
  *
- * A copy of frontend/src/index.css with an `@theme inline` block that bridges the
- * shadcn HSL design tokens into Tailwind's color theme (so utilities like
- * `bg-primary` / `text-muted-foreground` / `border-input` are generated) plus
- * `@source` directives scoping the scan to the DS components + previews.
+ * This is a copy of frontend/src/index.css with two differences: the same
+ * `@theme inline` block that bridges the shadcn HSL design tokens into Tailwind's
+ * color theme (so utilities like `bg-primary` / `text-muted-foreground` /
+ * `border-input` are generated), plus `@source` directives and the dropped global
+ * element overrides so shadcn variant classes drive the look in the bundle.
  *
- * NOTE (shadcn-migration branch, 2026-07-27): frontend/src/index.css now ALSO has
- * this `@theme` block, and its global element rules were moved into `@layer base`
- * so component utilities out-rank them. That makes this file largely redundant —
- * the intended cleanup is to point cfg.cssEntry at the app's compiled
- * dist/assets/*.css and delete this file + the gen step. Kept for now only because
- * that requires a working native `vite build` (current bundler install is
- * Linux-only / Docker). Unlike the app CSS, this copy DROPS the global element
- * rules rather than layering them (the DS bundle renders only shadcn components).
+ * NOTE: frontend/src/index.css now carries the same `@theme inline` block, so the
+ * app build generates these utilities on its own — this bundle-only stylesheet is
+ * now redundant and can be retired in favor of the app's compiled CSS. See
+ * .design-sync/NOTES.md ("The DS-bundle workaround is now redundant").
  *
  * Compile:  .ds-sync/node_modules/.bin/tailwindcss -i .design-sync/ds-theme.css -o frontend/ds-theme.gen.css
  * cfg.cssEntry points at the compiled output (frontend/ds-theme.gen.css, gitignored).
