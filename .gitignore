@@ -1,6 +1,13 @@
 .env
 micol-notes.md
 micol-notes
+
+# Python build artifacts
+__pycache__/
+*.py[cod]
+
+# Local / test databases
+*.db
 # design-sync (transient)
 .ds-sync/
 ds-bundle/
