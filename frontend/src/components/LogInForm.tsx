@@ -1,6 +1,7 @@
 import type { LogInFromData } from "../types";
 import styles from "./LogInForm.module.css";
 import { useState } from "react"
+import { Button } from "@/components/ui/button"
 
 // This is a Controlled form example
 // this is wrong email 
@@ -45,7 +46,7 @@ export default function LogInForm({handleLogIn}: LogInFormProps){
             placeholder="password"
             value={formData.password}
             onChange={handleInputChange}/>
-            <button type="submit">Log In</button>
+            <Button type="submit">Log In</Button>
         </form>
     </div>
     )
