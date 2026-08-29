@@ -1,5 +1,5 @@
 import BoardGrid from "./componets/BoardGrid";
-import { Outlet, useNavigate, useParams, useOutlet } from "react-router-dom";
+import { Outlet, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import type { ColumnType, TicketTypeSmall, TicketFormData } from "../../types";
 import instance from "../../api/axios";
@@ -35,19 +35,14 @@ export default function Board() {
     );
   };
 
-  const outlet = useOutlet();
-
   return (
     <>
-      {!outlet && (
-        <>
-          {isLoading && <p>Loading…</p>}
-          {isError && <p>Failed to load board.</p>}
-          {!isLoading && !isError && (
-            <BoardGrid boardId={boardId!} columns={columns} tickets={tickets} />
-          )}
-        </>
+      {isLoading && <p>Loading…</p>}
+      {isError && <p>Failed to load board.</p>}
+      {!isLoading && !isError && (
+        <BoardGrid boardId={boardId!} columns={columns} tickets={tickets} />
       )}
+      {/* Nested "new-ticket" route renders as a Dialog overlaying the board. */}
       <Outlet context={{ handleNewTicket }} />
     </>
   );

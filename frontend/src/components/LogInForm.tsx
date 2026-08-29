@@ -47,6 +47,7 @@ export default function LogInForm({handleLogIn, error}: LogInFormProps){
             placeholder="password"
             value={formData.password}
             onChange={handleInputChange}/>
+            {error && <p role="alert" style={{ color: "var(--priority-high-color)", margin: 0 }}>{error}</p>}
             <Button type="submit">Log In</Button>
         </form>
     </div>

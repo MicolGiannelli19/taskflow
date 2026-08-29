@@ -53,50 +53,50 @@
 :root {
   /* ─── Color scheme · semantic (shadcn) ──────────────────────────────────────
      HSL channels, consumed as hsl(var(--token)). */
-  --background:             40 22% 97%;
-  --foreground:             28 10% 16%;
+  --background:             270 20% 98%;
+  --foreground:             270 10% 14%;
   --card:                   0 0% 100%;
-  --card-foreground:        28 10% 16%;
+  --card-foreground:        270 10% 14%;
   --popover:                0 0% 100%;
-  --popover-foreground:     28 10% 16%;
-  --primary:                30 52% 38%;
-  --primary-foreground:     40 22% 97%;
-  --secondary:              35 18% 93%;
-  --secondary-foreground:   28 10% 26%;
-  --muted:                  35 16% 91%;
-  --muted-foreground:       28 8% 48%;
-  --accent:                 35 18% 93%;
-  --accent-foreground:      28 10% 16%;
-  --destructive:            0 72% 51%;
+  --popover-foreground:     270 10% 14%;
+  --primary:                11 82% 41%;
+  --primary-foreground:     0 0% 98%;
+  --secondary:              270 14% 94%;
+  --secondary-foreground:   270 10% 26%;
+  --muted:                  270 14% 93%;
+  --muted-foreground:       270 6% 46%;
+  --accent:                 244 40% 94%;
+  --accent-foreground:      244 40% 30%;
+  --destructive:            11 80% 45%;
   --destructive-foreground: 0 0% 98%;
-  --border:                 35 14% 87%;
-  --input:                  35 14% 87%;
-  --ring:                   30 52% 38%;
+  --border:                 270 10% 82%;
+  --input:                  270 10% 82%;
+  --ring:                   11 82% 41%;
 
   /* ─── Color scheme · brand palette (raw hex) ─── */
-  --color-background:    #FAFAF7;
-  --color-surface:       #F3EFE8;
+  --color-background:    #FAFAFB;
+  --color-surface:       #EEEDF1;
   --color-card:          #FFFFFF;
-  --color-border:        #E6E0D6;
-  --color-text:          #2D2A26;
-  --color-text-muted:    #8A8278;
-  --color-primary:       #9B6B2F;
-  --color-primary-hover: #7D5524;
+  --color-border:        #D6D3DB;
+  --color-text:          #201F24;
+  --color-text-muted:    #6D6A73;
+  --color-primary:       #BC3113;
+  --color-primary-hover: #9A2810;
 
   /* ─── Color scheme · priority palette ─── */
-  --priority-low-color:    #2E7D52;
-  --priority-low-bg:       #EDFAF3;
-  --priority-medium-color: #B5621A;
-  --priority-medium-bg:    #FFF6EC;
-  --priority-high-color:   #C0392B;
-  --priority-high-bg:      #FFF1EF;
+  --priority-low-color:    #008B7F;
+  --priority-low-bg:       #E4F3F1;
+  --priority-medium-color: #8F9000;
+  --priority-medium-bg:    #F4F4E0;
+  --priority-high-color:   #BC3113;
+  --priority-high-bg:      #FBE9E5;
 
   /* ─── Color scheme · charts ─── */
-  --chart-1: 30 52% 38%;
-  --chart-2: 168 52% 38%;
-  --chart-3: 220 52% 50%;
-  --chart-4: 350 60% 48%;
-  --chart-5: 60 56% 46%;
+  --chart-1: 11 82% 41%;   /* Once Bitten */
+  --chart-2: 175 100% 27%; /* Go Go Green */
+  --chart-3: 244 100% 74%; /* Orchid */
+  --chart-4: 60 100% 28%;  /* BioShock */
+  --chart-5: 270 7% 77%;   /* Weathered Stone */
 
   /* ─── Typography ─── */
   --font-sans:    'DM Sans', ui-sans-serif, system-ui, sans-serif;
@@ -107,13 +107,14 @@
   --card-radius: 8px;    /* app cards */
 
   /* ─── Spacing / layout ─── */
-  --column-width: 272px;
-  --column-gap:   12px;
+  --column-width:     272px; /* preferred / max column width */
+  --column-min-width: 200px; /* columns shrink to this before the board scrolls */
+  --column-gap:       12px;
 
   /* ─── Shadows ─── */
-  --shadow-xs: 0 1px 2px rgba(45, 42, 38, 0.04);
-  --shadow-sm: 0 2px 6px rgba(45, 42, 38, 0.06);
-  --shadow-md: 0 4px 16px rgba(45, 42, 38, 0.09);
+  --shadow-xs: 0 1px 2px rgba(32, 31, 36, 0.04);
+  --shadow-sm: 0 2px 6px rgba(32, 31, 36, 0.06);
+  --shadow-md: 0 4px 16px rgba(32, 31, 36, 0.09);
 }
 
 html {
