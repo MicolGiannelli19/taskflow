@@ -1,8 +1,9 @@
-import { Link } from "react-router-dom";
-import { Home, Plus } from "lucide-react";
+import { Link, useParams } from "react-router-dom";
+import { History, Home, Plus, Settings, User } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -13,6 +14,8 @@ import {
 import BoardSwitcher from "./BoardSwitcher";
 
 export default function AppSidebar() {
+  const { boardId } = useParams();
+
   return (
     <Sidebar collapsible="icon">
 
@@ -37,10 +40,18 @@ export default function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Home">
-                  <Link to="/">
-                    <Home />
-                    <span>Home</span>
+                <SidebarMenuButton asChild tooltip="Board Settings">
+                  <Link to={`/board/${boardId}/settings`}>
+                    <Settings />
+                    <span>Board Settings</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Board History">
+                  <Link to={`/board/${boardId}/history`}>
+                    <History />
+                    <span>Board History</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -48,6 +59,27 @@ export default function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip="Home">
+              <Link to="/">
+                <Home />
+                <span>Home</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip="Profile">
+              <Link to="/profile">
+                <User />
+                <span>Profile</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }
