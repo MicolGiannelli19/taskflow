@@ -44,6 +44,7 @@ export default function Column({ boardId, columnId, title, columns, tickets }: C
       {tickets.map((ticket) => (
         <Ticket
           key={ticket.id}
+          boardId={boardId}
           columns={columns}
           ticket={ticket}
           moveTicket={moveTicket.mutate}
