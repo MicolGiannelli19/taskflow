@@ -8,6 +8,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { useAuth } from "../../../hooks/useAuth";
+import { useBoards } from "../../../hooks/useBoards";
 import type { ColumnType, TicketTypeSmall } from "../../../types";
 
 interface BoardGridProps {
@@ -18,6 +19,8 @@ interface BoardGridProps {
 
 export default function BoardGrid({ boardId, columns, tickets }: BoardGridProps) {
   const { logout } = useAuth();
+  const { data: boards } = useBoards();
+  const boardName = boards?.find((b) => String(b.id) === String(boardId))?.name;
 
   return (
     <SidebarProvider>
@@ -26,6 +29,12 @@ export default function BoardGrid({ boardId, columns, tickets }: BoardGridProps)
         <header className={styles.header}>
           <SidebarTrigger />
           <div>Task Flow</div>
+          {boardName && (
+            <>
+              <span className={styles.separator} aria-hidden="true">/</span>
+              <span className={styles.boardName}>{boardName}</span>
+            </>
+          )}
           <Button
             variant="destructive"
             className={styles.loginBtn}

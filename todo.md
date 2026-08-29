@@ -26,20 +26,6 @@ being merged in — check them off if so.
 - [ ] Use real credentials from the form
 - [ ] Stop constructing a `mockUser`
 
-**No way to fetch the real logged-in user**
-- `POST /api/auth/token` only returns a token — there is no `GET /api/auth/me`,
-  which is *why* the frontend fakes the user object.
-- [ ] Add `GET /api/auth/me` (returns current user via `get_current_user`)
-- [ ] After token, call `/auth/me` and store the real user
-
-**A failed login gets swallowed / redirected**
-- `frontend/src/api/axios.ts` response interceptor redirects to `/login` on ANY
-  401 — including the login request itself — so a bad-credentials error can never
-  be shown (the page reloads first).
-- [ ] Exclude the `/auth/token` request from the 401 redirect
-- [ ] Surface the 401 in the UI ("Incorrect email or password") — pass an
-      `error` prop into `LogInForm` and render it
-
 **Data-model drift to reconcile (related, lower urgency)**
 - [ ] `frontend/src/types.ts` `BoardSummary.owner_id` references a column that no
       longer exists — `boards` dropped `owner_id` for the membership model. Will
@@ -56,21 +42,6 @@ being merged in — check them off if so.
 # Fix Data model defenition
 # TODO: Migrate from init.sql to Alembic Migrations
 
-## ✅ DONE as of 2026-07-26 (the init.sql → ORM half)
-The move *off* raw SQL is complete — the SQLAlchemy ORM models are now the
-single source of truth:
-- `init.sql` / `seed.sql` deleted; schema is built by `Base.metadata.create_all`
-  and data by `app/seed.py` on startup (see steps 2, 3, and most of 5 below).
-- Code reorganized into `app/database/models/` (one file per model) + `schemas.py`.
-- Docker Compose no longer mounts an init script; README updated.
-
-**Still NOT started: adopting Alembic itself** (steps 1, 4, 6, 7). Until then,
-schema changes are applied by recreating the volume (`docker compose down -v`).
-
-## Context
-Was using `init.sql` for rapid MVP iteration; now on ORM `create_all`. Still
-need proper migration management (Alembic) before production so schema changes
-can be applied without wiping data.
 
 ## When to Start This Task
 - [ ] Schema changes are becoming less frequent (< 1 change per week)
@@ -86,30 +57,6 @@ can be applied without wiping data.
 
 ## Migration Steps
 
-### 1. Setup Alembic
-- [ ] Install Alembic: `pip install alembic`
-- [ ] Add to `requirements.txt`
-- [ ] Initialize Alembic: `alembic init alembic`
-- [ ] Configure `alembic.ini` with database URL
-
-### 2. Organize Code Structure ✅
-- [x] Create models directory (`backend/app/database/models/`, one file per model)
-- [x] Split models into:
-  - [x] SQLAlchemy ORM models (source of truth) — `app/database/models/`
-  - [x] `schemas.py` - Pydantic models (API validation)
-- [x] Update imports across the application
-
-### 3. Convert init.sql to SQLAlchemy Models ✅
-- [x] Create SQLAlchemy Base model
-- [x] Convert each table in `init.sql` to SQLAlchemy model class
-- [x] Add relationships, indexes, and constraints
-- [x] Test models can create expected schema
-
-### 4. Create Initial Migration
-- [ ] Generate initial migration: `alembic revision --autogenerate -m "Initial schema"`
-- [ ] Review generated migration file
-- [ ] Test migration on fresh database: `alembic upgrade head`
-- [ ] Verify schema matches old `init.sql`
 
 ### 5. Update Development Workflow (partly done)
 - [x] Remove `init.sql` (deleted, along with seed.sql / set_up_mock_data.sql)

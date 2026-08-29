@@ -22,6 +22,24 @@
   letter-spacing: -0.02em;
 }
 
+.separator {
+  color: var(--color-border);
+  font-size: 16px;
+  user-select: none;
+}
+
+.boardName {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+
 /* Push the login button to the far right of the header */
 .loginBtn {
   margin-left: auto;
