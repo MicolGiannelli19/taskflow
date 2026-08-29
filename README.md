@@ -47,7 +47,7 @@ This starts:
 * **Backend API** → http://localhost:8000
 * **PostgreSQL** → localhost:5432
 
-On first run, the database is automatically initialised with the schema (`database/init.sql`) and seeded with mock data (`database/seed.sql`) — no manual steps needed. This creates three test users, a sample board with four columns (Backlog, In Progress, In Review, Done), six tickets, and a few comments.
+On first run, the backend automatically creates the schema from the SQLAlchemy models (`Base.metadata.create_all`) and seeds mock data (`app/seed.py`) on startup — no manual steps needed. This creates three test users, a sample board with four columns (Backlog, In Progress, In Review, Done), six tickets, and a few comments.
 
 ### Log in
 
@@ -75,7 +75,7 @@ To wipe and re-seed the database from scratch:
 docker compose down -v && docker compose up
 ```
 
-The `-v` flag removes the PostgreSQL data volume, so `init.sql` and `seed.sql` run again on the next start.
+The `-v` flag removes the PostgreSQL data volume, so the backend recreates the schema and re-seeds on the next start. This is also how schema changes are applied while the project has no migrations.
 
 ### Stop services
 

@@ -1,10 +1,14 @@
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.routers import auth, board, ticket
-from app.exceptions import NotFoundError, ConflictError, ValidationError, ForbiddenError
+from app.routers import auth, board, ticket, member
+from app.database import Base, engine
+from app.seed import seed
+from app.config import settings
+from app.exceptions import NotFoundError, ConflictError, ValidationError, ForbiddenError, UnauthorizedError
 
 logging.basicConfig(
     level=logging.INFO,
@@ -14,7 +18,17 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="taskflow API", version="1.0.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Create any missing tables from the ORM models (models are the source of truth).
+    Base.metadata.create_all(bind=engine)
+    if settings.seed_on_startup:
+        seed()
+    yield
+
+
+app = FastAPI(title="taskflow API", version="1.0.0", lifespan=lifespan)
 
 # CORS middleware
 app.add_middleware(
@@ -29,6 +43,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(board.router)
 app.include_router(ticket.router)
+app.include_router(member.router)
 
 
 @app.exception_handler(NotFoundError)
@@ -60,6 +75,15 @@ async def forbidden_handler(request: Request, exc: ForbiddenError):
     return JSONResponse(
         status_code=403,
         content={"error": "Forbidden", "detail": exc.detail},
+    )
+
+
+@app.exception_handler(UnauthorizedError)
+async def unauthorized_handler(request: Request, exc: UnauthorizedError):
+    return JSONResponse(
+        status_code=401,
+        content={"error": "Unauthorized", "detail": exc.detail},
+        headers={"WWW-Authenticate": "Bearer"},
     )
 
 

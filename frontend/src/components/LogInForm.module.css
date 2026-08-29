@@ -38,6 +38,12 @@
   border-radius: 8px;
 }
 
+.page form .error {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-destructive, #dc2626);
+}
+
 .page form button[type="submit"] {
   margin-top: 6px;
   padding: 12px;
