@@ -23,32 +23,39 @@ Synced surface: the shadcn/ui primitives in `frontend/src/components/ui/` (25 ex
 - `cfg.srcDir = "src/components/ui"` scopes discovery to the DS primitives only
   (excludes app/page feature components that need router/query/auth providers).
 
-## The Tailwind v4 theme gap (important)
+## The Tailwind v4 theme gap — FIXED in the app (shadcn-migration branch, 2026-07-27)
 
-`frontend/src/index.css` has **no `@theme` block**, so Tailwind v4 never
-registers the shadcn design tokens as colors — the color utilities
-(`bg-primary`, `bg-destructive`, `text-muted-foreground`, `border-input`, …) are
-**not compiled into the app build at all**. In the app the shadcn components fall
-back to the global `button {}` / `input {}` element styles, so every Button/Badge
-variant renders identically and the brand colors never appear on them.
+**Historical (pre-shadcn-migration):** `frontend/src/index.css` had **no `@theme`
+block**, so Tailwind v4 never registered the shadcn design tokens as colors — the
+color utilities (`bg-primary`, `bg-destructive`, `text-muted-foreground`,
+`border-input`, …) were **not compiled into the app build at all**, and the shadcn
+components fell back to the global `button {}` / `input {}` element styles, so every
+variant rendered identically. To fix it without touching app source (user decision
+2026-06-21) the DS bundle used its own corrected stylesheet.
 
-**This is a real bug in the app's design system.** Per user decision (2026-06-21)
-we did **not** modify app source; instead we generate a corrected stylesheet for
-the DS bundle ONLY:
+**Now the app itself carries the fix** (so it is no longer a DS-only workaround):
+- `index.css` has an `@theme inline` block bridging the HSL tokens into Tailwind's
+  color/radius theme, so `bg-primary` / `border-input` / … compile.
+- The global `button{}`/`input{}`/`select{}` element rules were moved into
+  `@layer base`, so component utility classes (emitted into the `utilities` layer,
+  which the cascade ranks above `base`) out-rank them and the shadcn variants win —
+  while raw elements stay styled.
+- App feature components now consume `<Button>` from `src/components/ui`.
 
-- Source (committed): `.design-sync/ds-theme.css` — a copy of `index.css` plus an
-  `@theme inline` block bridging the HSL tokens, and `@source` directives.
-- Compiled (gitignored, **must be regenerated before each build**):
-  ```sh
-  ln -sfn ../.ds-sync/node_modules .design-sync/node_modules   # once per clone — Tailwind CLI needs it to resolve `@import "tailwindcss"`
-  .ds-sync/node_modules/.bin/tailwindcss -i .design-sync/ds-theme.css -o frontend/ds-theme.gen.css
-  ```
-- `cfg.cssEntry = "ds-theme.gen.css"` (relative to `frontend/`).
-- We intentionally **dropped the global `button{}`/`input{}`/`select{}` element
-  overrides** from `ds-theme.css` so the shadcn variant classes drive the look.
+**`ds-theme.css` is therefore largely redundant.** It still works (a copy of
+`index.css` + `@theme` + `@source`, with the globals *dropped* rather than layered),
+but since the app CSS now handles precedence itself, the intended cleanup is viable:
+point `cfg.cssEntry` at the app's compiled `dist/assets/*.css` and delete
+`ds-theme.css` + the gen step. Kept for now only because that requires a working
+native `vite build` (the current bundler install is Linux-only, so the app build
+runs in Docker, not on the host).
 
-If the app ever gets a proper `@theme` block, switch `cfg.cssEntry` back to the
-app's compiled `dist/assets/*.css` and delete `ds-theme.css` + the gen step.
+Current build still uses the generated stylesheet:
+```sh
+ln -sfn ../.ds-sync/node_modules .design-sync/node_modules   # once per clone — Tailwind CLI needs it to resolve `@import "tailwindcss"`
+.ds-sync/node_modules/.bin/tailwindcss -i .design-sync/ds-theme.css -o frontend/ds-theme.gen.css
+```
+`cfg.cssEntry = "ds-theme.gen.css"` (relative to `frontend/`).
 
 ## Previews & overrides
 

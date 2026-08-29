@@ -37,28 +37,3 @@
 .item:hover .actions {
   opacity: 1;
 }
-
-.iconButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted);
-  border-radius: 4px;
-}
-
-.iconButton:hover:not(:disabled) {
-  background-color: var(--color-surface);
-  color: var(--color-text);
-  border: none;
-}
-
-.danger:hover:not(:disabled) {
-  background-color: var(--priority-high-bg);
-  color: var(--priority-high-color);
-  border: none;
-}
