@@ -193,6 +193,50 @@ Phase 1 (drag between columns) is complete. Within-column reordering was deliber
 
 ---
 
+# STORY: Better debugger setup for the backend
+
+**Type:** Dev-experience / tooling
+**Status:** Not started (paused 2026-08-29 — decided approach, deferred the work)
+
+**Context:**
+There's currently no way to run the VS Code debugger against the backend. There's
+no `.vscode/launch.json`, the backend only runs inside the `backend` container
+(`command: uvicorn app.main:app --reload`), and `debugpy` isn't in
+`requirements.txt`. So today debugging = print statements / logs only. Want proper
+breakpoints for stepping through the new authz + service-layer code.
+
+**Two approaches evaluated:**
+
+1. **Debug locally, Postgres in Docker (RECOMMENDED — least friction):**
+   Run only the DB in Docker (`docker compose up db`, already published on
+   `localhost:5432`) and launch the backend on the host under the debugger.
+   - Add a `launch.json` "Python: FastAPI" config running
+     `uvicorn app.main:app --reload` with `cwd: backend`.
+   - **Gotcha:** `config.py`'s default `database_url` is wrong for the compose DB
+     (`user:password@localhost/taskflow_db`). Must pass the real one:
+     `postgresql://taskflow_user:taskflow_pass@localhost:5432/taskflow_db`.
+   - **Gotcha:** deps must be installed in a local venv
+     (`pip install -r requirements.txt`) — the container's are isolated.
+   - Bonus: `seed_on_startup=True` seeds on launch; same config pattern also
+     enables debugging `pytest`.
+
+2. **Attach to the container via `debugpy`:** add `debugpy` to
+   `requirements.txt`, change the backend command to
+   `python -m debugpy --listen 0.0.0.0:5678 -m uvicorn ...`, expose port `5678`
+   in compose, add an "attach" `launch.json`. Closest to prod parity, more moving
+   parts.
+
+**Acceptance criteria:**
+- [ ] Can set a breakpoint in a router/service and hit it on a real request
+- [ ] `.vscode/launch.json` committed with a FastAPI debug config (Option A)
+- [ ] A `pytest` debug config so tests can be stepped through too
+- [ ] Quick note in `backend/README.md` on how to start a debug session
+
+**Priority:** Low–Medium (quality of life; do before the big authz test-writing push)
+**Dependencies:** local venv with requirements installed
+
+---
+
 # EPIC: DESIGN A WAY TO MAKE SHORT CUTS A CENTRAL FEATURE OF THIS
 
 # EPIC : Add tests to fast api application 

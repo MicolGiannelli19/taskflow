@@ -6,9 +6,10 @@ import { useState } from "react"
 // this is wrong email 
 interface LogInFormProps {
     handleLogIn: (FormData: LogInFromData) => void;
+    error?: string | null;
 }
 
-export default function LogInForm({handleLogIn}: LogInFormProps){
+export default function LogInForm({handleLogIn, error}: LogInFormProps){
 
     const [formData, setFromData] = useState<LogInFromData>({
         email: "",
@@ -45,6 +46,7 @@ export default function LogInForm({handleLogIn}: LogInFormProps){
             placeholder="password"
             value={formData.password}
             onChange={handleInputChange}/>
+            {error && <p className={styles.error} role="alert">{error}</p>}
             <button type="submit">Log In</button>
         </form>
     </div>
