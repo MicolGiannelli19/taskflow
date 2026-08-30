@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { History, Home, Plus, Settings, User } from "lucide-react";
+import { History, Home, Plus, Settings } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -11,11 +11,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import UserAvatar from "@/components/UserAvatar";
+import { useAuth } from "@/hooks/useAuth";
 import { paths } from "@/routes";
 import BoardSwitcher from "./BoardSwitcher";
 
 export default function AppSidebar() {
   const { boardId } = useParams();
+  const { user } = useAuth();
 
   return (
     <Sidebar collapsible="icon">
@@ -75,10 +78,15 @@ export default function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Profile">
+            <SidebarMenuButton asChild tooltip={user?.name ?? "Profile"}>
               <Link to={paths.profile}>
-                <User />
-                <span>Profile</span>
+                <UserAvatar
+                  size="xs"
+                  name={user?.name}
+                  email={user?.email}
+                  avatar={user?.avatar}
+                />
+                <span>{user?.name ?? "Profile"}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

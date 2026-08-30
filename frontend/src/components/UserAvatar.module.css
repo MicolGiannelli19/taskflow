@@ -1,0 +1,33 @@
+.root {
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.xs { height: 18px; width: 18px; }
+.sm { height: 24px; width: 24px; }
+.md { height: 32px; width: 32px; }
+.lg { height: 40px; width: 40px; }
+
+/* Initials fallback: tinted by a hue derived from the user, so people stay
+   visually distinct even before their image loads (or when they have none). */
+.fallback {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  color: hsl(var(--avatar-hue, 270) 45% 32%);
+  background: hsl(var(--avatar-hue, 270) 55% 90%);
+}
+
+.xs .fallback { font-size: 8px; }
+.sm .fallback { font-size: 10px; }
+.md .fallback { font-size: 12px; }
+.lg .fallback { font-size: 15px; }
+
+/* Nobody assigned — a neutral dashed placeholder rather than a person. */
+.empty {
+  color: var(--color-text-muted);
+  background: transparent;
+  border-style: dashed;
+}

@@ -55,7 +55,7 @@ export interface TicketTypeSmall {
   column_id: string;
   title: string;
   priority: "low" | "medium" | "high";
-  asssignee_id?: string | null; // Question is it common to keep ids for frontend only types ?
+  assignee_id?: string | null; // Question is it common to keep ids for frontend only types ?
   due_date?: string | null;
 }
 

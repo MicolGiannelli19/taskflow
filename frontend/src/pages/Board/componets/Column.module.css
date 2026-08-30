@@ -39,9 +39,22 @@
 }
 
 /* ─── Tickets scroll area inside column ────────────────────────────────────── */
-.column > *:not(h2) {
-  overflow-y: auto;
+/* The list scrolls; the cards inside it keep their natural height. */
+.tickets {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--color-border) transparent;
+}
+
+.tickets::-webkit-scrollbar {
+  width: 6px;
+}
+.tickets::-webkit-scrollbar-track {
+  background: transparent;
+}
+.tickets::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
 }
