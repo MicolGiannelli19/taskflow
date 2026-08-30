@@ -9,6 +9,7 @@ startup (see ``app.main``) and can also be invoked directly::
 All seed users share the password ``password123``.
 """
 import logging
+from datetime import datetime
 
 from sqlalchemy.orm import Session
 
@@ -90,14 +91,17 @@ def seed(db: Session | None = None) -> None:
         db.flush()
 
         auth_ticket, ui_ticket = tickets[2], tickets[3]
+        _now = datetime.utcnow()
         db.add_all([
-            Comment(ticket_id=auth_ticket.id, user_id=bob.id,
+            # created_at/updated_at pinned to one reading so seeded comments
+            # don't read as "edited" (the two column defaults differ by µs).
+            Comment(ticket_id=auth_ticket.id, user_id=bob.id, created_at=_now, updated_at=_now,
                     content="Should we use JWT or sessions? I prefer JWT for the stateless approach."),
-            Comment(ticket_id=auth_ticket.id, user_id=alice.id,
+            Comment(ticket_id=auth_ticket.id, user_id=alice.id, created_at=_now, updated_at=_now,
                     content="JWT with refresh tokens — already planned in the schema."),
-            Comment(ticket_id=ui_ticket.id, user_id=carol.id,
+            Comment(ticket_id=ui_ticket.id, user_id=carol.id, created_at=_now, updated_at=_now,
                     content="Are we using a drag and drop library or building it from scratch?"),
-            Comment(ticket_id=ui_ticket.id, user_id=bob.id,
+            Comment(ticket_id=ui_ticket.id, user_id=bob.id, created_at=_now, updated_at=_now,
                     content="Looking at dnd-kit, seems lightweight and well maintained."),
         ])
 

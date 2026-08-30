@@ -67,6 +67,7 @@ export interface CommentType {
   user_avatar?: string | null;
   content: string;
   created_at: string;
+  updated_at: string;
 }
 
 // Full ticket payload returned by GET /boards/:boardId/tickets/:ticketId

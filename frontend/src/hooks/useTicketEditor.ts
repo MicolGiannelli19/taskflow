@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useTicketDetail } from "./useTicketDetail";
 import { useBoardMembers } from "./useBoardMembers";
 import { useUpdateTicket, type TicketEditPatch } from "./useUpdateTicket";
+import { useCreateComment } from "./useCreateComment";
+import { useUpdateComment } from "./useUpdateComment";
+import { useDeleteComment } from "./useDeleteComment";
 import { useAuth } from "./useAuth";
 import type { TicketDetailed } from "../types";
 
@@ -9,6 +12,8 @@ export type Priority = "low" | "medium" | "high";
 export const PRIORITIES: Priority[] = ["low", "medium", "high"];
 
 const EDIT_ROLES = ["owner", "admin", "member"];
+// Deleting someone else's comment is moderation, not authorship.
+const MODERATE_ROLES = ["owner", "admin"];
 
 export interface FormState {
   title: string;
@@ -82,10 +87,21 @@ export function useTicketEditor(
   );
   const { data: members } = useBoardMembers(boardId, active);
   const updateTicket = useUpdateTicket(boardId, ticketId);
+  const createComment = useCreateComment(boardId, ticketId);
+  const editComment = useUpdateComment(boardId, ticketId);
+  const removeComment = useDeleteComment(boardId, ticketId);
 
   const [mode, setMode] = useState<"view" | "edit">("view");
   const [form, setForm] = useState<FormState | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  // ─── Comment composer / editor state ──────────────────────────────────────
+  const [commentDraft, setCommentDraft] = useState("");
+  const [commentError, setCommentError] = useState<string | null>(null);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [commentEditDraft, setCommentEditDraft] = useState("");
+  // Held rather than deleted immediately — a comment is not recoverable.
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   // Always reopen in view mode; drop any half-finished edit when we go inactive.
   useEffect(() => {
@@ -93,11 +109,17 @@ export function useTicketEditor(
       setMode("view");
       setForm(null);
       setSaveError(null);
+      setCommentDraft("");
+      setCommentError(null);
+      setEditingCommentId(null);
+      setCommentEditDraft("");
+      setPendingDeleteId(null);
     }
   }, [active]);
 
   const myRole = members?.find((m) => m.user_id === user?.id)?.role;
   const canEdit = !!myRole && EDIT_ROLES.includes(myRole);
+  const canModerate = !!myRole && MODERATE_ROLES.includes(myRole);
 
   function startEdit() {
     if (!ticket) return;
@@ -129,6 +151,61 @@ export function useTicketEditor(
     });
   }
 
+  // ─── Comments ─────────────────────────────────────────────────────────────
+
+  function postComment() {
+    const content = commentDraft.trim();
+    if (!content) return;
+    setCommentError(null);
+    createComment.mutate(content, {
+      onSuccess: () => setCommentDraft(""),
+      onError: () =>
+        setCommentError("Couldn't post your comment. Please try again."),
+    });
+  }
+
+  function startEditComment(commentId: string, content: string) {
+    setCommentError(null);
+    setEditingCommentId(commentId);
+    setCommentEditDraft(content);
+  }
+
+  function cancelEditComment() {
+    setEditingCommentId(null);
+    setCommentEditDraft("");
+  }
+
+  function saveComment() {
+    const content = commentEditDraft.trim();
+    if (!editingCommentId || !content) return;
+    setCommentError(null);
+    editComment.mutate(
+      { commentId: editingCommentId, content },
+      {
+        onSuccess: () => cancelEditComment(),
+        onError: () =>
+          setCommentError("Couldn't save your edit. Please try again."),
+      }
+    );
+  }
+
+  function confirmDeleteComment() {
+    if (!pendingDeleteId) return;
+    setCommentError(null);
+    removeComment.mutate(pendingDeleteId, {
+      onSuccess: () => setPendingDeleteId(null),
+      onError: () => {
+        setPendingDeleteId(null);
+        setCommentError("Couldn't delete that comment. Please try again.");
+      },
+    });
+  }
+
+  /** True when the signed-in user may delete this comment. */
+  function canDeleteComment(authorId: string) {
+    return authorId === user?.id || canModerate;
+  }
+
   return {
     ticket,
     isLoading,
@@ -144,6 +221,27 @@ export function useTicketEditor(
     saveError,
     isSaving: updateTicket.isPending,
     titleValid: (form?.title.trim().length ?? 0) > 0,
+
+    // Comments
+    currentUserId: user?.id,
+    canModerate,
+    canDeleteComment,
+    commentDraft,
+    setCommentDraft,
+    commentError,
+    postComment,
+    isPostingComment: createComment.isPending,
+    editingCommentId,
+    commentEditDraft,
+    setCommentEditDraft,
+    startEditComment,
+    cancelEditComment,
+    saveComment,
+    isSavingComment: editComment.isPending,
+    pendingDeleteId,
+    setPendingDeleteId,
+    confirmDeleteComment,
+    isDeletingComment: removeComment.isPending,
   };
 }
 

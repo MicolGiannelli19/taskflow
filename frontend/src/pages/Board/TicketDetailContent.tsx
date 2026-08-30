@@ -1,6 +1,13 @@
 import type { ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
-import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import MarkdownEditor from "./componets/MarkdownEditor";
 import CopyableTitle from "./componets/CopyableTitle";
+import UserAvatar from "@/components/UserAvatar";
 import {
   Select,
   SelectContent,
@@ -16,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PRIORITIES, type Priority, type TicketEditor } from "@/hooks/useTicketEditor";
+import type { CommentType } from "@/types";
 import styles from "./TicketDetail.module.css";
 import { paths } from "@/routes";
 
@@ -30,6 +39,19 @@ interface TicketDetailContentProps {
 }
 
 const NO_ASSIGNEE = "__none__"; // Radix Select forbids an empty-string value.
+
+/**
+ * True only if a comment was really edited.
+ *
+ * `created_at` and `updated_at` are stamped independently on insert, so rows
+ * written before that was fixed sit a microsecond apart. A sub-second gap is
+ * never a human edit, so treat it as untouched.
+ */
+function wasEdited(c: CommentType): boolean {
+  const gap =
+    new Date(c.updated_at).getTime() - new Date(c.created_at).getTime();
+  return gap > 1000;
+}
 
 function formatDate(value?: string | null): string | null {
   if (!value) return null;
@@ -69,6 +91,24 @@ export default function TicketDetailContent({
     saveError,
     isSaving,
     titleValid,
+    currentUserId,
+    canDeleteComment,
+    commentDraft,
+    setCommentDraft,
+    commentError,
+    postComment,
+    isPostingComment,
+    editingCommentId,
+    commentEditDraft,
+    setCommentEditDraft,
+    startEditComment,
+    cancelEditComment,
+    saveComment,
+    isSavingComment,
+    pendingDeleteId,
+    setPendingDeleteId,
+    confirmDeleteComment,
+    isDeletingComment,
   } = editor;
 
   const isModal = variant === "modal";
@@ -224,19 +264,43 @@ export default function TicketDetailContent({
                   <SelectItem value={NO_ASSIGNEE}>Unassigned</SelectItem>
                   {members?.map((m) => (
                     <SelectItem key={m.user_id} value={m.user_id}>
-                      {m.name ?? m.email}
+                      <span className={styles.person}>
+                        <UserAvatar
+                          size="xs"
+                          name={m.name}
+                          email={m.email}
+                          avatar={m.avatar}
+                        />
+                        {m.name ?? m.email}
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             ) : (
-              <span>{ticket.assignee?.name ?? "Unassigned"}</span>
+              <span className={styles.person}>
+                <UserAvatar
+                  size="sm"
+                  name={ticket.assignee?.name}
+                  email={ticket.assignee?.email}
+                  avatar={ticket.assignee?.avatar}
+                />
+                {ticket.assignee?.name ?? "Unassigned"}
+              </span>
             )}
           </div>
 
           <div className={styles.metaRow}>
             <span className={styles.metaLabel}>Reporter</span>
-            <span>{ticket.creator?.name ?? "Unknown"}</span>
+            <span className={styles.person}>
+              <UserAvatar
+                size="sm"
+                name={ticket.creator?.name}
+                email={ticket.creator?.email}
+                avatar={ticket.creator?.avatar}
+              />
+              {ticket.creator?.name ?? "Unknown"}
+            </span>
           </div>
 
           <div className={styles.metaRow}>
@@ -265,21 +329,149 @@ export default function TicketDetailContent({
             {ticket.comments.length === 0 && (
               <p className={styles.muted}>No comments yet.</p>
             )}
-            {ticket.comments.map((c) => (
-              <div key={c.id} className={styles.comment}>
-                <div className={styles.commentHead}>
-                  <span className={styles.commentAuthor}>{c.user_name}</span>
-                  <span className={styles.commentDate}>
-                    {formatDate(c.created_at)}
-                  </span>
+            {ticket.comments.map((c) => {
+              const isMine = c.user_id === currentUserId;
+              const isEditing = editingCommentId === c.id;
+
+              return (
+                <div key={c.id} className={styles.comment}>
+                  <UserAvatar
+                    size="sm"
+                    name={c.user_name}
+                    avatar={c.user_avatar}
+                    className={styles.commentAvatar}
+                  />
+                  <div className={styles.commentMain}>
+                    <div className={styles.commentHead}>
+                      <span className={styles.commentAuthor}>{c.user_name}</span>
+                      <span className={styles.commentDate}>
+                        {formatDate(c.created_at)}
+                        {wasEdited(c) && " · edited"}
+                      </span>
+
+                      {!isEditing && (
+                        <div className={styles.commentActions}>
+                          {isMine && (
+                            <button
+                              type="button"
+                              className={styles.commentAction}
+                              onClick={() => startEditComment(c.id, c.content)}
+                            >
+                              Edit
+                            </button>
+                          )}
+                          {canDeleteComment(c.user_id) && (
+                            <button
+                              type="button"
+                              className={styles.commentAction}
+                              onClick={() => setPendingDeleteId(c.id)}
+                            >
+                              Delete
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {isEditing ? (
+                      <div className={styles.commentEditor}>
+                        <MarkdownEditor
+                          value={commentEditDraft}
+                          onChange={setCommentEditDraft}
+                          placeholder="Edit your comment…"
+                        />
+                        <div className={styles.commentEditActions}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={cancelEditComment}
+                            disabled={isSavingComment}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={saveComment}
+                            disabled={
+                              !commentEditDraft.trim() || isSavingComment
+                            }
+                          >
+                            {isSavingComment ? "Saving…" : "Save"}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className={cn(styles.markdown, styles.commentBody)}>
+                        <ReactMarkdown>{c.content}</ReactMarkdown>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <p className={styles.commentBody}>{c.content}</p>
+              );
+            })}
+
+            {/* ─── Composer ─────────────────────────────────────────────── */}
+            {canEdit && (
+              <div className={styles.composer}>
+                <MarkdownEditor
+                  value={commentDraft}
+                  onChange={setCommentDraft}
+                  placeholder="Add a comment… Markdown supported."
+                />
+                <div className={styles.composerActions}>
+                  {commentError && (
+                    <span className={styles.error}>{commentError}</span>
+                  )}
+                  <Button
+                    size="sm"
+                    onClick={postComment}
+                    disabled={!commentDraft.trim() || isPostingComment}
+                  >
+                    {isPostingComment ? "Posting…" : "Comment"}
+                  </Button>
+                </div>
               </div>
-            ))}
+            )}
           </div>
         )}
       </div>
       {/* end scrollable body */}
+
+      {/* Deleting a comment is not recoverable, so confirm first. Radix
+          portals this, so it stacks correctly above the ticket modal. */}
+      <Dialog
+        open={pendingDeleteId !== null}
+        onOpenChange={(open) => {
+          if (!open && !isDeletingComment) setPendingDeleteId(null);
+        }}
+      >
+        <DialogContent className={styles.confirm}>
+          <DialogHeader>
+            <DialogTitle>Delete this comment?</DialogTitle>
+            <DialogDescription>
+              This can't be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setPendingDeleteId(null)}
+              disabled={isDeletingComment}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={confirmDeleteComment}
+              disabled={isDeletingComment}
+            >
+              {isDeletingComment ? "Deleting…" : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* ─── Edit footer ─────────────────────────────────────────────── */}
       {mode === "edit" && (
