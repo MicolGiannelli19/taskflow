@@ -73,6 +73,11 @@ export default function Ticket({ boardId, columns, ticket, moveTicket }: TicketP
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
+          // Only the card itself activates. A keypress on the nested "move"
+          // button (or on a column button in the portaled dropdown, which still
+          // bubbles through the React tree) lands here too, and preventDefault
+          // would swallow that button's own Enter/Space activation.
+          if (e.target !== e.currentTarget) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             setDetailOpen(true);
