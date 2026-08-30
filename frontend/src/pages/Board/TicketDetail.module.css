@@ -24,6 +24,14 @@
   padding-right: 4px;
 }
 
+/* Full-page variant: the sheet grows and the page scrolls, so the body must not
+   become its own scroll container. */
+.bodyPage {
+  flex: none;
+  overflow: visible;
+  padding-right: 0;
+}
+
 .muted {
   color: var(--color-text-muted);
   font-size: 13.5px;

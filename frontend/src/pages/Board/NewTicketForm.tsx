@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { paths } from "../../routes";
 
 interface BoardOutletContext {
   handleNewTicket: (formData: TicketFormData) => void;
@@ -26,7 +27,7 @@ export default function NewTicketForm() {
     due_date: "",
   });
 
-  const close = () => navigate(`/board/${boardId}`);
+  const close = () => navigate(paths.board(boardId!));
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "./NewBoardForm.module.css";
 import { useCreateBoard } from "../../hooks/useCreateBoard";
 import { Button } from "@/components/ui/button";
+import { paths } from "../../routes";
 
 export default function NewBoardForm() {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ export default function NewBoardForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createBoard.mutate(formData, {
-      onSuccess: () => navigate("/"),
+      onSuccess: () => navigate(paths.home),
     });
   };
 
@@ -27,7 +28,7 @@ export default function NewBoardForm() {
     <div className={styles.NewBoardForm}>
       <div className={styles.header}>
         <h2>New Board</h2>
-        <Button variant="ghost" onClick={() => navigate("/")}>Close</Button>
+        <Button variant="ghost" onClick={() => navigate(paths.home)}>Close</Button>
       </div>
       <form onSubmit={handleSubmit}>
         <input
