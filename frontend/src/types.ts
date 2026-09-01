@@ -60,6 +60,34 @@ export interface TicketTypeSmall {
 }
 
 
+export interface CommentType {
+  id: string;
+  user_id: string;
+  user_name: string;
+  user_avatar?: string | null;
+  content: string;
+  created_at: string;
+}
+
+// Full ticket payload returned by GET /boards/:boardId/tickets/:ticketId
+export interface TicketDetailed {
+  id: string;
+  board_id: string;
+  column_id: string;
+  title: string;
+  description?: string | null;
+  position: number;
+  priority: "low" | "medium" | "high";
+  assignee_id?: string | null;
+  assignee?: UserType | null;
+  creator_id: string;
+  creator?: UserType | null;
+  due_date?: string | null;
+  comments: CommentType[];
+  created_at: string;
+  updated_at: string;
+}
+
 export type TicketFormData = Omit<
   TicketType,
   "id" | "board_id" | "creator_id" | "assignee_id" | "created_at" | "updated_at" | "assignee_name" | "assignee_avatar"

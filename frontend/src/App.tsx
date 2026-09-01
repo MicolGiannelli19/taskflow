@@ -2,6 +2,7 @@ import Board from "./pages/Board/Board";
 import NewTicketForm from "./pages/Board/NewTicketForm";
 import Home from "./pages/Home/Home";
 import NewBoardForm from "./pages/Home/NewBoardForm";
+import ComingSoon from "./pages/ComingSoon";
 import LogInForm from "./components/LogInForm";
 import "./App.css";
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
@@ -56,6 +57,18 @@ function App() {
         <Route path="/board/:boardId" element={user ? <Board /> : <Navigate to="/login" replace />}>
           <Route path="new-ticket" element={<NewTicketForm />} />
         </Route>
+        <Route
+          path="/board/:boardId/history"
+          element={user ? <ComingSoon title="Board history" /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/board/:boardId/settings"
+          element={user ? <ComingSoon title="Board settings" /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/profile"
+          element={user ? <ComingSoon title="Profile" /> : <Navigate to="/login" replace />}
+        />
       </Routes>
     </div>
   );

@@ -1,0 +1,268 @@
+.content {
+  font-family: var(--font-sans);
+  /* Near-full-page modal. Override the shared Dialog's max-w-lg. */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 95vw;
+  max-width: 1200px;
+  height: 92vh;
+  max-height: 92vh;
+  overflow: hidden; /* the body scrolls; header + edit footer stay pinned */
+}
+
+/* Scrollable middle: fills the space between the pinned header and footer, and
+   scrolls when the description/comments exceed the available height. */
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* a little room so content doesn't sit under the scrollbar */
+  padding-right: 4px;
+}
+
+.muted {
+  color: var(--color-text-muted);
+  font-size: 13.5px;
+  margin: 0;
+}
+
+/* ─── Header (title + edit button) ───────────────────────────────────────────── */
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Edit + close sit together as one inline group on the right. */
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.editBtn {
+  white-space: nowrap;
+}
+
+/* Compact square icon button; overrides the app's global button padding. */
+.closeBtn {
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+}
+
+/* ─── Generic form field ─────────────────────────────────────────────────────── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ─── Sections (description, comments) ───────────────────────────────────────── */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sectionHeading {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* ─── Description: rendered markdown ─────────────────────────────────────────── */
+.markdown {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--color-text);
+}
+
+.markdown > :first-child { margin-top: 0; }
+.markdown > :last-child { margin-bottom: 0; }
+
+.markdown p { margin: 0 0 8px; }
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 14px 0 6px;
+  color: var(--color-text);
+}
+.markdown h1 { font-size: 20px; }
+.markdown h2 { font-size: 17px; }
+.markdown h3 { font-size: 15px; }
+.markdown h4 { font-size: 13.5px; }
+.markdown h1:first-child,
+.markdown h2:first-child,
+.markdown h3:first-child { margin-top: 0; }
+.markdown ul { margin: 0 0 8px; padding-left: 20px; list-style: disc; }
+.markdown ol { margin: 0 0 8px; padding-left: 20px; list-style: decimal; }
+.markdown li { margin: 2px 0; }
+.markdown code {
+  font-family: var(--font-mono, monospace);
+  font-size: 12.5px;
+  background: var(--color-surface);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.markdown pre {
+  background: var(--color-surface);
+  padding: 10px 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+.markdown pre code { background: none; padding: 0; }
+.markdown a { color: var(--color-primary); text-decoration: underline; }
+.markdown blockquote {
+  margin: 0 0 8px;
+  padding-left: 12px;
+  border-left: 3px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+/* ─── Description: empty state (still editable) ──────────────────────────────── */
+.emptyDescription {
+  text-align: left;
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-style: italic;
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color 0.12s ease, color 0.12s ease;
+}
+
+.emptyDescription:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+.emptyDescription:disabled {
+  cursor: default;
+}
+
+/* ─── Meta block ─────────────────────────────────────────────────────────────── */
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  padding: 12px 0;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--color-text);
+  min-height: 32px;
+}
+
+.metaLabel {
+  width: 84px;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.metaControl {
+  max-width: 220px;
+}
+
+.priority_low {
+  background: var(--priority-low-bg);
+  color: var(--priority-low-color);
+}
+
+.priority_medium {
+  background: var(--priority-medium-bg);
+  color: var(--priority-medium-color);
+}
+
+.priority_high {
+  background: var(--priority-high-bg);
+  color: var(--priority-high-color);
+}
+
+/* ─── Comments ───────────────────────────────────────────────────────────────── */
+.comments {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comment {
+  background: var(--color-surface);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.commentHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.commentAuthor {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.commentDate {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.commentBody {
+  font-size: 13px;
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+/* ─── Edit footer ────────────────────────────────────────────────────────────── */
+.editFooter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--color-border);
+  padding-top: 12px;
+  margin-top: auto; /* pin to the bottom of the tall modal */
+}
+
+.editActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.error {
+  font-size: 12.5px;
+  color: var(--priority-high-color);
+}
