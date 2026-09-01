@@ -25,7 +25,7 @@
 .card {
   max-width: 720px;
   margin: 0 auto;
-  padding: 20px 22px 8px;
+  padding: 20px 22px;
   background: var(--color-card);
   border: 1px solid var(--color-border);
   border-radius: var(--card-radius);
@@ -37,7 +37,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 6px;
 }
 
 .cardHeader h2 {
@@ -52,33 +52,97 @@
   color: var(--color-text-muted);
 }
 
-/* Add form: fields sit on one line and wrap to their own rows when narrow. */
+/* ─── Collapsible group (Admins · Editors · Viewers) ───────────────────────── */
+
+.section {
+  border-top: 1px solid var(--color-border);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  /* The disclosure carries the row's padding so its hit area spans the header. */
+  padding-right: 2px;
+}
+
+/* A plain button styled as a header: the whole title row toggles the group. */
+.disclosure {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  padding: 12px 0;
+  background: none;
+  border: none;
+  border-radius: var(--radius);
+  font: inherit;
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.disclosure:hover .sectionTitle {
+  color: var(--color-primary);
+}
+
+.disclosure:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+/* One chevron, rotated — the open and closed states can never drift apart. */
+.chevron,
+.chevronOpen {
+  color: var(--color-text-muted);
+  transition: transform 120ms ease;
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+/* Reduced motion: the rotation is decorative, the chevron still points. */
+@media (prefers-reduced-motion: reduce) {
+  .chevron,
+  .chevronOpen {
+    transition: none;
+  }
+}
+
+/* ─── Add form ─────────────────────────────────────────────────────────────── */
+
 .addForm {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 10px;
-  padding-bottom: 16px;
-  margin-bottom: 4px;
-  border-bottom: 1px solid var(--color-border);
+  padding: 4px 0 14px;
 }
 
 .addField {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  flex: 1 1 200px;
+  flex: 1 1 220px;
 }
 
-.roleTrigger {
-  width: 100%;
-}
+/* ─── Member rows ──────────────────────────────────────────────────────────── */
 
 .list {
   display: flex;
   flex-direction: column;
   margin: 0;
-  padding: 0;
+  padding: 0 0 8px;
   list-style: none;
 }
 
@@ -86,12 +150,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.row:last-child {
-  border-bottom: none;
+  padding: 8px 0;
 }
 
 /* Takes the slack so the role badge and remove button stay right-aligned. */
@@ -137,7 +196,7 @@
 .muted {
   color: var(--color-text-muted);
   font-size: 13.5px;
-  padding: 8px 0 12px;
+  padding: 2px 0 12px;
   margin: 0;
 }
 
@@ -146,6 +205,7 @@
   color: hsl(var(--destructive));
   font-size: 13px;
   margin: 0;
+  padding: 4px 0;
 }
 
 /* Narrow screens: the join date is the first thing worth losing. */

@@ -1,85 +1,65 @@
 import { useState, type FormEvent } from "react";
-import { UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useAddMember, type AddMemberInput } from "@/hooks/useAddMember";
 import { apiErrorMessage } from "@/lib/apiError";
 import styles from "./BoardSettings.module.css";
 
-/** Roles that can be handed out. `owner` is missing on purpose — the API
- *  rejects it, since ownership transfer isn't supported. */
-const ASSIGNABLE: { value: AddMemberInput["role"]; label: string }[] = [
-  { value: "member", label: "Member" },
-  { value: "viewer", label: "Viewer" },
-  { value: "admin", label: "Admin" },
-];
+interface Props {
+  boardId: string;
+  /** Fixed by the section this form sits in — Viewers adds viewers, and so on. */
+  role: AddMemberInput["role"];
+  /** Human name of that role, for the field label. */
+  roleLabel: string;
+  onCancel: () => void;
+}
 
-export default function AddMemberForm({ boardId }: { boardId: string }) {
+/**
+ * Invite one person into one section. The role is not a choice here: the
+ * section already decided it, so the form is just an address and a button.
+ */
+export default function AddMemberForm({ boardId, role, roleLabel, onCancel }: Props) {
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<AddMemberInput["role"]>("member");
   const addMember = useAddMember(boardId);
+  const fieldId = `add-${role}-email`;
+  const errorId = `add-${role}-error`;
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const trimmed = email.trim();
     if (!trimmed) return;
-    addMember.mutate(
-      { email: trimmed, role },
-      // Only clear the field on success, so a typo'd address stays editable
-      // next to the "No user with email …" message.
-      { onSuccess: () => setEmail("") }
-    );
+    // Stays open on success, cleared and ready — adding three viewers in a row
+    // shouldn't mean reopening the form three times. A typo'd address is kept
+    // instead, next to the "No user with email …" message.
+    addMember.mutate({ email: trimmed, role }, { onSuccess: () => setEmail("") });
   };
 
   return (
     <form className={styles.addForm} onSubmit={handleSubmit}>
       <div className={styles.addField}>
-        <Label htmlFor="member-email">Email address</Label>
+        <Label htmlFor={fieldId}>Add {roleLabel} by email</Label>
         <Input
-          id="member-email"
+          id={fieldId}
           type="email"
           value={email}
           placeholder="teammate@example.com"
           autoComplete="off"
+          autoFocus
           onChange={(e) => setEmail(e.target.value)}
-          aria-describedby={addMember.isError ? "add-member-error" : undefined}
+          aria-describedby={addMember.isError ? errorId : undefined}
         />
       </div>
 
-      <div className={styles.addField}>
-        <Label htmlFor="member-role">Role</Label>
-        <Select
-          value={role}
-          onValueChange={(v) => setRole(v as AddMemberInput["role"])}
-        >
-          <SelectTrigger id="member-role" className={styles.roleTrigger}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {ASSIGNABLE.map((r) => (
-              <SelectItem key={r.value} value={r.value}>
-                {r.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       <Button type="submit" disabled={!email.trim() || addMember.isPending}>
-        <UserPlus size={14} aria-hidden />
-        {addMember.isPending ? "Adding…" : "Add member"}
+        {addMember.isPending ? "Adding…" : "Add"}
+      </Button>
+      <Button type="button" variant="ghost" onClick={onCancel}>
+        Cancel
       </Button>
 
       {addMember.isError && (
-        <p id="add-member-error" role="alert" className={styles.error}>
+        <p id={errorId} role="alert" className={styles.error}>
           {apiErrorMessage(addMember.error, "Could not add that member.")}
         </p>
       )}
