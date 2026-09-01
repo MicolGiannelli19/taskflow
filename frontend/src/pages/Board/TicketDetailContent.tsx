@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import MarkdownEditor from "./componets/MarkdownEditor";
 import CopyableTitle from "./componets/CopyableTitle";
 import UserAvatar from "@/components/UserAvatar";
+import DueDatePicker from "@/components/DueDatePicker";
 import {
   Select,
   SelectContent,
@@ -306,13 +307,10 @@ export default function TicketDetailContent({
           <div className={styles.metaRow}>
             <span className={styles.metaLabel}>Due</span>
             {mode === "edit" ? (
-              <Input
-                type="date"
+              <DueDatePicker
                 className={styles.metaControl}
                 value={form?.dueDate ?? ""}
-                onChange={(e) =>
-                  setForm((f) => f && { ...f, dueDate: e.target.value })
-                }
+                onChange={(v) => setForm((f) => f && { ...f, dueDate: v })}
               />
             ) : (
               <span>{formatDate(ticket.due_date) ?? "—"}</span>

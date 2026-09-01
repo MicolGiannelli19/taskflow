@@ -7,6 +7,7 @@ import { useUpdateComment } from "./useUpdateComment";
 import { useDeleteComment } from "./useDeleteComment";
 import { useAuth } from "./useAuth";
 import type { TicketDetailed } from "../types";
+import { toDateInput, fromDateInput } from "../lib/date";
 
 export type Priority = "low" | "medium" | "high";
 export const PRIORITIES: Priority[] = ["low", "medium", "high"];
@@ -21,26 +22,6 @@ export interface FormState {
   priority: Priority;
   assigneeId: string; // "" = unassigned
   dueDate: string; // yyyy-mm-dd, "" = none
-}
-
-// ISO string → the yyyy-mm-dd that <input type="date"> expects.
-// `due_date` arrives as a naive timestamp ("2026-09-15T00:00:00"), which JS
-// parses as local time — so read the day off the local calendar fields. Going
-// through toISOString() would re-project to UTC and pre-fill the input with the
-// previous day for anyone east of UTC, disagreeing with the view-mode date.
-export function toDateInput(value?: string | null): string {
-  if (!value) return "";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-
-// yyyy-mm-dd → the naive timestamp the API stores. The mirror of toDateInput:
-// no UTC projection, so the day the user picked is the day that comes back.
-// Matches what NewTicketForm sends when a ticket is created.
-function fromDateInput(value: string): string {
-  return `${value}T00:00:00`;
 }
 
 function seedForm(t: TicketDetailed): FormState {
