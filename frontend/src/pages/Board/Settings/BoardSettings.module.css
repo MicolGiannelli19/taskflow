@@ -1,0 +1,156 @@
+/* Settings renders inside the app shell, so it owns its own page padding —
+   same single-column reading measure as the ticket page. */
+.page {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 20px 40px;
+}
+
+.header {
+  max-width: 720px;
+  margin: 0 auto 16px;
+}
+
+.header h1 {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.card {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 22px 8px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.cardHeader h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.count {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+}
+
+/* Add form: fields sit on one line and wrap to their own rows when narrow. */
+.addForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+  padding-bottom: 16px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.addField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1 1 200px;
+}
+
+.roleTrigger {
+  width: 100%;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+/* Takes the slack so the role badge and remove button stay right-aligned. */
+.identity {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.you {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.email {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.joined {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.role {
+  text-transform: capitalize;
+}
+
+.muted {
+  color: var(--color-text-muted);
+  font-size: 13.5px;
+  padding: 8px 0 12px;
+  margin: 0;
+}
+
+.error {
+  flex-basis: 100%;
+  color: hsl(var(--destructive));
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Narrow screens: the join date is the first thing worth losing. */
+@media (max-width: 560px) {
+  .joined {
+    display: none;
+  }
+}
