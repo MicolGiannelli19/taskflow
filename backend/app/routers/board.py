@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 
 from app.database import get_db, User, BoardMember
-from app.schemas import BoardCreate, BoardBase, BoardWithData
+from app.schemas import BoardCreate, BoardUpdate, BoardBase, BoardWithData
 from app.dependencies import get_current_user, require_board_role
 from app.authorization import Role
 from app.services import BoardService
@@ -39,6 +39,18 @@ def get_board(
 @router.post("", response_model=BoardBase)
 def create_board(board: BoardCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     return BoardService(db).create_board(board, current_user)
+
+
+@router.patch("/{board_id}", response_model=BoardBase)
+def update_board(
+    board_id: uuid.UUID,
+    board_update: BoardUpdate,
+    current_user: User = Depends(get_current_user),
+    # Editing board metadata is a settings action, like member management.
+    _membership: BoardMember = Depends(require_board_role(Role.ADMIN)),
+    db: Session = Depends(get_db),
+):
+    return BoardService(db).update_board(board_id, board_update, current_user)
 
 
 @router.delete("/{board_id}", status_code=204)
