@@ -246,3 +246,81 @@ I am very visual and on a normal jira board I usually loose track of tickets I w
 I want to easily be able to move arround the page with keyboard short cuts only
 
 I want to have a widget that reminds me what ticket I am working on 
+
+---
+
+# STORY: Post, edit and delete ticket comments (2026-08-30)
+
+Comments are **read-only** today. The data is modelled and rendered, but there is
+no way to write one — the whole write path is missing, backend first.
+
+## What already exists
+
+- `comments` table + `Comment` ORM model (`backend/app/database/models/comment.py`):
+  `ticket_id`, `user_id`, `content`, `created_at`, `updated_at`.
+- `CommentResponse` schema, and `CommentCreate` (`content: str`) — **declared in
+  `schemas.py` but never imported anywhere**, i.e. written in anticipation of
+  this work.
+- Read path only: `TicketService.get_ticket_detail` loads a ticket's comments and
+  resolves each author, and they come back nested in
+  `GET /api/boards/{board_id}/tickets/{ticket_id}`. There is no
+  `GET .../comments` collection endpoint, and none is needed for the MVP.
+- Frontend renders them read-only in `TicketDetailContent` (author avatar, name,
+  date, body). No composer, no edit/delete affordance.
+
+## What's missing
+
+**Backend**
+- [ ] `POST /api/boards/{board_id}/tickets/{ticket_id}/comments` → 201 + `CommentResponse`
+- [ ] `PATCH .../comments/{comment_id}` (edit own comment)
+- [ ] `DELETE .../comments/{comment_id}` → 204
+- [ ] `TicketService` (or a new `CommentService`) methods behind them. Decide
+      which — `TicketService`'s docstring already claims "tickets and their
+      comments", but it's getting long.
+- [ ] Validate `content`: non-empty after strip, and a max length. `Comment.content`
+      is `Text` so the DB won't stop a 10MB comment.
+- [ ] Return `updated_at` (and probably an `edited` flag) on `CommentResponse` —
+      the column exists but isn't exposed, and edit is pointless without it.
+
+**Authorization — needs a decision before coding**
+- [ ] Can a `VIEWER` comment? Every existing write uses
+      `require_board_role(Role.MEMBER)`; commenting is arguably the one write a
+      viewer should have. Pick one and write it down in
+      `docs/specs/authorization-data-model.md`.
+- [ ] Edit: author only (not even admins) — the usual rule.
+- [ ] Delete: author, plus board `ADMIN`/`OWNER` for moderation.
+- [ ] `require_board_role` guards the *board*; ownership of the comment is a
+      second check inside the service. Don't conflate them.
+
+**Frontend**
+- [ ] Composer in `TicketDetailContent` (textarea + Post, disabled while empty
+      or pending). Reuse `MarkdownEditor` if comments should support markdown —
+      decide, since the body currently renders as plain `white-space: pre-wrap`.
+- [ ] `useCreateComment` / `useUpdateComment` / `useDeleteComment` hooks that
+      invalidate `["ticket", boardId, ticketId]`, matching the existing hooks.
+- [ ] Optimistic append, so posting feels instant (see `useMoveTicket`).
+- [ ] Edit/delete controls shown only on your own comments.
+- [ ] Delete needs a confirm step — a comment is not recoverable.
+
+**Data-model follow-up (already flagged above, bites harder once comments matter)**
+- [ ] `comments.user_id` is `ON DELETE CASCADE`: deleting a user silently wipes
+      their comments and leaves gaps in every thread. Should be `SET NULL` + a
+      "deleted user" placeholder, matching `tickets.assignee_id`.
+- [ ] `Comment` has no `author` relationship, so `get_ticket_detail` issues one
+      `User` query per comment (N+1). Add the relationship or join once.
+
+## Acceptance criteria
+- [ ] A board member can post a comment on a ticket and see it appear without a reload
+- [ ] The author can edit and delete their own comment; other members cannot
+- [ ] An owner/admin can delete anyone's comment
+- [ ] Empty/whitespace-only comments are rejected by the API, not just the UI
+- [ ] Tests cover: post, edit-own, edit-other (403), delete-own, delete-other
+      (403), owner-deletes-other (200), viewer permission per the decision above
+
+**Priority:** Medium — the highest-value missing interaction on a ticket.
+**Dependencies:** none blocking. `backend/tests/` is currently empty apart from
+`__init__.py`, so this story either lands without tests or carries the cost of
+setting up the first ones — see "EPIC: Add tests to fast api application".
+
+
+

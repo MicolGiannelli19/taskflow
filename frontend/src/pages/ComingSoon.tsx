@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Construction } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { paths } from "@/routes";
 
 interface ComingSoonProps {
   title: string;
@@ -16,7 +17,8 @@ export default function ComingSoon({ title }: ComingSoonProps) {
         alignItems: "center",
         justifyContent: "center",
         gap: "1rem",
-        minHeight: "60vh",
+        flex: 1,
+        minHeight: 0,
         textAlign: "center",
         padding: "2rem",
       }}
@@ -27,7 +29,7 @@ export default function ComingSoon({ title }: ComingSoonProps) {
         Feature set to be implemented.
       </p>
       <Button asChild variant="outline">
-        <Link to="/">Back to boards</Link>
+        <Link to={paths.home}>Back to boards</Link>
       </Button>
     </div>
   );

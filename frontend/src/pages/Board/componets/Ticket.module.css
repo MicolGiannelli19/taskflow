@@ -15,8 +15,10 @@
     border-color 0.15s ease,
     opacity 0.12s ease;
   position: relative;
-  max-height: 18vh;
-  overflow: hidden;
+  /* Cards keep a consistent floor and grow with their title; the column
+     scrolls once they overflow it. */
+  min-height: 76px;
+  flex-shrink: 0;
 }
 
 .dragging {
@@ -45,6 +47,15 @@
   margin: 0;
   line-height: 1.45;
   flex: 1;
+}
+
+/* ─── Right-hand stack: assignee above the move button ──────────────────────── */
+.side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 /* ─── Move wrapper + dropdown ───────────────────────────────────────────────── */

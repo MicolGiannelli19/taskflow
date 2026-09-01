@@ -1,0 +1,309 @@
+/* Ticket title that copies a permalink to itself when clicked.
+   The affordance is quiet at rest, explicit on hover, and celebratory on click. */
+
+.root {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-start;
+  max-width: 100%;
+  margin: 0;
+  padding: 2px 4px 4px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: var(--color-text);
+  /* the "link copied" pill hangs below the button */
+  overflow: visible;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.root:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.text {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  transition: color 0.15s ease;
+}
+
+.modal .text {
+  font-size: 20px;
+}
+
+.page .text {
+  font-size: 28px;
+}
+
+/* ─── Icon slot: link ⇄ check ────────────────────────────────────────────────── */
+.iconSlot {
+  position: relative;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  align-self: center;
+  color: var(--color-text-muted);
+}
+
+.linkIcon,
+.checkIcon {
+  position: absolute;
+  inset: 0;
+  width: 16px;
+  height: 16px;
+  transition: opacity 0.18s ease, transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* At rest the link icon is tucked away; hover slides it into place. */
+.linkIcon {
+  opacity: 0;
+  transform: translateX(-4px) scale(0.85);
+}
+
+.root:hover .linkIcon,
+.root:focus-visible .linkIcon {
+  opacity: 1;
+  transform: none;
+}
+
+.checkIcon {
+  opacity: 0;
+  transform: scale(0.4) rotate(-12deg);
+  color: var(--priority-low-color);
+}
+
+/* Copied: the link icon drops out and the check springs in. */
+.copied .linkIcon {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.6);
+}
+
+.copied .checkIcon {
+  opacity: 1;
+  transform: none;
+}
+
+.error .linkIcon {
+  opacity: 1;
+  color: var(--priority-high-color);
+  animation: shake 0.36s ease;
+}
+
+/* Ring that expands out of the icon at the moment of copying. */
+.pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 999px;
+  border: 1.5px solid var(--priority-low-color);
+  opacity: 0;
+  pointer-events: none;
+  animation: pulse 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ─── Underline: grows on hover, locks in on copy ────────────────────────────── */
+.underline {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 1px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: var(--color-text-muted);
+  opacity: 0.45;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s ease,
+    opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.root:hover .underline,
+.root:focus-visible .underline {
+  transform: scaleX(1);
+}
+
+.copied .underline {
+  transform: scaleX(1);
+  background: var(--priority-low-color);
+  opacity: 1;
+}
+
+.error .underline {
+  transform: scaleX(1);
+  background: var(--priority-high-color);
+  opacity: 1;
+}
+
+/* ─── Shine that sweeps across the title on copy ─────────────────────────────── */
+.sweepClip {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.sweep {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 55%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    color-mix(in srgb, var(--priority-low-color) 22%, transparent),
+    transparent
+  );
+  transform: translateX(-120%) skewX(-14deg);
+  animation: sweep 0.62s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ─── "Link copied" pill ─────────────────────────────────────────────────────── */
+.toast {
+  position: absolute;
+  top: 100%;
+  left: 4px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  box-shadow: var(--shadow-md);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--color-text);
+  pointer-events: none;
+  animation: toastIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    toastOut 0.32s ease 1.5s forwards;
+}
+
+.toastIcon {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  color: var(--priority-low-color);
+}
+
+.toastError .toastIcon {
+  color: var(--priority-high-color);
+}
+
+/* The copied URL, trimmed to the path so the pill stays compact. */
+.toastPath {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-120%) skewX(-14deg);
+  }
+  to {
+    transform: translateX(320%) skewX(-14deg);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes toastOut {
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+/* Keep the feedback, drop the motion. */
+@media (prefers-reduced-motion: reduce) {
+  .linkIcon,
+  .checkIcon {
+    transition: opacity 0.15s ease;
+    transform: none;
+  }
+
+  .root:hover .linkIcon,
+  .root:focus-visible .linkIcon,
+  .copied .linkIcon,
+  .copied .checkIcon {
+    transform: none;
+  }
+
+  /* Reveal the underline with opacity instead of a growing scale. */
+  .underline {
+    transform: scaleX(1);
+    opacity: 0;
+    transition: opacity 0.15s ease, background-color 0.15s ease;
+  }
+
+  .root:hover .underline,
+  .root:focus-visible .underline {
+    opacity: 0.45;
+  }
+
+  .copied .underline,
+  .error .underline {
+    opacity: 1;
+  }
+
+  .sweep,
+  .pulse {
+    display: none;
+  }
+
+  .toast {
+    animation: toastIn 0.01s linear forwards, toastOut 0.01s linear 1.7s forwards;
+  }
+
+  .error .linkIcon {
+    animation: none;
+  }
+}

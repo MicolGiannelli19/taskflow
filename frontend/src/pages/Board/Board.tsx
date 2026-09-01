@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { ColumnType, TicketTypeSmall, TicketFormData } from "../../types";
 import instance from "../../api/axios";
 import { useCreateTicket } from "../../hooks/useCreateTicket";
+import { paths } from "../../routes";
 
 interface BoardData {
   columns: ColumnType[];
@@ -31,7 +32,7 @@ export default function Board() {
       columns.find((col) => col.name === "Backlog") ?? columns[0];
     createTicket.mutate(
       { ...newTicketData, column_id: backlogColumn.id },
-      { onSuccess: () => navigate(`/board/${boardId}`) }
+      { onSuccess: () => navigate(paths.board(boardId!)) }
     );
   };
 

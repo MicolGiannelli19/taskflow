@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import type { ColumnType, TicketTypeSmall } from "../../../types";
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import TicketDetail from "../TicketDetail";
+import UserAvatar from "@/components/UserAvatar";
+import { useBoardMembers } from "@/hooks/useBoardMembers";
 
 interface TicketProps {
   boardId: string;
@@ -22,6 +24,10 @@ export default function Ticket({ boardId, columns, ticket, moveTicket }: TicketP
 
   const ref = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState<boolean>(false);
+
+  // Cached per board, so every card on the board shares one request.
+  const { data: members } = useBoardMembers(boardId);
+  const assignee = members?.find((m) => m.user_id === ticket.assignee_id);
 
   useEffect(() => {
     const el = ref.current;
@@ -67,6 +73,11 @@ export default function Ticket({ boardId, columns, ticket, moveTicket }: TicketP
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
+          // Only the card itself activates. A keypress on the nested "move"
+          // button (or on a column button in the portaled dropdown, which still
+          // bubbles through the React tree) lands here too, and preventDefault
+          // would swallow that button's own Enter/Space activation.
+          if (e.target !== e.currentTarget) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             setDetailOpen(true);
@@ -76,46 +87,55 @@ export default function Ticket({ boardId, columns, ticket, moveTicket }: TicketP
         <header>
           <h1>{ticket.title}</h1>
 
-          <div className={styles.moveWrapper}>
-            <Button
-              ref={btnRef}
-              variant="ghost"
+          <div className={styles.side}>
+            <UserAvatar
               size="sm"
-              className={isOpen ? styles.active : undefined}
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsOpen((o) => !o);
-              }}
-            >
-              move →
-            </Button>
+              name={assignee?.name}
+              email={assignee?.email}
+              avatar={assignee?.avatar}
+            />
 
-            {isOpen &&
-              createPortal(
-                <div
-                  ref={dropdownRef}
-                  className={styles.dropdown}
-                  style={{ top: pos.top, right: window.innerWidth - pos.left }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {columns.filter((col) => col.id !== ticket.column_id).map((col) => (
-                    <Button
-                      key={col.id}
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        moveTicket({ ticketId: ticket.id, columnId: col.id });
-                        setIsOpen(false);
-                      }}
-                    >
-                      {col.name}
-                    </Button>
-                  ))}
-                </div>,
-                document.body
-              )}
+            <div className={styles.moveWrapper}>
+              <Button
+                ref={btnRef}
+                variant="ghost"
+                size="sm"
+                className={isOpen ? styles.active : undefined}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsOpen((o) => !o);
+                }}
+              >
+                move →
+              </Button>
+
+              {isOpen &&
+                createPortal(
+                  <div
+                    ref={dropdownRef}
+                    className={styles.dropdown}
+                    style={{ top: pos.top, right: window.innerWidth - pos.left }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {columns.filter((col) => col.id !== ticket.column_id).map((col) => (
+                      <Button
+                        key={col.id}
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          moveTicket({ ticketId: ticket.id, columnId: col.id });
+                          setIsOpen(false);
+                        }}
+                      >
+                        {col.name}
+                      </Button>
+                    ))}
+                  </div>,
+                  document.body
+                )}
+            </div>
           </div>
 
         </header>

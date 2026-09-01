@@ -41,15 +41,17 @@ export default function Column({ boardId, columnId, title, columns, tickets }: C
   return (
     <div className={`${styles.column} ${isDraggedOver ? styles.over : ""}`} ref={ref}>
       <h2>{title}</h2>
-      {tickets.map((ticket) => (
-        <Ticket
-          key={ticket.id}
-          boardId={boardId}
-          columns={columns}
-          ticket={ticket}
-          moveTicket={moveTicket.mutate}
-        />
-      ))}
+      <div className={styles.tickets}>
+        {tickets.map((ticket) => (
+          <Ticket
+            key={ticket.id}
+            boardId={boardId}
+            columns={columns}
+            ticket={ticket}
+            moveTicket={moveTicket.mutate}
+          />
+        ))}
+      </div>
     </div>
   );
 }

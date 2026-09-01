@@ -3,6 +3,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import styles from "./BoardElement.module.css";
 import { Button } from "@/components/ui/button";
 import type { BoardSummary } from "../../../types";
+import { paths } from "../../../routes";
 
 interface Props {
   board: BoardSummary;
@@ -13,7 +14,7 @@ interface Props {
 export default function BoardElement({ board, onEdit, onDelete }: Props) {
   return (
     <li className={styles.item}>
-      <Link to={`/board/${board.id}`} className={styles.name}>
+      <Link to={paths.board(board.id)} className={styles.name}>
         {board.name}
       </Link>
       <div className={styles.actions}>
