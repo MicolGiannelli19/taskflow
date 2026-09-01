@@ -31,6 +31,7 @@ def get_board(
         name=detail.board.name,
         description=detail.board.description,
         created_at=detail.board.created_at,
+        updated_at=detail.board.updated_at,
         columns=detail.columns,
         tickets=detail.tickets,
     )
