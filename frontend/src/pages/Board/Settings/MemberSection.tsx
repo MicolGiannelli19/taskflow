@@ -14,6 +14,9 @@ interface Props {
   role: AddMemberInput["role"];
   roleLabel: string;
   members: BoardMember[];
+  /** Every member of the board, not just this section's — the typeahead
+   *  shouldn't offer someone who is already an editor from the Viewers form. */
+  existingMemberIds: Set<string>;
   emptyText: string;
   currentUserId?: string;
   /** Owners only — adding someone is an ownership-level decision. */
@@ -37,6 +40,7 @@ export default function MemberSection({
   role,
   roleLabel,
   members,
+  existingMemberIds,
   emptyText,
   currentUserId,
   canAdd,
@@ -86,6 +90,7 @@ export default function MemberSection({
             boardId={boardId}
             role={role}
             roleLabel={roleLabel}
+            existingMemberIds={existingMemberIds}
             onCancel={() => setAdding(false)}
           />
         )}

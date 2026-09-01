@@ -69,6 +69,8 @@ export default function BoardSettings() {
   // until you deliberately ask for them.
   const [editing, setEditing] = useState(false);
 
+  const memberIds = new Set(members.map((m) => m.user_id));
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -123,6 +125,7 @@ export default function BoardSettings() {
               role={section.addAs}
               roleLabel={section.roleLabel}
               members={members.filter((m) => section.roles.includes(m.role))}
+              existingMemberIds={memberIds}
               emptyText={section.emptyText}
               currentUserId={user?.id}
               canAdd={canAdd}

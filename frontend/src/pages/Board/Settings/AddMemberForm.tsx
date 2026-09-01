@@ -1,9 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useAddMember, type AddMemberInput } from "@/hooks/useAddMember";
 import { apiErrorMessage } from "@/lib/apiError";
+import UserCombobox from "./UserCombobox";
 import styles from "./BoardSettings.module.css";
 
 interface Props {
@@ -12,6 +11,8 @@ interface Props {
   role: AddMemberInput["role"];
   /** Human name of that role, for the field label. */
   roleLabel: string;
+  /** Ids already on the board, so the typeahead doesn't offer them. */
+  existingMemberIds: Set<string>;
   onCancel: () => void;
 }
 
@@ -19,7 +20,13 @@ interface Props {
  * Invite one person into one section. The role is not a choice here: the
  * section already decided it, so the form is just an address and a button.
  */
-export default function AddMemberForm({ boardId, role, roleLabel, onCancel }: Props) {
+export default function AddMemberForm({
+  boardId,
+  role,
+  roleLabel,
+  existingMemberIds,
+  onCancel,
+}: Props) {
   const [email, setEmail] = useState("");
   const addMember = useAddMember(boardId);
   const fieldId = `add-${role}-email`;
@@ -37,19 +44,14 @@ export default function AddMemberForm({ boardId, role, roleLabel, onCancel }: Pr
 
   return (
     <form className={styles.addForm} onSubmit={handleSubmit}>
-      <div className={styles.addField}>
-        <Label htmlFor={fieldId}>Add {roleLabel} by email</Label>
-        <Input
-          id={fieldId}
-          type="email"
-          value={email}
-          placeholder="teammate@example.com"
-          autoComplete="off"
-          autoFocus
-          onChange={(e) => setEmail(e.target.value)}
-          aria-describedby={addMember.isError ? errorId : undefined}
-        />
-      </div>
+      <UserCombobox
+        inputId={fieldId}
+        label={`Add ${roleLabel} by name or email`}
+        value={email}
+        onChange={setEmail}
+        excludeIds={existingMemberIds}
+        describedBy={addMember.isError ? errorId : undefined}
+      />
 
       <Button type="submit" disabled={!email.trim() || addMember.isPending}>
         {addMember.isPending ? "Adding…" : "Add"}
