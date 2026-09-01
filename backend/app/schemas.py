@@ -55,6 +55,8 @@ class MemberResponse(BaseModel):
     name: Optional[str] = None
     avatar: Optional[str] = None
     role: str
+    # When the membership was created, not the user account.
+    joined_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

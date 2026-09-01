@@ -18,6 +18,7 @@ def _to_response(membership: BoardMember, user: User) -> MemberResponse:
     return MemberResponse(
         user_id=user.id, email=user.email, name=user.name,
         avatar=user.avatar, role=membership.role,
+        joined_at=membership.created_at,
     )
 
 
