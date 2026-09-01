@@ -10,5 +10,6 @@ from app.services.membership_service import MembershipService
 from app.services.board_service import BoardService
 from app.services.column_service import ColumnService
 from app.services.ticket_service import TicketService
+from app.services.user_service import UserService
 
-__all__ = ["AuthService", "MembershipService", "BoardService", "ColumnService", "TicketService"]
+__all__ = ["AuthService", "MembershipService", "BoardService", "ColumnService", "TicketService", "UserService"]
