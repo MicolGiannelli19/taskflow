@@ -2,3 +2,4 @@
 from . import auth
 from . import board
 from . import ticket
+from . import column

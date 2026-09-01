@@ -152,7 +152,8 @@ class BoardWithData(BoardBase):
 
 class ColumnCreate(BaseModel):
     name: str
-    position: int
+    # Omitted means "append to the end of the board".
+    position: Optional[int] = None
 
 class ColumnUpdate(BaseModel):
     name: Optional[str] = None
