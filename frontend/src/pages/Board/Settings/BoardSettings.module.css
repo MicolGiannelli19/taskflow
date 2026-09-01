@@ -34,7 +34,7 @@
 
 .cardHeader {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 6px;
@@ -50,6 +50,20 @@
 .count {
   font-size: 12.5px;
   color: var(--color-text-muted);
+}
+
+/* Member count and the edit-mode toggle, kept together on the right. */
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Only while editing: says what the bins will do before anyone clicks one. */
+.hint {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  margin: 0 0 10px;
 }
 
 /* ─── Collapsible group (Admins · Editors · Viewers) ───────────────────────── */

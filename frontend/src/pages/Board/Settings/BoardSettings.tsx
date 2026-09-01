@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useBoardMembers, type BoardRole } from "@/hooks/useBoardMembers";
 import { useRemoveMember } from "@/hooks/useRemoveMember";
@@ -62,6 +64,11 @@ export default function BoardSettings() {
   const canAdd = myRole === "owner";
   const canRemove = myRole === "owner" || myRole === "admin";
 
+  // Removal is destructive and irreversible from here — losing a board takes
+  // one click and getting it back takes an invite. So the bins stay hidden
+  // until you deliberately ask for them.
+  const [editing, setEditing] = useState(false);
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -71,12 +78,31 @@ export default function BoardSettings() {
       <div className={styles.card}>
         <div className={styles.cardHeader}>
           <h2>Members</h2>
-          {!isLoading && !isError && (
-            <span className={styles.count}>
-              {members.length} {members.length === 1 ? "person" : "people"}
-            </span>
-          )}
+          <div className={styles.cardActions}>
+            {!isLoading && !isError && (
+              <span className={styles.count}>
+                {members.length} {members.length === 1 ? "person" : "people"}
+              </span>
+            )}
+            {!isLoading && !isError && canRemove && (
+              <Button
+                variant={editing ? "secondary" : "outline"}
+                size="sm"
+                aria-pressed={editing}
+                onClick={() => setEditing((e) => !e)}
+              >
+                {editing ? "Done" : "Edit members"}
+              </Button>
+            )}
+          </div>
         </div>
+
+        {editing && (
+          <p className={styles.hint}>
+            Removing someone takes their access away immediately. Choose Done
+            when you've finished.
+          </p>
+        )}
 
         {isLoading && <p className={styles.muted}>Loading members…</p>}
         {isError && <p className={styles.muted}>Failed to load members.</p>}
@@ -100,7 +126,7 @@ export default function BoardSettings() {
               emptyText={section.emptyText}
               currentUserId={user?.id}
               canAdd={canAdd}
-              canRemove={canRemove}
+              canRemove={canRemove && editing}
               onRemove={(userId) => removeMember.mutate(userId)}
               removing={removeMember.isPending}
             />
