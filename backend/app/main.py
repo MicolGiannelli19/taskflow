@@ -47,7 +47,7 @@ app.include_router(member.router)
 app.include_router(column.router)
 app.include_router(user.router)
 
-
+# TODO: check the  Exeption handlers shoudl be set up here 
 @app.exception_handler(NotFoundError)
 async def not_found_handler(request: Request, exc: NotFoundError):
     return JSONResponse(

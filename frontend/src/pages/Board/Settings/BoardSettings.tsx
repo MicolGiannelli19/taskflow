@@ -64,10 +64,11 @@ export default function BoardSettings() {
   const canAdd = myRole === "owner";
   const canRemove = myRole === "owner" || myRole === "admin";
 
-  // Removal is destructive and irreversible from here — losing a board takes
-  // one click and getting it back takes an invite. So the bins stay hidden
-  // until you deliberately ask for them.
+  // The roster reads as a roster by default. Changing it — adding someone, or
+  // removing them, which is irreversible from here — is deliberate, so both the
+  // Add buttons and the bins stay hidden until you ask for them.
   const [editing, setEditing] = useState(false);
+  const canEdit = canAdd || canRemove;
 
   const memberIds = new Set(members.map((m) => m.user_id));
 
@@ -86,7 +87,7 @@ export default function BoardSettings() {
                 {members.length} {members.length === 1 ? "person" : "people"}
               </span>
             )}
-            {!isLoading && !isError && canRemove && (
+            {!isLoading && !isError && canEdit && (
               <Button
                 variant={editing ? "secondary" : "outline"}
                 size="sm"
@@ -101,8 +102,8 @@ export default function BoardSettings() {
 
         {editing && (
           <p className={styles.hint}>
-            Removing someone takes their access away immediately. Choose Done
-            when you've finished.
+            Adding someone gives them access straight away, and removing them
+            takes it away just as fast. Choose Done when you've finished.
           </p>
         )}
 
@@ -128,7 +129,7 @@ export default function BoardSettings() {
               existingMemberIds={memberIds}
               emptyText={section.emptyText}
               currentUserId={user?.id}
-              canAdd={canAdd}
+              canAdd={canAdd && editing}
               canRemove={canRemove && editing}
               onRemove={(userId) => removeMember.mutate(userId)}
               removing={removeMember.isPending}

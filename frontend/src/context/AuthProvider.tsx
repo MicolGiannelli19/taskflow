@@ -27,6 +27,13 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         setUser(user)
     }
 
+    // The sidebar reads its name and avatar from here, so an edited profile has
+    // to land in the cache too or it reverts on the next reload.
+    const updateUser = (user: UserType) => {
+        localStorage.setItem('user', JSON.stringify(user));
+        setUser(user)
+    }
+
     const logout = () => {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
@@ -34,7 +41,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     }
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+        <AuthContext.Provider value={{ user, login, updateUser, logout, isLoading }}>
             {children}
         </AuthContext.Provider>
     );

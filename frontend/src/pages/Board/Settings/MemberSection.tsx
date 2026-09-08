@@ -19,9 +19,9 @@ interface Props {
   existingMemberIds: Set<string>;
   emptyText: string;
   currentUserId?: string;
-  /** Owners only — adding someone is an ownership-level decision. */
+  /** Owners only, and only in edit mode — adding is an ownership decision. */
   canAdd: boolean;
-  /** Admins and owners. */
+  /** Admins and owners, and only in edit mode. */
   canRemove: boolean;
   onRemove: (userId: string) => void;
   removing: boolean;
@@ -51,6 +51,14 @@ export default function MemberSection({
   const [open, setOpen] = useState(true);
   const [adding, setAdding] = useState(false);
   const panelId = useId();
+
+  // Leaving edit mode closes an open form instead of stranding it, and doesn't
+  // reopen it with stale input the next time edit mode starts.
+  const [couldAdd, setCouldAdd] = useState(canAdd);
+  if (couldAdd !== canAdd) {
+    setCouldAdd(canAdd);
+    if (!canAdd) setAdding(false);
+  }
 
   const startAdding = () => {
     setOpen(true); // Never hide the form behind a collapsed section.
@@ -85,7 +93,7 @@ export default function MemberSection({
       </div>
 
       <div id={panelId} hidden={!open}>
-        {adding && (
+        {canAdd && adding && (
           <AddMemberForm
             boardId={boardId}
             role={role}
