@@ -9,6 +9,8 @@ import Home from "./pages/Home/Home";
 import NewBoardForm from "./pages/Home/NewBoardForm";
 import LoginPage from "./pages/Login/LoginPage";
 import ComingSoon from "./pages/ComingSoon";
+import BoardSettings from "./pages/Board/Settings/BoardSettings";
+import Profile from "./pages/Profile/Profile";
 import { routePatterns } from "./routes";
 
 /**
@@ -42,14 +44,8 @@ export const router = createBrowserRouter([
                 path: routePatterns.boardHistory,
                 element: <ComingSoon title="Board history" />,
               },
-              {
-                path: routePatterns.boardSettings,
-                element: <ComingSoon title="Board settings" />,
-              },
-              {
-                path: routePatterns.profile,
-                element: <ComingSoon title="Profile" />,
-              },
+              { path: routePatterns.boardSettings, element: <BoardSettings /> },
+              { path: routePatterns.profile, element: <Profile /> },
             ],
           },
         ],

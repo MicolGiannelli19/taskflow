@@ -6,7 +6,7 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from app.database import Board, BoardColumn, BoardMember, Ticket, User
-from app.schemas import BoardCreate
+from app.schemas import BoardCreate, BoardUpdate
 from app.authorization import Role
 from app.services.membership_service import MembershipService
 from app.exceptions import NotFoundError, ValidationError
@@ -95,6 +95,29 @@ class BoardService:
 
         logger.info("User %s created board %s ('%s')", owner.id, new_board.id, new_board.name)
         return new_board
+
+    def update_board(self, board_id: uuid.UUID, board_update: BoardUpdate,
+                     current_user: User) -> Board:
+        board = self.db.query(Board).filter(Board.id == board_id).first()
+        if not board:
+            logger.warning("Board %s not found (update attempt)", board_id)
+            raise NotFoundError(f"Board {board_id} not found")
+
+        update_data = board_update.dict(exclude_unset=True)
+
+        if "name" in update_data:
+            name = (update_data["name"] or "").strip()
+            if not name:
+                raise ValidationError("Board name cannot be empty")
+            update_data["name"] = name
+
+        for field, value in update_data.items():
+            setattr(board, field, value)
+
+        self.db.commit()
+        self.db.refresh(board)
+        logger.info("User %s updated board %s", current_user.id, board_id)
+        return board
 
     def delete_board(self, board_id: uuid.UUID, current_user: User) -> None:
         # Authorization (owner-only) is enforced by require_board_role(OWNER) at

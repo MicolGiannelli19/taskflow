@@ -1,0 +1,310 @@
+/* Settings renders inside the app shell, so it owns its own page padding —
+   same single-column reading measure as the ticket page. */
+.page {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 20px 40px;
+}
+
+.header {
+  max-width: 720px;
+  margin: 0 auto 16px;
+}
+
+.header h1 {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.card {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 22px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.cardHeader h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.count {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+}
+
+/* Member count and the edit-mode toggle, kept together on the right. */
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Only while editing: says what the bins will do before anyone clicks one. */
+.hint {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  margin: 0 0 10px;
+}
+
+/* ─── Collapsible group (Admins · Editors · Viewers) ───────────────────────── */
+
+.section {
+  border-top: 1px solid var(--color-border);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  /* The disclosure carries the row's padding so its hit area spans the header. */
+  padding-right: 2px;
+}
+
+/* A plain button styled as a header: the whole title row toggles the group. */
+.disclosure {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  padding: 12px 0;
+  background: none;
+  border: none;
+  border-radius: var(--radius);
+  font: inherit;
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.disclosure:hover .sectionTitle {
+  color: var(--color-primary);
+}
+
+.disclosure:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+/* One chevron, rotated — the open and closed states can never drift apart. */
+.chevron,
+.chevronOpen {
+  color: var(--color-text-muted);
+  transition: transform 120ms ease;
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+/* Reduced motion: the rotation is decorative, the chevron still points. */
+@media (prefers-reduced-motion: reduce) {
+  .chevron,
+  .chevronOpen {
+    transition: none;
+  }
+}
+
+/* ─── Add form ─────────────────────────────────────────────────────────────── */
+
+.addForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 4px 0 14px;
+}
+
+.addField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1 1 220px;
+}
+
+/* ─── Invite typeahead ─────────────────────────────────────────────────────── */
+
+/* Anchors the suggestion list to the field. */
+.comboWrap {
+  position: relative;
+}
+
+.comboList {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+}
+
+.comboOption,
+.comboOptionActive {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: calc(var(--radius) - 2px);
+  cursor: pointer;
+}
+
+/* Keyboard and mouse share one highlight, so the two can't disagree. */
+.comboOptionActive {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+.comboName {
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.comboEmail {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.comboOptionActive .comboEmail {
+  color: inherit;
+  opacity: 0.75;
+}
+
+.comboEmpty {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.comboHint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* ─── Member rows ──────────────────────────────────────────────────────────── */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0 0 8px;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+/* Takes the slack so the role badge and remove button stay right-aligned. */
+.identity {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.you {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.email {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.joined {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.role {
+  text-transform: capitalize;
+}
+
+.muted {
+  color: var(--color-text-muted);
+  font-size: 13.5px;
+  padding: 2px 0 12px;
+  margin: 0;
+}
+
+.error {
+  flex-basis: 100%;
+  color: hsl(var(--destructive));
+  font-size: 13px;
+  margin: 0;
+  padding: 4px 0;
+}
+
+/* Narrow screens: the join date is the first thing worth losing. */
+@media (max-width: 560px) {
+  .joined {
+    display: none;
+  }
+}

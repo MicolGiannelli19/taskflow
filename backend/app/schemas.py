@@ -22,6 +22,20 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class UserSuggestion(BaseModel):
+    """A user as offered by the search typeahead.
+
+    Deliberately smaller than UserResponse: picking someone out of a list needs
+    a face, a name and an address, not their account's creation date.
+    """
+    id: uuid.UUID
+    email: EmailStr
+    name: Optional[str] = None
+    avatar: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
 # Board schemas
 class BoardCreate(BaseModel):
     name: str
@@ -36,6 +50,7 @@ class BoardBase(BaseModel):
     name: str
     description: Optional[str] = None
     created_at: datetime
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -54,6 +69,8 @@ class MemberResponse(BaseModel):
     name: Optional[str] = None
     avatar: Optional[str] = None
     role: str
+    # When the membership was created, not the user account.
+    joined_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -152,7 +169,8 @@ class BoardWithData(BoardBase):
 
 class ColumnCreate(BaseModel):
     name: str
-    position: int
+    # Omitted means "append to the end of the board".
+    position: Optional[int] = None
 
 class ColumnUpdate(BaseModel):
     name: Optional[str] = None

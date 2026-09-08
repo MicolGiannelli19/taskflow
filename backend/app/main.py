@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.routers import auth, board, ticket, member
+from app.routers import auth, board, ticket, member, column, user
 from app.database import Base, engine
 from app.seed import seed
 from app.config import settings
@@ -44,8 +44,10 @@ app.include_router(auth.router)
 app.include_router(board.router)
 app.include_router(ticket.router)
 app.include_router(member.router)
+app.include_router(column.router)
+app.include_router(user.router)
 
-
+# TODO: check the  Exeption handlers shoudl be set up here 
 @app.exception_handler(NotFoundError)
 async def not_found_handler(request: Request, exc: NotFoundError):
     return JSONResponse(
