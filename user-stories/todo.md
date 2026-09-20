@@ -18,13 +18,14 @@ sends hardcoded mock credentials — real form input never reaches the API. Capt
 here so they survive the branch merges. Some may already be fixed on a branch
 being merged in — check them off if so.
 
-**Login sends mock values instead of the real form input**
-- `frontend/src/App.tsx` → `handleLogIn` ignores the form: it hardcodes
-  `mockemail`/`mockpassword` and builds a fake `mockUser` with `id: "mock"`.
-- Fix: take the real `LogInFromData`, POST the typed email/password (as
-  `username`/`password`, x-www-form-urlencoded), then load the real user (below).
-- [ ] Use real credentials from the form
-- [ ] Stop constructing a `mockUser`
+**Login sends mock values instead of the real form input** — ✅ **resolved by the
+Clerk migration (2026-09-19), not by fixing this code.** `handleLogIn` and
+`LogInForm.tsx` were deleted: Clerk's `<SignIn />` owns the form, the
+credentials and the session, so there is no hand-rolled login path left to send
+mock values. `useAuth()` returns the real local user via `GET /api/auth/me`.
+See `docs/specs/clerk-integration.md` and `backend/docs/auth.md`.
+- [x] Use real credentials from the form
+- [x] Stop constructing a `mockUser`
 
 **Data-model drift to reconcile (related, lower urgency)**
 - [ ] `frontend/src/types.ts` `BoardSummary.owner_id` references a column that no
@@ -34,6 +35,10 @@ being merged in — check them off if so.
       deleting a user wipes their tickets/comments. The spec left this TBD and did
       not cascade — reconcile (likely `SET NULL` + a "deleted user" placeholder,
       matching `assignee_id`).
+      **Raised priority (2026-09-19):** comments have shipped, so there is real
+      content to lose. The `user.deleted` webhook deliberately routes around this
+      — it deletes only the `user_identities` link and never the `users` row —
+      but that is a workaround, not the fix. See `docs/specs/clerk-integration.md` §11.
 
 **Priority:** High for the login items (auth is broken for real users); Medium for the drift items.
 
@@ -150,12 +155,23 @@ Understand the three main token storage patterns and when to use each, so we can
    - Research: implement the Axios interceptor that retries failed requests after refresh
 
 **Acceptance criteria:**
-- [ ] Can explain the XSS and CSRF threat models in plain language
-- [ ] Have a working proof-of-concept for httpOnly cookie login in FastAPI (on a branch)
-- [ ] Decision documented in `backend/docs/auth.md` with rationale
+- [x] Can explain the XSS and CSRF threat models in plain language
+- [x] ~~Have a working proof-of-concept for httpOnly cookie login in FastAPI (on a branch)~~
+      **Moot.** Clerk implements exactly the hybrid this spike was going to
+      prototype: the session credential is an `HttpOnly` cookie on Clerk's
+      domain, and `getToken()` keeps a short-lived access token in memory. That
+      FastAPI code will never be written, so the proof-of-concept has nothing
+      left to prove.
+- [x] Decision documented in `backend/docs/auth.md` with rationale
+      → see the **Token storage** section: what was chosen, what was rejected
+      (`localStorage`, a BFF/token proxy), and the residual XSS exposure.
 
-**Priority:** Medium — do before production or before handling any sensitive user data
-**Dependencies:** Frontend auth (localStorage) must be working first
+**Status:** ✅ **Closed 2026-09-19.** The short version: nothing of ours stores a
+token any more. Storage bounds the *damage* from an XSS; the Content-Security-Policy
+(also now in `backend/docs/auth.md`) is what *prevents* one.
+
+**Priority:** ~~Medium~~ — done.
+**Dependencies:** ~~Frontend auth (localStorage) must be working first~~ — superseded by Clerk.
 
 ---
 

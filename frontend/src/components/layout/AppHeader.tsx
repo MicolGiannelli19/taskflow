@@ -1,7 +1,6 @@
+import { UserButton } from "@clerk/react";
 import { Link, useParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { useAuth } from "@/hooks/useAuth";
 import { useBoards } from "@/hooks/useBoards";
 import { useTicketDetail } from "@/hooks/useTicketDetail";
 import { paths } from "@/routes";
@@ -14,7 +13,6 @@ import styles from "./AppHeader.module.css";
  */
 export default function AppHeader() {
   const { boardId, ticketId } = useParams();
-  const { logout } = useAuth();
   const { data: boards } = useBoards();
 
   const boardName = boards?.find((b) => String(b.id) === String(boardId))?.name;
@@ -51,9 +49,9 @@ export default function AppHeader() {
       )}
 
       <div className={styles.actions}>
-        <Button variant="destructive" onClick={logout}>
-          Log out
-        </Button>
+        {/* Replaces the old Log out button: account menu, profile link and
+            sign-out, all owned by Clerk. */}
+        <UserButton userProfileUrl={paths.profile} />
       </div>
     </header>
   );

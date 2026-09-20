@@ -1,6 +1,63 @@
-# Testing the API in Isolation
+# Testing the API
 
-This guide covers how to manually test API endpoints without running the frontend.
+Two kinds of testing live here: the automated suite, and driving the API by
+hand without the frontend.
+
+---
+
+## The automated suite
+
+```bash
+cd backend
+pytest                          # everything
+pytest tests/test_auth.py       # one file
+pytest -k authorization         # one topic
+```
+
+No Clerk key, no database, and no network are needed — a test that opens a
+socket fails on purpose (`no_network` in `conftest.py`).
+
+| File | Covers |
+|---|---|
+| `tests/conftest.py` | Fixtures: in-memory database, clients, a user at each board role |
+| `tests/test_auth.py` | `GET /api/auth/me`; the 401 boundary |
+| `tests/test_authorization.py` | The `require_board_role` matrix: 404-not-403, role hierarchy, comment ownership |
+| `tests/test_identity.py` | `IdentityService`: adoption, provisioning, the race |
+| `tests/test_webhook.py` | Signature verification, profile sync, replay |
+| `tests/test_security_headers.py` | CSP and friends on API responses |
+
+### How authentication is faked
+
+`get_current_user` is a FastAPI dependency, so tests swap it for a known user:
+
+```python
+def test_viewer_cannot_create_a_ticket(as_user, viewer, board, column):
+    response = as_user(viewer).post(
+        f"/api/boards/{board.id}/tickets",
+        json={"title": "Viewers may not write", "column_id": str(column.id)},
+    )
+    assert response.status_code == 403
+```
+
+**What this does not cover:** the token-verification path itself —
+`authenticate_request`, the `azp` check, the `sub` extraction. Those belong to
+the Clerk SDK. The practical consequence is that a misconfigured
+`CLERK_AUTHORIZED_PARTIES` will **not** fail the suite; it has to be checked
+against a running deployment.
+
+### Why SQLite
+
+The suite builds the whole schema in memory, fresh per test. That works because
+the models use SQLAlchemy's dialect-agnostic `Uuid` type — Postgres still gets
+a native `uuid` column, and the DDL there is unchanged. The one place the two
+dialects had to be named explicitly is the partial index in
+`app/database/models/board_member.py`.
+
+---
+
+## Testing the API by hand
+
+This section covers how to manually test API endpoints without running the frontend.
 
 ---
 
@@ -11,24 +68,22 @@ FastAPI generates interactive docs automatically.
 1. Start the backend: `uvicorn app.main:app --reload`
 2. Open `http://localhost:8000/docs` in your browser
 
-### Without authentication (mock mode)
+### Getting a token
 
-By default `USE_MOCK_AUTH=true`, which means all endpoints are accessible without a token — requests are automatically treated as Alice (`a0000000-0000-0000-0000-000000000001`).
+Every endpoint requires a Clerk session token; there is no mock-auth bypass.
 
-Just call any endpoint directly in the Swagger UI — no login required.
+1. Sign in to the app at http://localhost:5173
+2. In that tab's devtools console, run:
+   ```js
+   await window.Clerk.session.getToken()
+   ```
+3. In Swagger UI, click **Authorize** (top right)
+4. Paste the token — Swagger will include it on all subsequent requests
 
-### With real JWT authentication
+Tokens are short-lived, so re-run step 2 when requests start returning 401.
 
-1. Set `USE_MOCK_AUTH=false` in your `.env`
-2. In Swagger UI, call `POST /api/auth/token`:
-   - **username**: `alice@example.com`
-   - **password**: `password123`
-   - Leave **scope** and **grant_type** blank
-3. Copy the `access_token` from the response
-4. Click **Authorize** (top right)
-5. Paste the token — Swagger will include it on all subsequent requests
-
-Seed users available for testing (all use password `password123`):
+Seed users available for testing (all use password `password123`, pushed to
+Clerk by the seed):
 
 | Name | Email |
 |---|---|
@@ -40,20 +95,9 @@ Seed users available for testing (all use password `password123`):
 
 ## Option 2: curl
 
-### Mock auth (default)
-
 ```bash
-curl http://localhost:8000/api/boards
-```
-
-### Real JWT auth
-
-```bash
-# 1. Get a token
-curl -X POST http://localhost:8000/api/auth/token \
-  -d "username=alice@example.com&password=password123"
-
-# 2. Copy the access_token from the response, then use it
+# Token comes from a signed-in browser tab:
+#   await window.Clerk.session.getToken()
 curl http://localhost:8000/api/boards \
   -H "Authorization: Bearer <paste_token_here>"
 ```
@@ -66,8 +110,7 @@ curl http://localhost:8000/api/boards \
 2. To authenticate:
    - Go to the **Authorization** tab
    - Select **Bearer Token**
-   - Paste your token (obtained from `POST /api/auth/token` as above)
-3. Or use the built-in OAuth2 flow to fetch the token automatically
+   - Paste your token (obtained from the browser console as above)
 
 ---
 

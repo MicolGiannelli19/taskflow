@@ -1,45 +1,59 @@
 import logging
 import uuid
 
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from clerk_backend_api.security.types import AuthenticateRequestOptions
+from fastapi import Depends, Request
+from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
-from jose import JWTError, jwt
 
 from app.database import get_db
 from app.database import User, BoardMember
+from app.clerk import get_clerk
 from app.config import settings
 from app.authorization import Role, role_satisfies
-from app.exceptions import NotFoundError, ForbiddenError
+from app.exceptions import NotFoundError, ForbiddenError, UnauthorizedError
+from app.services.identity_service import IdentityService
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/token")
+# Declared only so Swagger shows an "Authorize" button; the SDK reads the
+# header itself. auto_error=False keeps the 401 shape ours rather than
+# FastAPI's.
+bearer_scheme = HTTPBearer(auto_error=False)
+
 logger = logging.getLogger(__name__)
 
 
-async def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
-):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
-        user_id: str = payload.get("sub")
-        if user_id is None:
-            logger.warning("JWT token missing 'sub' claim")
-            raise credentials_exception
-    except JWTError as e:
-        logger.warning("JWT decode failed: %s", str(e))
-        raise credentials_exception
+# Deliberately sync: `authenticate_request` does blocking I/O (it fetches and
+# caches Clerk's JWKS), so FastAPI should run this in its threadpool rather
+# than on the event loop — same as every handler in this app.
+def get_current_user(
+    request: Request,
+    db: Session = Depends(get_db),
+    _credentials=Depends(bearer_scheme),
+) -> User:
+    """Authenticate the caller against Clerk and return their TaskFlow user.
 
-    user = db.query(User).filter(User.id == user_id).first()
-    if user is None:
-        logger.warning("JWT references non-existent user_id: %s", user_id)
-        raise credentials_exception
-    return user
+    Clerk verifies the session token's signature, expiry and `azp` claim. The
+    `sub` claim is a Clerk user ID, not a TaskFlow one, so it is exchanged for
+    the local `User` record that boards and tickets are keyed on.
+    """
+    clerk = get_clerk()
+    state = clerk.authenticate_request(
+        request,
+        AuthenticateRequestOptions(
+            authorized_parties=settings.clerk_authorized_parties,
+        ),
+    )
+
+    if not state.is_signed_in:
+        logger.warning("Clerk rejected request: %s", state.reason or state.message)
+        raise UnauthorizedError("Could not validate credentials")
+
+    clerk_user_id = (state.payload or {}).get("sub")
+    if not clerk_user_id:
+        logger.warning("Clerk session token missing 'sub' claim")
+        raise UnauthorizedError("Could not validate credentials")
+
+    return IdentityService(db, clerk).resolve(clerk_user_id)
 
 
 def require_board_role(minimum: Role):

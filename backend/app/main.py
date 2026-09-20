@@ -4,10 +4,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.routers import auth, board, ticket, member, column, user
+from app.routers import auth, board, ticket, member, column, user, webhook
 from app.database import Base, engine
 from app.seed import seed
 from app.config import settings
+from app.security_headers import SecurityHeadersMiddleware
 from app.exceptions import NotFoundError, ConflictError, ValidationError, ForbiddenError, UnauthorizedError
 
 logging.basicConfig(
@@ -30,10 +31,17 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="taskflow API", version="1.0.0", lifespan=lifespan)
 
-# CORS middleware
+# Security response headers (CSP, nosniff, referrer policy). Added first so it
+# wraps outermost: CORS rejections and error responses get the headers too.
+# The policy that protects the *app page* is not here — it ships with the HTML,
+# which this API does not serve. See `app/security_headers.py`.
+app.add_middleware(SecurityHeadersMiddleware)
+
+# CORS middleware. Origins come from the environment so deploying does not mean
+# editing this file (spec §6.1); the default is the local frontend.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=settings.cors_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -46,6 +54,9 @@ app.include_router(ticket.router)
 app.include_router(member.router)
 app.include_router(column.router)
 app.include_router(user.router)
+# Publicly reachable by design — authenticated by its Svix signature, not by
+# a session token. See app/routers/webhook.py.
+app.include_router(webhook.router)
 
 # TODO: check the  Exeption handlers shoudl be set up here 
 @app.exception_handler(NotFoundError)

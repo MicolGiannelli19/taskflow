@@ -32,9 +32,12 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://taskflow_user:taskflow_pass@db:5432/taskflow_db
-      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production}
-      ALGORITHM: HS256
-      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      # Verifies Clerk session tokens and calls the Clerk Backend API.
+      # Never expose this to the browser.
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY:-}
+      # Verifies Clerk webhook deliveries. Unset means the webhook endpoint
+      # refuses everything, which is the safe default.
+      CLERK_WEBHOOK_SIGNING_SECRET: ${CLERK_WEBHOOK_SIGNING_SECRET:-}
       PYTHONPATH: /app
     ports:
       - "8000:8000"
@@ -62,6 +65,10 @@ services:
       - taskflow-network
     environment:
       VITE_API_URL: http://localhost:8000
+      # Safe to ship to the browser — this is the publishable half of the pair.
+      VITE_CLERK_PUBLISHABLE_KEY: ${VITE_CLERK_PUBLISHABLE_KEY:-}
+      # `report` (default) or `enforce` — see backend/docs/auth.md.
+      VITE_CSP_MODE: ${VITE_CSP_MODE:-report}
     command: sh -c "yarn install && yarn dev --host"
 
 

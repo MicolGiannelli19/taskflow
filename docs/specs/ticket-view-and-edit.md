@@ -1,8 +1,8 @@
 # Spec: Ticket View & Edit
 
-**Status:** Draft — view shipped, edit not started
+**Status:** ✅ Shipped — view and edit both implemented
 **Author:** Micol
-**Last updated:** 2026-08-29
+**Last updated:** 2026-09-19
 
 > Users can open a ticket from the board to see its full details, and edit those
 > details in place. The **view** half (a read-only detail modal) is already
@@ -27,7 +27,7 @@
 
 - Editing comments, or adding new comments (separate story).
 - Editing attachments (not modelled on the frontend yet).
-- Rich-text / markdown description editing — plain `<textarea>` for now.
+- ~~Rich-text / markdown description editing — plain `<textarea>` for now.~~ Superseded: `MarkdownEditor` shipped, and descriptions and comments both render as markdown.
 - Reordering within a column (`position`) via this UI — moving between columns
   already exists through drag-and-drop and the "move →" dropdown.
 - Ticket deletion UI (endpoint exists; surface it in a follow-up).
@@ -157,15 +157,15 @@ useMutation({
 - [x] "move →" and drag-and-drop still work and do not open the modal.
 
 ### Edit
-- [ ] An **Edit** button appears in the modal for members/admins/owners only.
-- [ ] Edit mode pre-fills title, description, priority, assignee, due date.
-- [ ] Only changed fields are included in the `PATCH` request body.
-- [ ] Save persists via `PATCH /boards/:boardId/tickets/:ticketId` and returns to view mode.
-- [ ] After save, both the modal and the board card reflect the new values.
-- [ ] Cancel discards changes and returns to view mode.
-- [ ] Save is disabled when `title` is empty; Save shows a pending state while in flight.
-- [ ] A failed save shows an inline error and preserves the user's edits.
-- [ ] Viewers never see the Edit button; a rejected `PATCH` is handled gracefully.
+- [x] An **Edit** button appears in the modal for members/admins/owners only. (`canEdit`, `EDIT_ROLES` in `useTicketEditor.ts`)
+- [x] Edit mode pre-fills title, description, priority, assignee, due date. (`seedForm`)
+- [x] Only changed fields are included in the `PATCH` request body. (`buildPatch`)
+- [x] Save persists via `PATCH /boards/:boardId/tickets/:ticketId` and returns to view mode. (`useUpdateTicket`)
+- [x] After save, both the modal and the board card reflect the new values. (invalidates `['ticket', …]` and `['board', …]`)
+- [x] Cancel discards changes and returns to view mode. (`cancelEdit`)
+- [x] Save is disabled when `title` is empty; Save shows a pending state while in flight. (`titleValid`, `isSaving`)
+- [x] A failed save shows an inline error and preserves the user's edits. (`saveError`)
+- [x] Viewers never see the Edit button; a rejected `PATCH` is handled gracefully. Now covered by a test: `test_viewer_cannot_edit_or_delete_a_ticket`.
 
 ---
 

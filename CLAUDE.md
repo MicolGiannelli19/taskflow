@@ -46,7 +46,12 @@ Tests:
 cd backend
 pytest                        # all tests
 pytest tests/test_auth.py     # single file
+pytest -k authorization       # one topic
 ```
+
+Tests need no Clerk key, no database and no network: `get_current_user` is
+overridden with a known user and the schema is built in SQLite in memory. A
+test that opens a socket fails deliberately. See `backend/docs/testing.md`.
 
 ## Architecture
 
@@ -55,7 +60,7 @@ pytest tests/test_auth.py     # single file
 ```
 React component (useState + useEffect)
   → axios instance (frontend/src/api/axios.ts)
-    → adds JWT from localStorage via request interceptor
+    → awaits a Clerk session token and attaches it via request interceptor
     → redirects to /login on 401 via response interceptor
   → FastAPI router (backend/app/routers/)
     → get_current_user() dependency injects authenticated user
@@ -65,10 +70,16 @@ React component (useState + useEffect)
 
 ### Auth
 
-- Backend: JWT tokens (python-jose), bcrypt passwords (passlib), 30-minute expiry
-- Token claim: `sub` = user_id
-- Frontend: `AuthProvider` reads localStorage on mount, validates JWT expiry from payload
+Authentication is delegated to **Clerk**. See `backend/docs/auth.md` for the full picture.
+
+- Backend: `clerk-backend-api` verifies session tokens (`authenticate_request`); no passwords, no local token signing
+- Token claim: `sub` = **Clerk** user id (e.g. `user_2abc…`), *not* a TaskFlow UUID
+- `IdentityService` exchanges that for the local `users` row via `user_identities` (`provider='clerk'`), provisioning on first sight
+- Frontend: `ClerkProvider` owns the session; `useAuth()` still returns the **local** user so `user.id` keeps matching `assignee_id` / `board_members.user_id`
 - All protected routes use `Depends(get_current_user)` in FastAPI
+- Requires `CLERK_SECRET_KEY` (backend) and `VITE_CLERK_PUBLISHABLE_KEY` (frontend); get them with `npx clerk@latest auth login && npx clerk@latest env pull` in `frontend/`
+- `POST /api/webhooks/clerk` is the one **public** route: Clerk sends no session token, so its auth is the Svix signature on the body (`CLERK_WEBHOOK_SIGNING_SECRET`). It keeps the local `name`/`avatar` copy fresh
+- Deployment config is environment-driven: `CLERK_AUTHORIZED_PARTIES` (the `azp` allowlist) and `CORS_ALLOWED_ORIGINS`, both comma-separated, both defaulting to `http://localhost:5173`
 
 ### Key Files
 
@@ -79,7 +90,13 @@ React component (useState + useEffect)
 | `backend/app/routers/` | Auth, board, ticket route handlers |
 | `backend/app/dependencies.py` | `get_current_user()` dependency |
 | `frontend/src/api/axios.ts` | Axios instance with auth interceptors |
-| `frontend/src/context/AuthProvider.tsx` | Global auth state + localStorage |
+| `frontend/src/hooks/useAuth.ts` | Clerk session + local user record |
+| `frontend/src/api/clerkToken.ts` | Bridges Clerk's `getToken` to axios |
+| `backend/app/services/identity_service.py` | Clerk account → TaskFlow user |
+| `backend/app/routers/webhook.py` | Clerk webhook, verified by signature |
+| `backend/app/security_headers.py` | CSP + security headers on API responses |
+| `backend/tests/conftest.py` | Test fixtures (dependency overrides, in-memory DB) |
+| `frontend/csp.ts` | CSP for the app page, applied by `vite.config.ts` |
 | `frontend/src/types.ts` | TypeScript interfaces |
 
 ### Database Schema
@@ -89,15 +106,19 @@ React component (useState + useEffect)
 ### Frontend Routing
 
 - `/` → board listing (redirects to `/login` if unauthenticated)
-- `/login` → login form
+- `/login` → Clerk `<SignIn />` (mounted at `/login/*`)
+- `/sign-up` → Clerk `<SignUp />` (mounted at `/sign-up/*`)
+- `/profile` → Clerk `<UserProfile />` (mounted at `/profile/*`)
 - `/new-board` → board creation
 - `/board/:boardId` → board view
 - `/board/:boardId/new-ticket` → ticket creation (nested route)
 
 ### State Management
 
-Components use `useState`/`useEffect` directly. Auth state lives in `AuthContext`. Board data is refetched by incrementing a `refetchKey` state variable. React Query is a planned improvement but not yet implemented.
+Server state is **React Query** (`@tanstack/react-query`): one hook per operation in `frontend/src/hooks/` (`useBoards`, `useTicketDetail`, `useUpdateTicket`, …), with the client configured in `frontend/src/lib/queryClient.ts`. Cache invalidation replaced the old `refetchKey` counter. Local UI state still uses `useState`/`useEffect`; auth state lives in Clerk (`ClerkProvider`).
 
-### CORS
+### CORS and security headers
 
-Backend allows only `http://localhost:5173`. Update `backend/app/main.py` if the frontend port changes.
+CORS origins come from `CORS_ALLOWED_ORIGINS` (default `http://localhost:5173`), not a literal in `main.py`.
+
+Every API response carries `Content-Security-Policy: default-src 'none'`, `nosniff`, a referrer policy and `frame-ancestors 'none'`. The policy that protects the *app page* — the one behind the markdown renderer — is separate and lives in `frontend/csp.ts`, because a CSP ships with the document and the API does not serve the document. It is report-only until verified against a live Clerk instance; see `backend/docs/auth.md`.

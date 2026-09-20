@@ -143,6 +143,17 @@ Two design choices worth pausing on:
 
 ## 3. The auth lifecycle
 
+> [!WARNING]
+> **Superseded by the Clerk migration.** This section describes the previous
+> hand-rolled auth: `AuthProvider`, a JWT in `localStorage`, and
+> `POST /auth/token`. None of those exist any more — Clerk owns the session,
+> and the axios interceptor awaits `getToken()` per request. §2's auth gate and
+> §4's 401 interceptor are still broadly accurate; the rest of this section is
+> kept only as a record of what the app used to do.
+>
+> For how auth works now, see [`backend/docs/auth.md`](../../backend/docs/auth.md).
+
+
 Auth is JWT-based. The frontend stores both the token and a serialised user object in `localStorage` so a refresh doesn't log the user out.
 
 Three paths to understand: **mount-time rehydration**, **login**, and **session loss (401)**.

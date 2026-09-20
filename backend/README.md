@@ -79,9 +79,8 @@ Create a `.env` file in the backend directory:
 
 ```env
 DATABASE_URL=postgresql://taskflow_user:taskflow_pass@localhost:5432/taskflow_db
-SECRET_KEY=your-super-secret-key-change-this-in-production
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+# From `npx clerk@latest env pull` (run in ../frontend). Never expose to the browser.
+CLERK_SECRET_KEY=sk_test_...
 ```
 
 ### 4. Set Up Database
@@ -118,8 +117,9 @@ FastAPI automatically generates interactive API documentation:
 ### Key Endpoints
 
 #### Authentication
-* `POST /api/auth/register` - Register new user
-* `POST /api/auth/token` - Login and get JWT token
+* `GET /api/auth/me` - The signed-in user's TaskFlow record
+
+Sign-up and sign-in are handled by Clerk in the frontend, not by this API.
 
 #### Boards
 * `GET /api/boards` - List all boards
@@ -136,16 +136,19 @@ FastAPI automatically generates interactive API documentation:
 
 ## Authentication
 
-The API uses JWT (JSON Web Tokens). Credentials are stored in the `user_identities` table, which supports multiple providers per user (password, Google, GitHub).
+Authentication is delegated to [Clerk](https://clerk.com). Clerk verifies the
+session token; `user_identities` maps the Clerk account (`provider='clerk'`) to
+the local `users` row that boards and tickets reference.
 
 For a full explanation of the auth flow see [docs/auth.md](./docs/auth.md).
 
 ### Getting a Token
 
-```bash
-curl -X POST "http://localhost:8000/api/auth/token" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "username=alice@example.com&password=password123"
+Tokens are minted by Clerk in the browser, so grab one from a signed-in tab's
+console:
+
+```js
+await window.Clerk.session.getToken()
 ```
 
 ### Using the Token
@@ -189,10 +192,8 @@ Use the interactive Swagger UI at `/docs` or tools like Postman, Insomnia, or cu
 # Database
 DATABASE_URL=postgresql://taskflow_user:taskflow_pass@db:5432/taskflow_db
 
-# Security
-SECRET_KEY=change-this-to-a-random-secret-key
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+# Clerk (see ../frontend: `npx clerk@latest env pull`)
+CLERK_SECRET_KEY=sk_test_...
 ```
 
 **Important**: Never commit `.env` to version control.
@@ -203,7 +204,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 ### Security Checklist
 
-- [ ] Change `SECRET_KEY` to a strong random value
+- [ ] Claim the Clerk app (`npx clerk@latest auth login`) and switch to production keys (`npx clerk@latest deploy`)
+- [ ] Add the production origin to `clerk_authorized_parties` in `app/config.py`
 - [ ] Update `allow_origins` in `main.py` to your production frontend domain
 - [ ] Use environment variables for all secrets
 - [ ] Enable HTTPS

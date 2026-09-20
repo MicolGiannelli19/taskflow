@@ -1,6 +1,5 @@
-from sqlalchemy import Column, String, Text, TIMESTAMP
+from sqlalchemy import Column, String, Text, TIMESTAMP, Uuid
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
 import uuid
 from app.database.session import Base
@@ -8,7 +7,7 @@ from app.database.session import Base
 
 class Board(Base):
     __tablename__ = "boards"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(255), nullable=False)
     description = Column(Text)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)

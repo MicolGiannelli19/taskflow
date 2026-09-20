@@ -13,7 +13,7 @@ The second is professional. This project is a deliberate collection of software 
 ## Engineering Topics to Explore
 
 - **React patterns** — optimistic UI updates, lifting state up, props drilling vs Context, custom hooks, compound components, React Query for server state
-- **Authentication & security** — JWT lifecycle, OAuth providers, RBAC (role-based access control), CSRF protection, rate limiting, secure storage patterns
+- **Authentication & security** — delegated auth (Clerk), RBAC (role-based access control), CSRF protection, rate limiting, secure storage patterns
 - **Drag-and-drop** — `@dnd-kit` integration, accessible DnD, position/ordering persistence
 - **Real-time updates** — WebSockets or Server-Sent Events for live board updates across users
 - **Testing** — component testing with React Testing Library, API integration tests, E2E with Playwright
@@ -98,7 +98,7 @@ docker compose down
 
 - FastAPI REST API
 - PostgreSQL database for persistent storage
-- JWT authentication with support for password and OAuth providers
+- Clerk-delegated authentication, mapped onto local users via `user_identities`
 - User, board, column, ticket, and comment management
 - Dockerized for easy development and deployment
 
