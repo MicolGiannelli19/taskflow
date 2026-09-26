@@ -21,7 +21,7 @@ Services:
 - Backend API: http://localhost:8000
 - PostgreSQL: localhost:5432
 
-Test credentials (from seed data): `alice@example.com` / `password123`
+Test credentials (from seed data): `alice@example.com` / `taskflow-FIiR-TxiN-Rjte`
 
 ## Frontend (React + TypeScript + Vite)
 

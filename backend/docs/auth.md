@@ -126,7 +126,11 @@ Two simultaneous first requests can race; the unique constraint on
 The seed pushes `alice@example.com`, `bob@example.com` and
 `carol@example.com` into Clerk with their bcrypt digests, using Clerk's
 user-import support (`password_hasher="bcrypt"`). That is why
-`password123` still signs you in after the migration.
+`taskflow-FIiR-TxiN-Rjte` signs you in through Clerk.
+
+The password is random on purpose: Clerk checks sign-in passwords against known
+data breaches, and something like `password123` fails with "This password has
+been found as part of a breach".
 
 The push is best-effort. Without `CLERK_SECRET_KEY` the local rows are still
 created, and the first Clerk account with a matching email adopts one — the

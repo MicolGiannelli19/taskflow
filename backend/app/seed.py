@@ -6,12 +6,15 @@ startup (see ``app.main``) and can also be invoked directly::
 
     python -m app.seed
 
-All seed users share the password ``password123``.
+All seed users share the password ``taskflow-FIiR-TxiN-Rjte``.
 
 Clerk owns authentication, so the seed users are also pushed to Clerk with
 their bcrypt digests (Clerk's user-import accepts them via
-``password_hasher="bcrypt"``). That is what keeps ``alice@example.com`` /
-``password123`` working after the migration.
+``password_hasher="bcrypt"``). That is what lets ``alice@example.com`` /
+``taskflow-FIiR-TxiN-Rjte`` sign in through Clerk.
+
+The password is random rather than something like ``password123`` because
+Clerk rejects passwords found in known data breaches at sign-in.
 
 The push is best-effort. Without a Clerk key — or if the API call fails — the
 local rows are still created, and the first Clerk account to sign in with a
@@ -33,7 +36,7 @@ from app.services.identity_service import CLERK_PROVIDER
 
 logger = logging.getLogger(__name__)
 
-SEED_PASSWORD = "password123"
+SEED_PASSWORD = "taskflow-FIiR-TxiN-Rjte"
 
 
 def _push_to_clerk(users: list[User], password_digest: str) -> dict[str, str]:

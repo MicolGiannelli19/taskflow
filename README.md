@@ -30,9 +30,18 @@ The objective of this project is to create a full end-to-end application, focusi
 
 ## Running Locally
 
-The whole stack runs in Docker. The only manual step is supplying Clerk keys —
-authentication is delegated to Clerk, so the frontend refuses to boot without
-them.
+The whole stack runs in Docker. The only manual step is supplying Clerk keys.
+
+> **A Clerk account is required — there is no offline or local-password mode.**
+> Authentication is delegated to Clerk by design: sign-up, sign-in, passwords
+> and sessions are Clerk's, and this project keeps no credentials of its own to
+> fall back on. Without `VITE_CLERK_PUBLISHABLE_KEY` the frontend throws on
+> boot; without `CLERK_SECRET_KEY` every authenticated API call fails.
+>
+> Keyless, you still get Postgres, the backend container, `GET /`, the Swagger
+> UI at `/docs` and the full backend test suite — enough to work on the API.
+> You just can't sign in to the board. Setup is a free account and the two
+> commands in [step 2](#2-add-your-clerk-keys).
 
 ### Prerequisites
 
@@ -51,6 +60,10 @@ you run the backend directly from `backend/`, its settings read the same file
 ```bash
 cp .env.template .env
 ```
+
+Leave the `POSTGRES_*` entries blank — `docker-compose.yml` sets the local
+database credentials itself (`taskflow_user` / `taskflow_pass` / `taskflow_db`).
+The keys that matter are the Clerk ones below.
 
 ### 2. Add your Clerk keys
 
@@ -119,9 +132,9 @@ pushed the demo users into Clerk with their password digests, and these work:
 
 | Email | Password |
 |-------|----------|
-| `alice@example.com` | `password123` |
-| `bob@example.com` | `password123` |
-| `carol@example.com` | `password123` |
+| `alice@example.com` | `taskflow-FIiR-TxiN-Rjte` |
+| `bob@example.com` | `taskflow-FIiR-TxiN-Rjte` |
+| `carol@example.com` | `taskflow-FIiR-TxiN-Rjte` |
 
 Alice owns the demo board; Bob and Carol are members.
 
@@ -213,7 +226,8 @@ just won't propagate until the user signs in again.
 | Blank page, console reads `Missing VITE_CLERK_PUBLISHABLE_KEY` | Key never reached the container | Put it in the **root** `.env`, then `docker compose up` again — Compose reads env at container start |
 | `401` on every API call | `CLERK_SECRET_KEY` missing or from a different Clerk application | Both keys must come from the same application; `npx clerk@latest env pull` gives a matching pair |
 | Signed in, but no boards | Your Clerk email doesn't match a seeded user | Sign up as `alice@example.com`, or create a board |
-| `password123` rejected | Seed ran without `CLERK_SECRET_KEY`, so no Clerk account was created | Add the key, then `docker compose down -v && docker compose up` to re-seed |
+| `taskflow-FIiR-TxiN-Rjte` rejected (account not found) | Seed ran without `CLERK_SECRET_KEY`, so no Clerk account was created | Add the key, then `docker compose down -v && docker compose up` to re-seed |
+| "This password has been found as part of a breach" | The Clerk account was created with an old seed password (`password123`) | Delete the three demo users in the Clerk Dashboard, then `docker compose down -v && docker compose up` to re-seed |
 | Backend restarts in a loop | Postgres not ready, or `DATABASE_URL` wrong | `docker compose logs db`; in Compose the host is `db`, not `localhost` |
 | Port already allocated | 5173 / 8000 / 5432 in use | Stop the other process, or remap the port in `docker-compose.yml` |
 | CSP violations in the console | Page policy is report-only by default | Expected — see `backend/docs/auth.md`; set `VITE_CSP_MODE=enforce` to block instead |

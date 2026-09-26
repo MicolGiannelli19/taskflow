@@ -82,7 +82,7 @@ Every endpoint requires a Clerk session token; there is no mock-auth bypass.
 
 Tokens are short-lived, so re-run step 2 when requests start returning 401.
 
-Seed users available for testing (all use password `password123`, pushed to
+Seed users available for testing (all use password `taskflow-FIiR-TxiN-Rjte`, pushed to
 Clerk by the seed):
 
 | Name | Email |
