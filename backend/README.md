@@ -61,28 +61,27 @@ See the [main README](../README.md) for Docker setup instructions.
 
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate  # macOS/Linux
-venv\Scripts\activate     # Windows
+python3.12 -m venv .venv   # 3.11 or 3.12; psycopg2-binary won't install on 3.14
+source .venv/bin/activate  # macOS/Linux
+.venv\Scripts\activate     # Windows
 ```
 
 ### 2. Install Dependencies
 
 ```bash
 pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r requirements.txt -r requirements-test.txt
 ```
 
 ### 3. Configure Environment Variables
 
-Create a `.env` file in the backend directory:
+Settings are read from the **root** `.env` (`env_file="../.env"` in
+`app/config.py`) — there is no `backend/.env`. Set it up as described in the
+[main README](../README.md#1-create-your-env). Outside Docker, the database
+host is `localhost`, not `db`, so override `DATABASE_URL` when starting the
+server (step 5).
 
-```env
-DATABASE_URL=postgresql://taskflow_user:taskflow_pass@localhost:5432/taskflow_db
-SECRET_KEY=your-super-secret-key-change-this-in-production
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-```
+(The tests need none of this — skip to [Running the Tests](#running-the-tests).)
 
 ### 4. Set Up Database
 
@@ -98,13 +97,36 @@ in [`docs/specs/authorization-data-model.md`](../docs/specs/authorization-data-m
 
 ### 5. Run the Server
 
+With Postgres running (`docker compose up db` from the project root):
+
 ```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+DATABASE_URL=postgresql://taskflow_user:taskflow_pass@localhost:5432/taskflow_db \
+  uvicorn app.main:app --reload --port 8000
 ```
 
 * **API**: http://localhost:8000
 * **Interactive Docs**: http://localhost:8000/docs
 * **ReDoc**: http://localhost:8000/redoc
+
+---
+
+## Running the Tests
+
+The suite runs with nothing else started — no Docker, no Postgres, no server,
+no Clerk key. Each test builds a fresh SQLite database in memory and replaces
+`get_current_user` with a known user.
+
+With the venv from steps 1–2 active:
+
+```bash
+pytest                        # everything
+pytest tests/test_auth.py     # one file
+pytest -k authorization       # tests whose name matches a keyword
+pytest -x                     # stop at the first failure
+```
+
+See [docs/testing.md](./docs/testing.md) for what each file covers, how the
+auth override works, and how to call the running API by hand with a real token.
 
 ---
 
@@ -118,8 +140,9 @@ FastAPI automatically generates interactive API documentation:
 ### Key Endpoints
 
 #### Authentication
-* `POST /api/auth/register` - Register new user
-* `POST /api/auth/token` - Login and get JWT token
+* `GET /api/auth/me` - The signed-in user's TaskFlow record
+
+Sign-up and sign-in are handled by Clerk in the frontend, not by this API.
 
 #### Boards
 * `GET /api/boards` - List all boards
@@ -136,16 +159,19 @@ FastAPI automatically generates interactive API documentation:
 
 ## Authentication
 
-The API uses JWT (JSON Web Tokens). Credentials are stored in the `user_identities` table, which supports multiple providers per user (password, Google, GitHub).
+Authentication is delegated to [Clerk](https://clerk.com). Clerk verifies the
+session token; `user_identities` maps the Clerk account (`provider='clerk'`) to
+the local `users` row that boards and tickets reference.
 
 For a full explanation of the auth flow see [docs/auth.md](./docs/auth.md).
 
 ### Getting a Token
 
-```bash
-curl -X POST "http://localhost:8000/api/auth/token" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "username=alice@example.com&password=password123"
+Tokens are minted by Clerk in the browser, so grab one from a signed-in tab's
+console:
+
+```js
+await window.Clerk.session.getToken()
 ```
 
 ### Using the Token
@@ -189,10 +215,8 @@ Use the interactive Swagger UI at `/docs` or tools like Postman, Insomnia, or cu
 # Database
 DATABASE_URL=postgresql://taskflow_user:taskflow_pass@db:5432/taskflow_db
 
-# Security
-SECRET_KEY=change-this-to-a-random-secret-key
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+# Clerk (see ../frontend: `npx clerk@latest env pull`)
+CLERK_SECRET_KEY=sk_test_...
 ```
 
 **Important**: Never commit `.env` to version control.
@@ -203,7 +227,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 ### Security Checklist
 
-- [ ] Change `SECRET_KEY` to a strong random value
+- [ ] Claim the Clerk app (`npx clerk@latest auth login`) and switch to production keys (`npx clerk@latest deploy`)
+- [ ] Add the production origin to `clerk_authorized_parties` in `app/config.py`
 - [ ] Update `allow_origins` in `main.py` to your production frontend domain
 - [ ] Use environment variables for all secrets
 - [ ] Enable HTTPS

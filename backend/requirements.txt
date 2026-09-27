@@ -5,5 +5,13 @@ sqlalchemy==2.0.21
 pydantic>=2.0
 python-dotenv==1.0.0
 pydantic-settings==2.12.0
+# Kept only so the seed can hash demo passwords for Clerk's user import.
 passlib
-python-jose[cryptography]==3.3.0
+# passlib's bcrypt scheme needs a backend, and it was missing: without it the
+# seed raises MissingBackendError and the app fails to start on a fresh
+# database. Pinned below 4.1 because passlib 1.7.4 reads `bcrypt.__about__`,
+# which newer releases removed (5.x fails outright).
+bcrypt==4.0.1
+clerk-backend-api==7.0.0
+# Verifies the signature on Clerk webhook deliveries (app/routers/webhook.py).
+svix==2.5.0

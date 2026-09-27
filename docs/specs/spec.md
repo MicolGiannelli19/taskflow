@@ -1,6 +1,6 @@
 # 🎫 Ticket View & Edit — Spec
 
-**Status:** 🟢 View shipped · 🟡 Edit not started
+**Status:** 🟢 View shipped · 🟢 Edit shipped
 **Author:** Micol · **Updated:** 2026-08-29
 
 > **TL;DR** — Click a ticket → a modal opens with its full details (done ✅).

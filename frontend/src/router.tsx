@@ -8,21 +8,23 @@ import TicketPage from "./pages/Board/TicketPage";
 import Home from "./pages/Home/Home";
 import NewBoardForm from "./pages/Home/NewBoardForm";
 import LoginPage from "./pages/Login/LoginPage";
+import SignUpPage from "./pages/Login/SignUpPage";
 import ComingSoon from "./pages/ComingSoon";
 import BoardSettings from "./pages/Board/Settings/BoardSettings";
-import Profile from "./pages/Profile/Profile";
+import ProfilePage from "./pages/Profile/ProfilePage";
 import { routePatterns } from "./routes";
 
 /**
  * The app's route tree. Paths come from `routes.ts`. Everything behind
  * `RequireAuth` needs a signed-in user and renders inside `AppLayout`
- * (sidebar + top bar); login is the one page with no app shell.
+ * (sidebar + top bar); sign-in and sign-up are the pages with no app shell.
  */
 export const router = createBrowserRouter([
   {
     element: <App />,
     children: [
       { path: routePatterns.login, element: <LoginPage /> },
+      { path: routePatterns.signUp, element: <SignUpPage /> },
       {
         element: <RequireAuth />,
         children: [
@@ -45,7 +47,7 @@ export const router = createBrowserRouter([
                 element: <ComingSoon title="Board history" />,
               },
               { path: routePatterns.boardSettings, element: <BoardSettings /> },
-              { path: routePatterns.profile, element: <Profile /> },
+              { path: routePatterns.profile, element: <ProfilePage /> },
             ],
           },
         ],

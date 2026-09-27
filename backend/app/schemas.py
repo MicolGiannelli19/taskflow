@@ -4,14 +4,8 @@ from datetime import datetime
 import uuid
 
 # User schemas
-class UserCreate(BaseModel):
-    email: EmailStr
-    password: str
-
-class UserProfileUpdate(BaseModel):
-    name: Optional[str] = None
-    avatar: Optional[str] = None
-
+# UserCreate and UserProfileUpdate are gone: Clerk owns sign-up and profile
+# editing, so nothing posts those shapes to this API any more.
 class UserResponse(BaseModel):
     id: uuid.UUID
     email: EmailStr

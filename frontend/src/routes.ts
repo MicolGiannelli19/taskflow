@@ -4,12 +4,17 @@
  * `routePatterns` are the `:param` templates handed to <Route path>; `paths`
  * builds concrete URLs for <Link to>/navigate(). Never hand-write a route
  * string elsewhere — add it here so a URL change is a one-file edit.
+ *
+ * Clerk's <SignIn>, <SignUp> and <UserProfile> run their own sub-routes (2FA,
+ * email verification, security settings), so their patterns end in `/*` while
+ * `paths` stays the plain URL those components are mounted at.
  */
 export const routePatterns = {
   home: "/",
-  login: "/login",
+  login: "/login/*",
+  signUp: "/sign-up/*",
   newBoard: "/new-board",
-  profile: "/profile",
+  profile: "/profile/*",
   board: "/board/:boardId",
   /** Nested under `board`, so it is declared as a relative segment. */
   newTicket: "new-ticket",
@@ -21,6 +26,7 @@ export const routePatterns = {
 export const paths = {
   home: "/",
   login: "/login",
+  signUp: "/sign-up",
   newBoard: "/new-board",
   profile: "/profile",
   board: (boardId: string) => `/board/${boardId}`,

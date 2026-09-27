@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&display=swap');
 @import "tailwindcss";
+/* Styles Clerk's components to match the shadcn theme (skill step 5). */
+@import "@clerk/ui/themes/shadcn.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -142,7 +144,7 @@
   --card-radius: 8px;    /* app cards */
 
   /* ─── Spacing / layout ─── */
-  --column-width:     272px; /* preferred / max column width */
+  --column-width:     272px; /* preferred width; columns grow to fill spare space */
   --column-min-width: 200px; /* columns shrink to this before the board scrolls */
   --column-gap:       12px;
 
@@ -332,20 +334,6 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-
-/* ─── Login page layout ─────────────────────────────────────────────────────── */
-.App > div:not([class]) form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: 360px;
-  background-color: var(--color-card);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 32px 28px;
-  box-shadow: var(--shadow-sm);
-  margin-top: 28px;
 }
 
 .dark {
