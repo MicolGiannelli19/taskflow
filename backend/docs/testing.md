@@ -168,9 +168,10 @@ curl http://localhost:8000/api/boards \
 | Method | Path | Description |
 |---|---|---|
 | `GET` | `/api/boards` | List all boards for the current user |
-| `GET` | `/api/boards/{id}` | Get a single board |
+| `GET` | `/api/boards/{id}` | Get a single board, with its columns and tickets |
 | `POST` | `/api/boards` | Create a board |
-| `GET` | `/api/boards/{id}/tickets` | List tickets on a board |
+| `GET` | `/api/boards/{id}/tickets/{ticket_id}` | Get one ticket, with its comments |
 | `POST` | `/api/boards/{id}/tickets` | Create a ticket |
+| `GET` | `/api/auth/me` | The local user behind your token |
 
 > Full endpoint list is always available at `http://localhost:8000/docs`

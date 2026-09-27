@@ -40,15 +40,15 @@ The whole stack runs in Docker. The only manual step is supplying Clerk keys.
 >
 > Keyless, you still get Postgres, the backend container, `GET /`, the Swagger
 > UI at `/docs` and the full backend test suite — enough to work on the API.
-> You just can't sign in to the board. Setup is a free account and the two
-> commands in [step 2](#2-add-your-clerk-keys).
+> You just can't sign in to the board. Setup is a free account of your own and
+> the three commands in [step 2](#2-add-your-clerk-keys).
 
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose
 - A [Clerk](https://clerk.com) account (free tier is enough) — one application,
   in development mode
-- Only if you run services outside Docker: Python 3.11, Node 20, PostgreSQL 15
+- Only if you run services outside Docker: Python 3.11, Node 22, PostgreSQL 15
 
 ### 1. Create your `.env`
 
@@ -67,15 +67,27 @@ The keys that matter are the Clerk ones below.
 
 ### 2. Add your Clerk keys
 
-From `frontend/`, log in and pull the keys for your Clerk application:
+**Every developer uses their own Clerk application.** The repo contains no
+keys — `.env` is gitignored — so cloning it gives you the code, not anyone
+else's Clerk instance. You create a free one; its users and settings are yours
+alone, and the seed fills it with the demo users on first start.
+
+From `frontend/`, log in, link the directory to your Clerk application, and
+pull its keys:
 
 ```bash
 cd frontend
-npx clerk@latest auth login
-npx clerk@latest env pull
+npx clerk@latest auth login   # creates a default application on first login
+npx clerk@latest link         # pick that application
+npx clerk@latest env pull     # writes frontend/.env.local
 ```
 
-Copy the two values it prints into the root `.env`:
+Skipping `link` makes `env pull` fail with "No Clerk project linked to this
+directory". Don't run `clerk init` — that sets Clerk up in a new project, and
+this one already has it.
+
+Copy the two values from `frontend/.env.local` (a hidden file) into the root
+`.env`:
 
 ```env
 VITE_CLERK_PUBLISHABLE_KEY=pk_test_...   # public — shipped in the browser bundle
@@ -84,6 +96,27 @@ CLERK_SECRET_KEY=sk_test_...             # secret — never expose to the browse
 
 `env pull` writes into `frontend/`, but Compose reads the root `.env`, so the
 copy step is what actually makes the keys reach the containers.
+
+Then set a password for the demo users. It lives only in your `.env`, never in
+the code, and must be random — Clerk rejects passwords found in data breaches:
+
+```bash
+python3 -c "import secrets; print(secrets.token_urlsafe(16))"
+```
+
+```env
+SEED_PASSWORD=<the value it printed>
+```
+
+**Working with collaborators.** The default above — everyone on their own Clerk
+application — needs no coordination and is the recommendation. If you would
+rather share one development instance (one set of Clerk settings), invite
+collaborators to the application in the Clerk Dashboard and have them `link` to
+it; don't send keys over chat. Everyone must then use the **same**
+`SEED_PASSWORD`: the first person to seed creates the demo users in Clerk, and
+later seeds reuse those accounts without changing their password. Production
+is always a single separate instance (`pk_live_` / `sk_live_`), with its keys
+held by the hosting platform, not in anyone's `.env`.
 
 Everything else in `.env.template` is optional for local development:
 `CLERK_AUTHORIZED_PARTIES` and `CORS_ALLOWED_ORIGINS` both default to

@@ -243,8 +243,9 @@ protected the markdown renderer at all.
 ### Verifying it — the step still outstanding
 
 The hosts above come from Clerk's CSP documentation, **not** from watching a
-real sign-in, because this checkout has no Clerk keys. Before switching to
-enforcing, do the report-only pass:
+real sign-in — they were written before this checkout had Clerk keys, and the
+pass below has not been done since. Before switching to enforcing, do the
+report-only pass:
 
 1. `npx clerk@latest auth login && npx clerk@latest env pull` in `frontend/`
 2. `yarn dev` — the dev server sends `Content-Security-Policy-Report-Only` by
@@ -260,8 +261,10 @@ enforcing, do the report-only pass:
 
 Two things the browser will likely add that are expected: `clerk-telemetry.com`
 (either allow it in `connect-src`, or turn it off with
-`telemetry={{ disabled: true }}` on `<ClerkProvider>`), and — if you use social
-sign-in — the provider's own domain.
+`telemetry={{ disabled: true }}` on `<ClerkProvider>`), and the social sign-in
+providers' domains. The development instance has Apple, Facebook, GitHub and
+Google enabled, so click through **each** of those buttons during the pass, not
+only email + password.
 
 ### Production
 

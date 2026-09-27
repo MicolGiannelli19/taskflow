@@ -6,32 +6,39 @@
 // documentation only; keep it in sync with the models by hand.
 //
 // Authorization design: docs/specs/authorization-data-model.md
+//
+// Timestamps are `timestamp` (no time zone): the models use TIMESTAMP and
+// store naive UTC from datetime.utcnow.
 
 Table users {
   id uuid [pk]
   email varchar(255) [unique, not null]
   name varchar(255)
   avatar varchar(500)
-  created_at timestamptz
-  updated_at timestamptz
+  created_at timestamp
+  updated_at timestamp
 }
 
 Table user_identities {
   id uuid [pk]
   user_id uuid [not null, ref: > users.id]
-  provider varchar(50) [not null, note: "'password', 'google', 'github'"]
-  provider_id varchar(255) [not null, note: "email for password, sub/id for OAuth"]
-  password_hash varchar(255) [note: "only set when provider = 'password'"]
-  created_at timestamptz
-  updated_at timestamptz
+  provider varchar(50) [not null, note: "always 'clerk' today"]
+  provider_id varchar(255) [not null, note: "Clerk user id (the token's sub)"]
+  password_hash varchar(255) [note: "unused since the Clerk migration; always NULL"]
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (provider, provider_id) [unique]
+  }
 }
 
 Table boards {
   id uuid [pk]
   name varchar(255) [not null]
   description text
-  created_at timestamptz
-  updated_at timestamptz
+  created_at timestamp
+  updated_at timestamp
   // No owner_id: ownership is a board_members row with role='owner' — the
   // single source of truth for access (spec Decision 1).
 }
@@ -41,7 +48,7 @@ Table board_members {
   board_id uuid [not null, ref: > boards.id]
   user_id uuid [not null, ref: > users.id]
   role varchar(20) [not null, default: 'member', note: "CHECK: 'owner' | 'admin' | 'member' | 'viewer'"]
-  created_at timestamptz
+  created_at timestamp
 
   indexes {
     (board_id, user_id) [unique, name: 'uq_board_members_user_board']
@@ -56,8 +63,8 @@ Table columns {
   board_id uuid [not null, ref: > boards.id]
   name varchar(255) [not null]
   position integer [not null]
-  created_at timestamptz
-  updated_at timestamptz
+  created_at timestamp
+  updated_at timestamp
 }
 
 Table tickets {
@@ -70,10 +77,10 @@ Table tickets {
   priority varchar(50) [default: 'medium', note: "'low', 'medium', 'high'"]
   assignee_id uuid [ref: > users.id]
   creator_id uuid [not null, ref: > users.id]
-  due_date timestamptz
-  created_at timestamptz
-  updated_at timestamptz
-  // PLANNED (spec §11, not yet implemented): completed_at timestamptz,
+  due_date timestamp
+  created_at timestamp
+  updated_at timestamp
+  // PLANNED (spec §11, not yet implemented): completed_at timestamp,
   // completed_by uuid ref users.id — powers the board progress bar.
 }
 
@@ -82,6 +89,6 @@ Table comments {
   ticket_id uuid [not null, ref: > tickets.id]
   user_id uuid [not null, ref: > users.id]
   content text [not null]
-  created_at timestamptz
-  updated_at timestamptz
+  created_at timestamp
+  updated_at timestamp
 }

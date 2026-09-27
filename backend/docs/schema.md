@@ -39,9 +39,9 @@ erDiagram
     user_identities {
         uuid id PK
         uuid user_id FK "-> users.id, CASCADE"
-        string provider "password | google | github"
-        string provider_id "email for password"
-        string password_hash "null for OAuth"
+        string provider "clerk"
+        string provider_id "Clerk user id"
+        string password_hash "unused since Clerk"
         timestamp created_at
         timestamp updated_at
     }
@@ -101,30 +101,41 @@ erDiagram
 ## 2. Tables
 
 ### `users`
-Profile only — **no credentials live here.** Login secrets are in `user_identities`.
+Profile only — **no credentials live here.** Passwords and sessions belong to
+Clerk; `user_identities` links each row to its Clerk account.
+
+`name` and `avatar` are a local copy of the Clerk profile, kept so board members
+and assignees can be shown to *other* users (Clerk won't expose them to the
+browser). They are filled when `IdentityService` first provisions the account
+and refreshed by the `user.updated` webhook — see `docs/auth.md`.
 
 | column | type | notes |
 |---|---|---|
 | id | uuid PK | |
-| email | varchar(255) | unique, not null |
-| name | varchar(255) | nullable — set later via `PATCH /auth/me` |
-| avatar | varchar(500) | |
+| email | varchar(255) | unique, not null — the key first sign-in adopts an existing row by |
+| name | varchar(255) | nullable — copied from Clerk's first + last name |
+| avatar | varchar(500) | copied from Clerk's image URL |
 | created_at / updated_at | timestamp | |
 
 ### `user_identities`
-One row per login method a user has. Keeps auth separate from profile so new
-providers (Google, GitHub, …) are new rows, not new columns on `users`.
+Links a TaskFlow user to an external auth account. Today every row is a Clerk
+account: a request's token carries the Clerk user id (`sub`), and this table
+turns it into the local `users.id` that boards, tickets and comments reference.
+Social sign-in (Google, GitHub, …) is handled *inside* Clerk, so it does not add
+rows here.
 
 | column | type | notes |
 |---|---|---|
 | id | uuid PK | |
 | user_id | uuid FK → users.id | not null, `ON DELETE CASCADE` |
-| provider | varchar(50) | `password` today; `google` / `github` later |
-| provider_id | varchar(255) | email for password auth; provider `sub` for OAuth |
-| password_hash | varchar(255) | bcrypt hash; **NULL for OAuth identities** |
+| provider | varchar(50) | always `clerk` today |
+| provider_id | varchar(255) | the Clerk user id, e.g. `user_2abc…` |
+| password_hash | varchar(255) | **unused** — left from local password auth; always NULL now. Clerk holds passwords |
 | created_at / updated_at | timestamp | |
 
-**Constraint:** `UNIQUE (provider, provider_id)` — the same external identity can't be registered twice.
+**Constraint:** `UNIQUE (provider, provider_id)` — one local user per Clerk
+account. It also settles the race when two first requests for a new account
+arrive together: the loser's insert fails and it re-reads the winner's row.
 
 ### `boards`
 Deliberately has **no `owner_id`** — ownership is a membership row (see Decision 1).
@@ -203,7 +214,7 @@ resolves to the same question, checked live on each request:
 
 ```mermaid
 flowchart TD
-    A["Request to board-scoped route"] --> B["get_current_user (decode JWT sub)"]
+    A["Request to board-scoped route"] --> B["get_current_user (Clerk verifies token, sub → users.id)"]
     B -->|invalid / expired| U["401 Unauthorized"]
     B -->|valid user| C{"membership row for user + board?"}
     C -->|no row| N["404 Not Found — board is invisible to non-members"]
@@ -264,10 +275,13 @@ the token can't answer, so it's checked live against `board_members` on every
 request. Checking live means a **demotion or removal takes effect immediately** —
 role is deliberately kept *out* of the JWT to avoid stale privileges.
 
-### D5 — separate credentials from profile (`user_identities`)
-Keeping login secrets in their own table (rather than columns on `users`) means
-adding OAuth providers is additive — a new `user_identities` row with a NULL
-`password_hash` — and the `users` profile table never mixes concerns.
+### D5 — separate identity from profile (`user_identities`)
+The table was built to keep login secrets out of `users`, with each auth method
+as its own row. That is what made the move to Clerk cheap: Clerk became one more
+`provider`, the `users` table and every foreign key into it stayed untouched,
+and pre-Clerk accounts were adopted by email instead of recreated. No secrets
+are stored here any more — Clerk owns passwords and sessions — so the table is
+now purely the Clerk-id → `users.id` link.
 
 ### D6 — UUID primary keys everywhere
 Non-guessable IDs (no enumeration of boards/tickets by incrementing an integer),
@@ -298,9 +312,14 @@ via `docker compose down -v`.
   and every comment they wrote. The spec left the user-deletion policy *TBD* and
   did **not** cascade these — this is worth reconciling (likely `SET NULL` +
   keep a "deleted user" placeholder, matching how `assignee_id` already uses
-  `SET NULL`).
+  `SET NULL`). Today nothing deletes a `users` row: the Clerk `user.deleted`
+  webhook removes only the `user_identities` link, precisely to avoid this.
+- **`user_identities.password_hash` is dead** — never written since the Clerk
+  migration. Dropping it needs a `docker compose down -v` reset (no migrations
+  during the MVP).
 - **`backend/docs/schema.dbml`** (dbdiagram.io format) is hand-maintained and can lag
   the models; this file and it should be regenerated together when models change.
 - **Open in the spec (§7):** role integrity mechanism (CHECK vs enum vs lookup),
   `priority` representation, whether `admin` can demote `owner`, invitations /
-  pending memberships, and whether `user_identities` stays in scope.
+  and invitations / pending memberships. (Whether `user_identities` stays in
+  scope was settled by the Clerk integration: it is the Clerk link.)
