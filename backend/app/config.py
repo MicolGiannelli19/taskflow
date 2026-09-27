@@ -19,6 +19,10 @@ def _split_origins(value):
 class Settings(BaseSettings):
     database_url: str = "postgresql://user:password@localhost/taskflow_db"
     seed_on_startup: bool = True
+    # Password the demo users are created with in Clerk. Deliberately not a
+    # literal in the code: the repo is public, and a committed password is a
+    # leaked one. Unset means the demo users get no Clerk account (see seed.py).
+    seed_password: str = ""
 
     # Clerk owns authentication. The secret key verifies session tokens and
     # calls the Clerk Backend API; it must never reach the browser.

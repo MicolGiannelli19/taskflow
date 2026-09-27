@@ -126,11 +126,13 @@ Two simultaneous first requests can race; the unique constraint on
 The seed pushes `alice@example.com`, `bob@example.com` and
 `carol@example.com` into Clerk with their bcrypt digests, using Clerk's
 user-import support (`password_hasher="bcrypt"`). That is why
-`taskflow-FIiR-TxiN-Rjte` signs you in through Clerk.
+the `SEED_PASSWORD` from `.env` signs you in through Clerk.
 
-The password is random on purpose: Clerk checks sign-in passwords against known
-data breaches, and something like `password123` fails with "This password has
-been found as part of a breach".
+`SEED_PASSWORD` has no default and is never written in the code — the repo is
+public, so a committed password is a leaked one. Unset, the seed creates the
+local rows but no Clerk accounts. Make it random: Clerk checks sign-in passwords
+against known data breaches, and something like `password123` fails with "This
+password has been found as part of a breach".
 
 The push is best-effort. Without `CLERK_SECRET_KEY` the local rows are still
 created, and the first Clerk account with a matching email adopts one — the
@@ -145,6 +147,7 @@ demo board survives either way, only the pre-set passwords depend on the push.
 | `CLERK_SECRET_KEY` | backend | Verifies tokens, calls the Backend API. **Never expose to the browser.** |
 | `VITE_CLERK_PUBLISHABLE_KEY` | frontend | Public half of the pair; safe in the bundle. |
 | `CLERK_WEBHOOK_SIGNING_SECRET` | backend | Verifies webhook deliveries. Without it the webhook refuses everything. |
+| `SEED_PASSWORD` | backend | Password the seed gives the demo users in Clerk. No default; never commit it. |
 | `CLERK_AUTHORIZED_PARTIES` | backend | Origins allowed to present a token (the `azp` check). Comma-separated. Defaults to `http://localhost:5173`. |
 | `CORS_ALLOWED_ORIGINS` | backend | Browser origins allowed to call the API. Comma-separated. Same default. |
 | `VITE_CSP_MODE` | frontend | `report` (default) or `enforce` — see "Content-Security-Policy" below. |

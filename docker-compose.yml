@@ -38,6 +38,9 @@ services:
       # Verifies Clerk webhook deliveries. Unset means the webhook endpoint
       # refuses everything, which is the safe default.
       CLERK_WEBHOOK_SIGNING_SECRET: ${CLERK_WEBHOOK_SIGNING_SECRET:-}
+      # Password the seed gives the demo users in Clerk. Unset means they get
+      # no Clerk account. Never commit a value for it.
+      SEED_PASSWORD: ${SEED_PASSWORD:-}
       PYTHONPATH: /app
     ports:
       - "8000:8000"

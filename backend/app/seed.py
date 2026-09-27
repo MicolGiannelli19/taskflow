@@ -6,18 +6,18 @@ startup (see ``app.main``) and can also be invoked directly::
 
     python -m app.seed
 
-All seed users share the password ``taskflow-FIiR-TxiN-Rjte``.
+All seed users share one password, read from ``SEED_PASSWORD`` in ``.env``.
+It is never written in the code: the repo is public, so a committed password
+is a leaked one. Pick something random — Clerk rejects passwords found in known
+data breaches at sign-in, so ``password123`` will not do.
 
 Clerk owns authentication, so the seed users are also pushed to Clerk with
 their bcrypt digests (Clerk's user-import accepts them via
-``password_hasher="bcrypt"``). That is what lets ``alice@example.com`` /
-``taskflow-FIiR-TxiN-Rjte`` sign in through Clerk.
+``password_hasher="bcrypt"``). That is what lets ``alice@example.com`` sign in
+through Clerk with ``SEED_PASSWORD``.
 
-The password is random rather than something like ``password123`` because
-Clerk rejects passwords found in known data breaches at sign-in.
-
-The push is best-effort. Without a Clerk key — or if the API call fails — the
-local rows are still created, and the first Clerk account to sign in with a
+The push is best-effort. Without a Clerk key or ``SEED_PASSWORD`` — or if the
+API call fails — the local rows are still created, and the first Clerk account to sign in with a
 matching email adopts one (see ``IdentityService``). The demo board survives
 either way; only the pre-set passwords depend on the push.
 """
@@ -32,14 +32,12 @@ from app.database import (
 )
 from app.auth_utils import get_password_hash
 from app.clerk import clerk_is_configured, get_clerk
+from app.config import settings
 from app.services.identity_service import CLERK_PROVIDER
 
 logger = logging.getLogger(__name__)
 
-SEED_PASSWORD = "taskflow-FIiR-TxiN-Rjte"
-
-
-def _push_to_clerk(users: list[User], password_digest: str) -> dict[str, str]:
+def _push_to_clerk(users: list[User]) -> dict[str, str]:
     """Create the seed users in Clerk. Returns {email: clerk_user_id}.
 
     Idempotent: an account that already exists is looked up rather than
@@ -49,9 +47,17 @@ def _push_to_clerk(users: list[User], password_digest: str) -> dict[str, str]:
         logger.warning(
             "CLERK_SECRET_KEY not set — seed users created locally only. They "
             "will be adopted by the first Clerk account signing in with a "
-            "matching email; %r will not work until then.", SEED_PASSWORD,
+            "matching email.",
         )
         return {}
+    if not settings.seed_password:
+        logger.warning(
+            "SEED_PASSWORD not set — seed users created locally only, with no "
+            "Clerk account. Set it in .env and re-seed to sign in as them.",
+        )
+        return {}
+
+    password_digest = get_password_hash(settings.seed_password)
 
     clerk = get_clerk()
     ids: dict[str, str] = {}
@@ -96,8 +102,6 @@ def seed(db: Session | None = None) -> None:
             logger.info("Seed data already present — skipping.")
             return
 
-        password_hash = get_password_hash(SEED_PASSWORD)
-
         alice = User(email="alice@example.com", name="Alice Johnson",
                      avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=alice")
         bob = User(email="bob@example.com", name="Bob Smith",
@@ -109,7 +113,7 @@ def seed(db: Session | None = None) -> None:
 
         # Identities are written against whatever Clerk accepted. An email with
         # no Clerk ID simply gets no identity row yet.
-        clerk_ids = _push_to_clerk([alice, bob, carol], password_hash)
+        clerk_ids = _push_to_clerk([alice, bob, carol])
         db.add_all([
             UserIdentity(user_id=u.id, provider=CLERK_PROVIDER,
                          provider_id=clerk_ids[u.email])
