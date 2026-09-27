@@ -176,7 +176,7 @@ docker compose up db             # Postgres only
 
 ```bash
 cd backend
-python -m venv venv && source venv/bin/activate
+python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
 DATABASE_URL=postgresql://taskflow_user:taskflow_pass@localhost:5432/taskflow_db \
@@ -196,15 +196,30 @@ yarn dev
 
 ### Running the tests
 
-The backend suite needs no Clerk key, no database and no network —
-`get_current_user` is overridden and the schema is built in SQLite in memory:
+The backend suite runs on your machine with nothing else started — no Docker,
+no database, no Clerk key, no network. `get_current_user` is overridden with a
+known user and the schema is built in SQLite in memory.
+
+First time only (Python 3.11 or 3.12 — on 3.14 the pinned `psycopg2-binary`
+won't install):
 
 ```bash
 cd backend
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt -r requirements-test.txt
+```
+
+Then:
+
+```bash
 pytest                        # everything
 pytest tests/test_auth.py     # one file
 pytest -k authorization       # one topic
 ```
+
+The auth override exists only inside pytest; there is no setting that turns
+auth off for the running server. To call the live API by hand, use a real
+Clerk token — both are covered in [backend/docs/testing.md](./backend/docs/testing.md).
 
 ### Optional: Clerk webhooks
 

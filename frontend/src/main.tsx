@@ -21,6 +21,26 @@ if (!publishableKey) {
   );
 }
 
+// Clerk's shadcn theme reads `var(--primary)` etc. as complete colors, but our
+// tokens in index.css are bare HSL channels ("11 82% 41%") meant to be wrapped
+// in hsl(). Unwrapped they are invalid, so every Clerk surface, border and
+// button rendered transparent. These override the theme's color variables.
+const clerkColors = {
+  colorBackground: "hsl(var(--card))",
+  colorDanger: "hsl(var(--destructive))",
+  colorForeground: "hsl(var(--card-foreground))",
+  // Clerk fills inputs with colorInput; shadcn's --input is a border color.
+  colorInput: "hsl(var(--card))",
+  colorInputForeground: "hsl(var(--card-foreground))",
+  colorMuted: "hsl(var(--muted))",
+  colorMutedForeground: "hsl(var(--muted-foreground))",
+  colorNeutral: "hsl(var(--foreground))",
+  colorPrimary: "hsl(var(--primary))",
+  colorPrimaryForeground: "hsl(var(--primary-foreground))",
+  colorRing: "hsl(var(--ring) / 0.5)",
+  colorModalBackdrop: "hsl(0 0% 0% / 0.5)",
+};
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     {/* Clerk owns the session, so it wraps everything: the query client below
@@ -28,7 +48,7 @@ createRoot(document.getElementById("root")!).render(
     <ClerkProvider
       publishableKey={publishableKey}
       afterSignOutUrl="/login"
-      appearance={{ theme: shadcn }}
+      appearance={{ theme: shadcn, variables: clerkColors }}
     >
       <QueryClientProvider client={queryClient}>
         {/* Hands Clerk's getToken to the axios interceptor, which has no hooks. */}

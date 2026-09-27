@@ -7,19 +7,55 @@ hand without the frontend.
 
 ## The automated suite
 
+### Running it on your machine
+
+Nothing has to be running first — not Docker, not Postgres, not the API server,
+and no Clerk key in `.env`. The suite runs entirely inside the pytest process:
+
+- **Database** — each test gets a fresh SQLite database in memory.
+- **Auth** — `get_current_user` is swapped for a known user (see below), so
+  Clerk is never called.
+- **HTTP** — `TestClient` calls the app in-process; nothing listens on port 8000.
+- **Network** — any test that opens a socket fails on purpose (`no_network` in
+  `conftest.py`), so the suite can't quietly start depending on a live service.
+
+One-time setup, from the project root. Use Python 3.11 or 3.12 (the Docker
+image runs 3.11); on 3.14 the install fails because the pinned
+`psycopg2-binary` has no wheel for it. Check with `python3 --version`, and if
+it's too new, name the version explicitly (e.g. `python3.12`, from
+`brew install python@3.12`):
+
 ```bash
 cd backend
-pytest                          # everything
-pytest tests/test_auth.py       # one file
-pytest -k authorization         # one topic
+python3.12 -m venv .venv              # .venv is gitignored
+source .venv/bin/activate
+pip install -r requirements.txt -r requirements-test.txt
 ```
 
-No Clerk key, no database, and no network are needed — a test that opens a
-socket fails on purpose (`no_network` in `conftest.py`).
+Both files are needed: `requirements-test.txt` holds only pytest and its
+helpers; the app's own dependencies are in `requirements.txt`.
+
+Then, with the venv active:
+
+```bash
+pytest                          # everything
+pytest tests/test_auth.py       # one file
+pytest -k authorization         # tests whose name matches a keyword
+pytest -x                       # stop at the first failure
+pytest -v                       # print each test's name
+pytest -p no:warnings           # hide the deprecation-warning summary
+```
+
+Without activating the venv: `.venv/bin/python -m pytest`.
+
+The full run takes well under a second. The long warnings summary at the end
+(`.dict()`, `datetime.utcnow()`) is deprecation noise, not failures — the line
+that matters is `N passed`.
 
 | File | Covers |
 |---|---|
 | `tests/conftest.py` | Fixtures: in-memory database, clients, a user at each board role |
+| `tests/test_api.py` | Smoke test: `GET /` answers |
 | `tests/test_auth.py` | `GET /api/auth/me`; the 401 boundary |
 | `tests/test_authorization.py` | The `require_board_role` matrix: 404-not-403, role hierarchy, comment ownership |
 | `tests/test_identity.py` | `IdentityService`: adoption, provisioning, the race |
@@ -39,6 +75,14 @@ def test_viewer_cannot_create_a_ticket(as_user, viewer, board, column):
     assert response.status_code == 403
 ```
 
+`app.dependency_overrides` lives in test code only. The running server never
+imports `conftest.py`, so no setting — in `.env` or anywhere else — can switch
+this bypass on outside pytest. That is deliberate: an environment flag that
+disables auth "for localhost" would ship inside the real server, one stray
+config value away from logging every visitor in as the fake user. To call the
+*running* API, use a real Clerk token instead (see
+[Testing the API by hand](#testing-the-api-by-hand)).
+
 **What this does not cover:** the token-verification path itself —
 `authenticate_request`, the `azp` check, the `sub` extraction. Those belong to
 the Clerk SDK. The practical consequence is that a misconfigured
@@ -57,7 +101,11 @@ dialects had to be named explicitly is the partial index in
 
 ## Testing the API by hand
 
-This section covers how to manually test API endpoints without running the frontend.
+This section covers calling the running API directly — Swagger, curl or
+Postman — instead of through the board UI. Unlike the automated suite, this
+goes through real Clerk auth, so it needs the whole stack up and Clerk keys in
+the root `.env` (see the [main README](../../README.md#running-locally)). The
+frontend is still needed once: it is where you sign in to get a token.
 
 ---
 
@@ -65,7 +113,8 @@ This section covers how to manually test API endpoints without running the front
 
 FastAPI generates interactive docs automatically.
 
-1. Start the backend: `uvicorn app.main:app --reload`
+1. Start the stack from the project root: `docker compose up`
+   (or run the backend outside Docker — see the main README)
 2. Open `http://localhost:8000/docs` in your browser
 
 ### Getting a token
