@@ -22,7 +22,7 @@ being merged in — check them off if so.
 Clerk migration (2026-09-19), not by fixing this code.** `handleLogIn` and
 `LogInForm.tsx` were deleted: Clerk's `<SignIn />` owns the form, the
 credentials and the session, so there is no hand-rolled login path left to send
-mock values. `useAuth()` returns the real local user via `GET /api/auth/me`.
+mock values. `useAuth()` returns the real local user via `GET /api/users/me`.
 See `docs/specs/clerk-integration.md` and `backend/docs/auth.md`.
 - [x] Use real credentials from the form
 - [x] Stop constructing a `mockUser`
@@ -340,3 +340,11 @@ setting up the first ones — see "EPIC: Add tests to fast api application".
 
 
 
+
+---
+
+# Frontend types file is getting confusing
+
+`frontend/src/types.ts` will get harder to follow as the frontend grows. For
+example, there is a user interface for authentication, and there will also need
+to be one for profile information. Restructure it to follow a clearer pattern.

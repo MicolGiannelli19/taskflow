@@ -44,15 +44,20 @@ is exchanged for the local record on every request.
 
 ## Files
 
+Two questions get answered on every request, in this order: **authentication**
+(*who is calling?*) and then **authorization** (*may they do this?*). The files
+split along that line.
+
 | File | Responsibility |
 |---|---|
-| `app/clerk.py` | Lazily-built Clerk Backend API client |
-| `app/dependencies.py` | `get_current_user` — verifies the token, protects routes |
+| `app/core/clerk.py` | Lazily-built Clerk Backend API client |
+| `app/dependencies.py` | `get_current_user` — verifies the token, protects routes (authentication). `require_board_role` — membership and role check on board routes (authorization) |
 | `app/services/identity_service.py` | Clerk user → TaskFlow `User`, provisioning on first sight |
-| `app/routers/auth.py` | `GET /api/auth/me` — the only auth endpoint left |
-| `app/auth_utils.py` | bcrypt hashing, used solely by the seed's Clerk import |
+| `app/core/authorization.py` | The board role hierarchy (`owner` > `admin` > `member` > `viewer`) that `require_board_role` compares against |
+| `app/routers/user.py` | `GET /api/users/me` — the local user behind the caller's token |
 | `app/routers/webhook.py` | `POST /api/webhooks/clerk` — signature-verified profile sync |
-| `app/security_headers.py` | CSP and friends on API responses |
+| `app/seed.py` | Demo users, pushed to Clerk with bcrypt digests — the only password hashing left in the app |
+| `app/core/security_headers.py` | CSP and friends on API responses |
 | `frontend/csp.ts` | CSP for the app page (the one that matters for XSS) |
 
 ---
@@ -125,7 +130,8 @@ Two simultaneous first requests can race; the unique constraint on
 
 The seed pushes `alice@example.com`, `bob@example.com` and
 `carol@example.com` into Clerk with their bcrypt digests, using Clerk's
-user-import support (`password_hasher="bcrypt"`). That is why
+user-import support (`password_hasher="bcrypt"`); the hashing happens in
+`app/seed.py` itself, the only place the app still hashes a password. That is why
 the `SEED_PASSWORD` from `.env` signs you in through Clerk.
 
 `SEED_PASSWORD` has no default and is never written in the code — the repo is
@@ -167,12 +173,12 @@ There is no token in `localStorage` any more. Clerk holds the session and mints
 short-lived tokens on demand:
 
 - `ClerkProvider` (`src/main.tsx`) wraps the app
-- `ClerkTokenBridge` hands Clerk's `getToken` to the axios layer, which can't
-  use hooks (`src/api/clerkToken.ts`)
+- `ClerkTokenBridge` (`src/components/ClerkTokenBridge.tsx`) hands Clerk's
+  `getToken` to the axios layer, which can't use hooks (`src/api/clerkToken.ts`)
 - The axios request interceptor `await`s a fresh token per request
-- `useAuth()` (`src/hooks/useAuth.ts`) still returns the **local** user, so
-  every `user?.id` comparison against `assignee_id` / `creator_id` /
-  `board_members.user_id` keeps working
+- `useAuth()` (`src/hooks/useAuth.ts`) fetches `GET /api/users/me` and returns
+  the **local** user, so every `user?.id` comparison against `assignee_id` /
+  `creator_id` / `board_members.user_id` keeps working
 
 ---
 
@@ -220,7 +226,7 @@ A CSP arrives with the *document*. That decides where each policy lives:
 | What | Where it is set | Why there |
 |---|---|---|
 | The app page (and the markdown it renders) | `frontend/csp.ts`, applied by `frontend/vite.config.ts` | Vite serves `index.html` in development; a static host serves it in production. The API never does. |
-| API responses | `backend/app/security_headers.py` | JSON that should load nothing: `default-src 'none'`. |
+| API responses | `backend/app/core/security_headers.py` | JSON that should load nothing: `default-src 'none'`. |
 | `/docs` and `/redoc` | same file, looser policy | Real HTML pages served by FastAPI; Swagger UI and ReDoc load from jsDelivr and bootstrap with an inline script. |
 
 This answers the open question in the spec (§12.3): the backend middleware is

@@ -24,7 +24,7 @@ from fastapi import APIRouter, Depends, Header, Request, Response
 from sqlalchemy.orm import Session
 from svix.webhooks import Webhook, WebhookVerificationError
 
-from app.config import settings
+from app.core.config import settings
 from app.database import get_db
 from app.services import IdentityService
 

@@ -1,5 +1,7 @@
 # User Story: Split `app/schemas.py` into a `app/schemas/` package (2026-09-05)
 
+**Status:** Done 2026-10-11 on `tech-debt-ammendemnts`.
+
 **As a** developer working on the Taskflow backend,
 **I want** the Pydantic request/response schemas split one-module-per-entity, mirroring `app/database/models/`,
 **So that** the ORM half and the API half of each entity live in the same-shaped place, and feature branches stop colliding in one shared file.
@@ -62,26 +64,27 @@ only grows: every schema added before the split is another one to move later.
 
 ### Structure
 
-- [ ] Delete `app/schemas.py`, create the package `app/schemas/`
-- [ ] `app/schemas/user.py` — `UserCreate`, `UserProfileUpdate`, `UserResponse`, `UserSuggestion`
-- [ ] `app/schemas/board.py` — `BoardCreate`, `BoardUpdate`, `BoardBase`, `BoardWithData`
-- [ ] `app/schemas/member.py` — `MemberAdd`, `MemberRoleUpdate`, `MemberResponse`
-- [ ] `app/schemas/column.py` — `ColumnCreate`, `ColumnUpdate`, `ColumnResponse`
-- [ ] `app/schemas/ticket.py` — `TicketBasic`, `TicketCreate`, `TicketUpdate`, `TicketDetailed`, `AttachmentResponse`
-- [ ] `app/schemas/comment.py` — `CommentCreate`, `CommentUpdate`, `CommentResponse`, `COMMENT_MAX_LENGTH`, `_clean_comment`
-- [ ] `app/schemas/__init__.py` re-exports every public name above and declares `__all__`, following the docstring + import + `__all__` shape of `app/database/models/__init__.py`
+- [x] Delete `app/schemas.py`, create the package `app/schemas/`
+- [x] `app/schemas/user.py` — `UserResponse`, `UserSuggestion` (`UserCreate` / `UserProfileUpdate` were already deleted by the Clerk migration)
+- [x] `app/schemas/board.py` — `BoardCreate`, `BoardUpdate`, `BoardBase`, `BoardWithData`
+- [x] `app/schemas/member.py` — `MemberAdd`, `MemberRoleUpdate`, `MemberResponse`
+- [x] `app/schemas/column.py` — `ColumnCreate`, `ColumnUpdate`, `ColumnResponse`
+- [x] `app/schemas/ticket.py` — `TicketBasic`, `TicketCreate`, `TicketUpdate`, `TicketDetailed`, `AttachmentResponse`
+- [x] `app/schemas/comment.py` — `CommentCreate`, `CommentUpdate`, `CommentResponse`, `COMMENT_MAX_LENGTH`, `_clean_comment`
+- [x] `app/schemas/__init__.py` re-exports every public name above and declares `__all__`, following the docstring + import + `__all__` shape of `app/database/models/__init__.py`
 
 ### Imports
 
-- [ ] No call site changes: all ten `from app.schemas import X` lines in `app/routers/` and `app/services/` are untouched by this commit
-- [ ] Cross-module schema imports are explicit and acyclic (see dependency order below)
-- [ ] No `TYPE_CHECKING` guards, string forward refs, or `model_rebuild()` calls are needed — if one appears to be, a cycle has been introduced and the module split is wrong
+- [x] No call site changes: all ten `from app.schemas import X` lines in `app/routers/` and `app/services/` are untouched by this commit
+- [x] Cross-module schema imports are explicit and acyclic (see dependency order below)
+- [x] No `TYPE_CHECKING` guards, string forward refs, or `model_rebuild()` calls are needed — if one appears to be, a cycle has been introduced and the module split is wrong
 
 ### Behaviour
 
-- [ ] `pytest` passes
-- [ ] `uvicorn app.main:app` boots and `/docs` renders with the same schema names as before
+- [x] `pytest` passes
+- [x] `uvicorn app.main:app` boots and `/docs` renders with the same schema names as before
 - [ ] `GET /api/boards/{board_id}` and the ticket detail endpoint return byte-identical JSON to `main`
+      (not checked against a live stack yet; the OpenAPI schema is byte-identical and all 80 tests pass)
 
 ---
 

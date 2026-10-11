@@ -86,15 +86,15 @@ Authentication is delegated to **Clerk**. See `backend/docs/auth.md` for the ful
 | File | Purpose |
 |------|---------|
 | `backend/app/models.py` | SQLAlchemy ORM models |
-| `backend/app/schemas.py` | Pydantic request/response schemas |
-| `backend/app/routers/` | Auth, board, ticket route handlers |
+| `backend/app/schemas/` | Pydantic request/response schemas, one module per entity |
+| `backend/app/routers/` | Board, ticket, column, member, user and webhook route handlers |
 | `backend/app/dependencies.py` | `get_current_user()` dependency |
 | `frontend/src/api/axios.ts` | Axios instance with auth interceptors |
 | `frontend/src/hooks/useAuth.ts` | Clerk session + local user record |
 | `frontend/src/api/clerkToken.ts` | Bridges Clerk's `getToken` to axios |
 | `backend/app/services/identity_service.py` | Clerk account → TaskFlow user |
 | `backend/app/routers/webhook.py` | Clerk webhook, verified by signature |
-| `backend/app/security_headers.py` | CSP + security headers on API responses |
+| `backend/app/core/security_headers.py` | CSP + security headers on API responses |
 | `backend/tests/conftest.py` | Test fixtures (dependency overrides, in-memory DB) |
 | `frontend/csp.ts` | CSP for the app page, applied by `vite.config.ts` |
 | `frontend/src/types.ts` | TypeScript interfaces |

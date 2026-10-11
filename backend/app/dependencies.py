@@ -8,10 +8,10 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.database import User, BoardMember
-from app.clerk import get_clerk
-from app.config import settings
-from app.authorization import Role, role_satisfies
-from app.exceptions import NotFoundError, ForbiddenError, UnauthorizedError
+from app.core.clerk import get_clerk
+from app.core.config import settings
+from app.core.authorization import Role, role_satisfies
+from app.core.exceptions import NotFoundError, ForbiddenError, UnauthorizedError
 from app.services.identity_service import IdentityService
 
 # Declared only so Swagger shows an "Authorize" button; the SDK reads the

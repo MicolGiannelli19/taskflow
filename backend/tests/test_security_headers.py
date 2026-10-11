@@ -9,7 +9,7 @@ steps in `backend/docs/auth.md`.
 """
 import pytest
 
-from app.security_headers import API_CSP, DOCS_CSP, policy_for
+from app.core.security_headers import API_CSP, DOCS_CSP, policy_for
 
 
 def _directives(policy: str) -> dict[str, str]:
@@ -43,7 +43,7 @@ def test_error_responses_carry_them_too(unauthenticated):
 
 
 def test_authenticated_responses_carry_them_too(as_user, owner):
-    response = as_user(owner).get("/api/auth/me")
+    response = as_user(owner).get("/api/users/me")
 
     assert response.headers["content-security-policy"] == API_CSP
 

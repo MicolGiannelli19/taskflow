@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db, User, BoardMember
 from app.schemas import BoardCreate, BoardUpdate, BoardBase, BoardWithData
 from app.dependencies import get_current_user, require_board_role
-from app.authorization import Role
+from app.core.authorization import Role
 from app.services import BoardService
 
 router = APIRouter(prefix="/api/boards", tags=["boards"])

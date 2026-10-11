@@ -8,7 +8,7 @@ from functools import lru_cache
 
 from clerk_backend_api import Clerk
 
-from app.config import settings
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 

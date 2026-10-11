@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 
 from app.database import Ticket, User, Comment, Board, BoardColumn, BoardMember
 from app.schemas import TicketCreate, TicketUpdate, CommentCreate, CommentUpdate
-from app.authorization import Role, role_satisfies
-from app.exceptions import NotFoundError, ForbiddenError
+from app.core.authorization import Role, role_satisfies
+from app.core.exceptions import NotFoundError, ForbiddenError
 
 logger = logging.getLogger(__name__)
 

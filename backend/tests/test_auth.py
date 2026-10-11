@@ -1,11 +1,11 @@
-"""`GET /api/auth/me` and the authentication boundary.
+"""`GET /api/users/me` and the authentication boundary.
 
 **What is not covered here, deliberately (spec §4.4).** Clerk's own token
 verification — the RS256 signature check, JWKS fetching and caching, expiry,
 and the `azp` (authorized party) check — belongs to the Clerk SDK and is
 exercised by its tests, not ours. Every test below either overrides
 `get_current_user` or stubs the Clerk client, so a wrong
-`clerk_authorized_parties` in `app/config.py` would **not** fail this suite.
+`clerk_authorized_parties` in `app/core/config.py` would **not** fail this suite.
 Treat that config line as unverified by tests; §6.1 of the spec covers it.
 
 What *is* covered: that a protected route refuses an unauthenticated caller,
@@ -42,7 +42,7 @@ def _client_with_clerk_state(db_session, monkeypatch, **state) -> TestClient:
 
 def test_me_returns_the_local_user(as_user, owner):
     """`sub` is a Clerk id; what comes back is the TaskFlow row."""
-    response = as_user(owner).get("/api/auth/me")
+    response = as_user(owner).get("/api/users/me")
 
     assert response.status_code == 200
     body = response.json()
@@ -52,7 +52,7 @@ def test_me_returns_the_local_user(as_user, owner):
 
 
 def test_me_requires_authentication(unauthenticated):
-    response = unauthenticated.get("/api/auth/me")
+    response = unauthenticated.get("/api/users/me")
 
     assert response.status_code == 401
     assert response.json()["error"] == "Unauthorized"
@@ -76,7 +76,7 @@ def test_token_without_sub_claim_is_rejected(db_session, monkeypatch):
         db_session, monkeypatch, is_signed_in=True, payload={}
     )
     try:
-        response = client.get("/api/auth/me")
+        response = client.get("/api/users/me")
     finally:
         app.dependency_overrides.clear()
 

@@ -4,12 +4,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.routers import auth, board, ticket, member, column, user, webhook
+from app.routers import board, ticket, member, column, user, webhook
 from app.database import Base, engine
 from app.seed import seed
-from app.config import settings
-from app.security_headers import SecurityHeadersMiddleware
-from app.exceptions import NotFoundError, ConflictError, ValidationError, ForbiddenError, UnauthorizedError
+from app.core.config import settings
+from app.core.security_headers import SecurityHeadersMiddleware
+from app.core.exceptions import NotFoundError, ConflictError, ValidationError, ForbiddenError, UnauthorizedError
 
 logging.basicConfig(
     level=logging.INFO,
@@ -34,7 +34,7 @@ app = FastAPI(title="taskflow API", version="1.0.0", lifespan=lifespan)
 # Security response headers (CSP, nosniff, referrer policy). Added first so it
 # wraps outermost: CORS rejections and error responses get the headers too.
 # The policy that protects the *app page* is not here — it ships with the HTML,
-# which this API does not serve. See `app/security_headers.py`.
+# which this API does not serve. See `app/core/security_headers.py`.
 app.add_middleware(SecurityHeadersMiddleware)
 
 # CORS middleware. Origins come from the environment so deploying does not mean
@@ -48,7 +48,6 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(auth.router)
 app.include_router(board.router)
 app.include_router(ticket.router)
 app.include_router(member.router)

@@ -5,8 +5,8 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from app.database import BoardMember
-from app.authorization import Role
-from app.exceptions import NotFoundError, ConflictError, ValidationError
+from app.core.authorization import Role
+from app.core.exceptions import NotFoundError, ConflictError, ValidationError
 
 logger = logging.getLogger(__name__)
 

@@ -7,7 +7,7 @@ from app.database import get_db, User, BoardMember
 from app.schemas import (TicketCreate, TicketUpdate, TicketDetailed, UserResponse,
                          CommentCreate, CommentUpdate, CommentResponse)
 from app.dependencies import get_current_user, require_board_role
-from app.authorization import Role
+from app.core.authorization import Role
 from app.services import TicketService
 from app.services.ticket_service import CommentWithAuthor
 

@@ -8,7 +8,7 @@ See ``docs/specs/authorization-data-model.md`` §5 for the design.
 """
 from enum import Enum
 
-from app.exceptions import ValidationError
+from app.core.exceptions import ValidationError
 
 
 class Role(str, Enum):

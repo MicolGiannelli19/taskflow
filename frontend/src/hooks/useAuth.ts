@@ -19,7 +19,7 @@ export function useAuth() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["profile"],
-    queryFn: () => instance.get<UserType>("/auth/me").then((r) => r.data),
+    queryFn: () => instance.get<UserType>("/users/me").then((r) => r.data),
     // Nothing to fetch until Clerk can attach a token to the request.
     enabled: isLoaded && Boolean(isSignedIn),
     staleTime: 5 * 60 * 1000,
