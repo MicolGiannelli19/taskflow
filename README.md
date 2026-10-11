@@ -14,6 +14,9 @@ columns, markdown descriptions and comments, due dates, and shared boards with m
 PostgreSQL backend, Clerk for authentication, Docker Compose for local
 development.
 
+The more advanced features, such as Clerk integration, role-based permissions,
+automatic seeding and drag and drop, are described in [features](./docs/features.md).
+
 For the full background, goals and the topics still to explore, see the
 [project overview](./docs/project-overview.md).
 
@@ -89,6 +92,8 @@ If something doesn't work, see
   troubleshooting
 - [Project overview](./docs/project-overview.md): why TaskFlow exists, its goals
   and its features
+- [Features](./docs/features.md): the features beyond basic CRUD, how each one
+  works and where its code lives
 - [Backend README](./backend/README.md): backend structure and API endpoints
 - [Authentication and security](./docs/backend/auth.md): the Clerk flow, token
   handling, CSP, webhooks and deployment config

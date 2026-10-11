@@ -122,3 +122,9 @@ Server state is **React Query** (`@tanstack/react-query`): one hook per operatio
 CORS origins come from `CORS_ALLOWED_ORIGINS` (default `http://localhost:5173`), not a literal in `main.py`.
 
 Every API response carries `Content-Security-Policy: default-src 'none'`, `nosniff`, a referrer policy and `frame-ancestors 'none'`. The policy that protects the *app page* — the one behind the markdown renderer — is separate and lives in `frontend/csp.ts`, because a CSP ships with the document and the API does not serve the document. It is report-only until verified against a live Clerk instance; see `docs/backend/auth.md`.
+
+## Documentation
+
+All docs live under the root `docs/` folder (`backend/`, `frontend/`, `specs/`); put new ones there too.
+
+When a change adds or reshapes a feature beyond basic CRUD (a new library, a security mechanism, infrastructure behaviour such as seeding), update `docs/features.md` in the same change: an entry saying what the feature does, how it works and where its code lives, plus a line in the list at the top.

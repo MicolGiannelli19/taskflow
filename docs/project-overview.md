@@ -31,12 +31,14 @@ The objective is a complete end-to-end application. The focus is on building fro
 
 ## Features
 
+The more advanced features are described in [features.md](./features.md).
+
 ### Frontend
 
 - Basic board, column and ticket management
 - Responsive design
 - Single-page application behaviour
-- Drag-and-drop support for tickets and columns
+- Drag and drop to move tickets between columns
 
 ### Backend
 
