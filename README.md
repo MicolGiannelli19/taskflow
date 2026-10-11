@@ -58,7 +58,8 @@ python3 -c "import secrets; print(secrets.token_urlsafe(16))"
 SEED_PASSWORD=<the value it printed>
 ```
 
-**4. Start everything** from the project root:
+**4. Start everything.** Open Docker Desktop first and wait until it says it is
+running, then from the project root:
 
 ```bash
 docker compose up
@@ -89,9 +90,9 @@ If something doesn't work, see
 - [Project overview](./docs/project-overview.md): why TaskFlow exists, its goals
   and its features
 - [Backend README](./backend/README.md): backend structure and API endpoints
-- [Authentication and security](./backend/docs/auth.md): the Clerk flow, token
+- [Authentication and security](./docs/backend/auth.md): the Clerk flow, token
   handling, CSP, webhooks and deployment config
-- [Database schema](./backend/docs/schema.md): the seven tables and how they relate
-- [Testing](./backend/docs/testing.md): the automated suite, and calling the API
+- [Database schema](./docs/backend/schema.md): the seven tables and how they relate
+- [Testing](./docs/backend/testing.md): the automated suite, and calling the API
   by hand
-- [Frontend architecture](./frontend/docs/architecture.md)
+- [Frontend architecture](./docs/frontend/architecture.md)

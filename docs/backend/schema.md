@@ -107,7 +107,7 @@ Clerk; `user_identities` links each row to its Clerk account.
 `name` and `avatar` are a local copy of the Clerk profile, kept so board members
 and assignees can be shown to *other* users (Clerk won't expose them to the
 browser). They are filled when `IdentityService` first provisions the account
-and refreshed by the `user.updated` webhook — see `docs/auth.md`.
+and refreshed by the `user.updated` webhook — see `docs/backend/auth.md`.
 
 | column | type | notes |
 |---|---|---|
@@ -317,7 +317,7 @@ via `docker compose down -v`.
 - **`user_identities.password_hash` is dead** — never written since the Clerk
   migration. Dropping it needs a `docker compose down -v` reset (no migrations
   during the MVP).
-- **`backend/docs/schema.dbml`** (dbdiagram.io format) is hand-maintained and can lag
+- **`docs/backend/schema.dbml`** (dbdiagram.io format) is hand-maintained and can lag
   the models; this file and it should be regenerated together when models change.
 - **Open in the spec (§7):** role integrity mechanism (CHECK vs enum vs lookup),
   `priority` representation, whether `admin` can demote `owner`, invitations /

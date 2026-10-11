@@ -178,7 +178,7 @@ pytest -k authorization       # one topic
 
 The auth override exists only inside pytest. No setting turns auth off for the
 running server, so calling the live API by hand needs a real Clerk token. See
-[backend/docs/testing.md](../backend/docs/testing.md) for both.
+[docs/backend/testing.md](./backend/testing.md) for both.
 
 ## Optional: Clerk webhooks
 
@@ -203,6 +203,7 @@ until the user signs in again.
 
 | Symptom | Cause | Fix |
 |---|---|---|
+| `failed to connect to the docker API at unix:///…/docker.sock` | Docker Desktop isn't running | Open Docker Desktop (`open -a Docker`), wait for it to finish starting, then `docker compose up` again |
 | Blank page, console reads `Missing VITE_CLERK_PUBLISHABLE_KEY` | Key never reached the container | Put it in the **root** `.env`, then `docker compose up` again. Compose reads env at container start |
 | `401` on every API call | `CLERK_SECRET_KEY` missing or from a different Clerk application | Both keys must come from the same application. `npx clerk@latest env pull` gives a matching pair |
 | Signed in, but no boards | Your Clerk email doesn't match a seeded user | Sign up as `alice@example.com`, or create a board |
@@ -210,7 +211,7 @@ until the user signs in again.
 | "This password has been found as part of a breach" | The Clerk account was created with an old seed password (`password123`) | Delete the three demo users in the Clerk Dashboard, then `docker compose down -v && docker compose up` to re-seed |
 | Backend restarts in a loop | Postgres not ready, or `DATABASE_URL` wrong | `docker compose logs db`. In Compose the host is `db`, not `localhost` |
 | Port already allocated | 5173 / 8000 / 5432 in use | Stop the other process, or remap the port in `docker-compose.yml` |
-| CSP violations in the console | Page policy is report-only by default | Expected. See [backend/docs/auth.md](../backend/docs/auth.md); set `VITE_CSP_MODE=enforce` to block instead |
+| CSP violations in the console | Page policy is report-only by default | Expected. See [docs/backend/auth.md](./backend/auth.md); set `VITE_CSP_MODE=enforce` to block instead |
 
 More on the auth flow, CSP and deployment config:
-[backend/docs/auth.md](../backend/docs/auth.md).
+[docs/backend/auth.md](./backend/auth.md).

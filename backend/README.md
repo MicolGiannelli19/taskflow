@@ -46,7 +46,7 @@ backend/
 │   ├── routers/             # API route modules
 │   ├── dependencies.py      # get_current_user, require_board_role
 │   └── seed.py              # Demo data, loaded on startup; the only bcrypt hashing left
-├── tests/                   # pytest suite (see docs/testing.md)
+├── tests/                   # pytest suite (see docs/backend/testing.md)
 ├── requirements.txt         # Python dependencies
 └── Dockerfile               # Docker configuration
 ```
@@ -93,7 +93,7 @@ No manual schema step is needed — the app creates all tables on startup
 (`Base.metadata.create_all`, from the ORM models in `app/database/models/`) and
 loads demo data via `app/seed.py`. Just ensure the database exists and
 `DATABASE_URL` points at it. A visual model lives in
-[`database/schema.dbml`](../database/schema.dbml); the authorization design is
+[`docs/backend/schema.dbml`](../docs/backend/schema.dbml); the authorization design is
 in [`docs/specs/authorization-data-model.md`](../docs/specs/authorization-data-model.md).
 
 > Schema changes: since there are no migrations during the MVP, apply them by
@@ -129,7 +129,7 @@ pytest -k authorization       # tests whose name matches a keyword
 pytest -x                     # stop at the first failure
 ```
 
-See [docs/testing.md](./docs/testing.md) for what each file covers, how the
+See [docs/backend/testing.md](../docs/backend/testing.md) for what each file covers, how the
 auth override works, and how to call the running API by hand with a real token.
 
 ---
@@ -168,7 +168,7 @@ Authentication is delegated to [Clerk](https://clerk.com). Clerk verifies the
 session token; `user_identities` maps the Clerk account (`provider='clerk'`) to
 the local `users` row that boards and tickets reference.
 
-For a full explanation of the auth flow see [docs/auth.md](./docs/auth.md).
+For a full explanation of the auth flow see [docs/backend/auth.md](../docs/backend/auth.md).
 
 ### Getting a Token
 

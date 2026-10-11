@@ -11,7 +11,7 @@
  *
  * Clerk's hosts below come from Clerk's CSP documentation, not from watching a
  * real sign-in. Until someone runs the report-only pass described in
- * `backend/docs/auth.md`, treat the list as a hypothesis: run the app with
+ * `docs/backend/auth.md`, treat the list as a hypothesis: run the app with
  * `VITE_CSP_MODE=report`, exercise sign-in / sign-up / profile / a board, and
  * read the violations out of the browser console. Add the hosts they name.
  * Never widen a directive to `*` to silence one.
@@ -113,7 +113,7 @@ export function buildPageCsp({ dev, publishableKey, apiUrl }: CspOptions): strin
  *
  * `report` (the default in development) tells the browser to log violations
  * and allow them anyway, so a wrong directive cannot lock you out of sign-in.
- * Switch to `enforce` once the console is clean — see `backend/docs/auth.md`.
+ * Switch to `enforce` once the console is clean — see `docs/backend/auth.md`.
  */
 export function cspHeaderName(mode: string | undefined): string {
   return mode === "enforce"

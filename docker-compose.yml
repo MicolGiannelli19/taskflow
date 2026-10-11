@@ -70,7 +70,7 @@ services:
       VITE_API_URL: http://localhost:8000
       # Safe to ship to the browser — this is the publishable half of the pair.
       VITE_CLERK_PUBLISHABLE_KEY: ${VITE_CLERK_PUBLISHABLE_KEY:-}
-      # `report` (default) or `enforce` — see backend/docs/auth.md.
+      # `report` (default) or `enforce` — see docs/backend/auth.md.
       VITE_CSP_MODE: ${VITE_CSP_MODE:-report}
     command: sh -c "yarn install && yarn dev --host"
 

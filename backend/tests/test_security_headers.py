@@ -5,7 +5,7 @@ These assert the criteria from §5.5 that can be checked without a browser: no
 criteria that need a real browser — that sign-in still works under the policy,
 and that an inline `<script>` pasted into a ticket description does not run —
 belong to the *page* policy in `frontend/csp.ts`, and are listed as manual
-steps in `backend/docs/auth.md`.
+steps in `docs/backend/auth.md`.
 """
 import pytest
 

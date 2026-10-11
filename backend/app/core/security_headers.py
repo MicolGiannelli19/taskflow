@@ -14,7 +14,7 @@ below belongs (spec §12, open question 3):
 - **`/docs` and `/redoc`** are the exception: real HTML pages, served by this
   app, that pull Swagger UI and ReDoc from a CDN. They need their own, looser
   policy — and they are developer tooling, so in production the better move is
-  to switch them off entirely (see `docs/auth.md`).
+  to switch them off entirely (see `docs/backend/auth.md`).
 
 Everything here is a plain response header. Nothing depends on Clerk, so
 nothing here can break sign-in.

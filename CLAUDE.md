@@ -51,7 +51,7 @@ pytest -k authorization       # one topic
 
 Tests need no Clerk key, no database and no network: `get_current_user` is
 overridden with a known user and the schema is built in SQLite in memory. A
-test that opens a socket fails deliberately. See `backend/docs/testing.md`.
+test that opens a socket fails deliberately. See `docs/backend/testing.md`.
 
 ## Architecture
 
@@ -70,7 +70,7 @@ React component (useState + useEffect)
 
 ### Auth
 
-Authentication is delegated to **Clerk**. See `backend/docs/auth.md` for the full picture.
+Authentication is delegated to **Clerk**. See `docs/backend/auth.md` for the full picture.
 
 - Backend: `clerk-backend-api` verifies session tokens (`authenticate_request`); no passwords, no local token signing
 - Token claim: `sub` = **Clerk** user id (e.g. `user_2abc…`), *not* a TaskFlow UUID
@@ -121,4 +121,4 @@ Server state is **React Query** (`@tanstack/react-query`): one hook per operatio
 
 CORS origins come from `CORS_ALLOWED_ORIGINS` (default `http://localhost:5173`), not a literal in `main.py`.
 
-Every API response carries `Content-Security-Policy: default-src 'none'`, `nosniff`, a referrer policy and `frame-ancestors 'none'`. The policy that protects the *app page* — the one behind the markdown renderer — is separate and lives in `frontend/csp.ts`, because a CSP ships with the document and the API does not serve the document. It is report-only until verified against a live Clerk instance; see `backend/docs/auth.md`.
+Every API response carries `Content-Security-Policy: default-src 'none'`, `nosniff`, a referrer policy and `frame-ancestors 'none'`. The policy that protects the *app page* — the one behind the markdown renderer — is separate and lives in `frontend/csp.ts`, because a CSP ships with the document and the API does not serve the document. It is report-only until verified against a live Clerk instance; see `docs/backend/auth.md`.

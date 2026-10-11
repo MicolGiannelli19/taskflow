@@ -151,7 +151,7 @@ Two design choices worth pausing on:
 > §4's 401 interceptor are still broadly accurate; the rest of this section is
 > kept only as a record of what the app used to do.
 >
-> For how auth works now, see [`backend/docs/auth.md`](../../backend/docs/auth.md).
+> For how auth works now, see [`docs/backend/auth.md`](../backend/auth.md).
 
 
 Auth is JWT-based. The frontend stores both the token and a serialised user object in `localStorage` so a refresh doesn't log the user out.

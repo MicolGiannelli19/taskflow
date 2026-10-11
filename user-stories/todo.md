@@ -23,7 +23,7 @@ Clerk migration (2026-09-19), not by fixing this code.** `handleLogIn` and
 `LogInForm.tsx` were deleted: Clerk's `<SignIn />` owns the form, the
 credentials and the session, so there is no hand-rolled login path left to send
 mock values. `useAuth()` returns the real local user via `GET /api/users/me`.
-See `docs/specs/clerk-integration.md` and `backend/docs/auth.md`.
+See `docs/specs/clerk-integration.md` and `docs/backend/auth.md`.
 - [x] Use real credentials from the form
 - [x] Stop constructing a `mockUser`
 
@@ -162,13 +162,13 @@ Understand the three main token storage patterns and when to use each, so we can
       domain, and `getToken()` keeps a short-lived access token in memory. That
       FastAPI code will never be written, so the proof-of-concept has nothing
       left to prove.
-- [x] Decision documented in `backend/docs/auth.md` with rationale
+- [x] Decision documented in `docs/backend/auth.md` with rationale
       → see the **Token storage** section: what was chosen, what was rejected
       (`localStorage`, a BFF/token proxy), and the residual XSS exposure.
 
 **Status:** ✅ **Closed 2026-09-19.** The short version: nothing of ours stores a
 token any more. Storage bounds the *damage* from an XSS; the Content-Security-Policy
-(also now in `backend/docs/auth.md`) is what *prevents* one.
+(also now in `docs/backend/auth.md`) is what *prevents* one.
 
 **Priority:** ~~Medium~~ — done.
 **Dependencies:** ~~Frontend auth (localStorage) must be working first~~ — superseded by Clerk.
@@ -194,7 +194,7 @@ Phase 1 (drag between columns) is complete. Within-column reordering was deliber
 - Extend `useMoveTicket` to send `position` alongside `column_id`, including in the optimistic update
 - Visual feedback for the insertion point (drop indicator line between tickets)
 
-**See:** `frontend/docs/drag-and-drop.md` for Phase 1 reference
+**See:** `docs/frontend/drag-and-drop.md` for Phase 1 reference
 
 ---
 

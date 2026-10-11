@@ -125,7 +125,7 @@ def clerk_webhook(
         # in `users` and is the key `_provision` adopts rows by, so writing it
         # from an event can collide with another row. Changing a primary email
         # in Clerk therefore still leaves the local address stale — a known
-        # limitation, recorded in `docs/auth.md`.
+        # limitation, recorded in `docs/backend/auth.md`.
         identities.sync_profile(
             clerk_user_id,
             name=_display_name(data),
