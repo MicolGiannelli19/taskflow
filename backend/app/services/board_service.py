@@ -7,9 +7,9 @@ from sqlalchemy.orm import Session
 
 from app.database import Board, BoardColumn, BoardMember, Ticket, User
 from app.schemas import BoardCreate, BoardUpdate
-from app.authorization import Role
+from app.core.authorization import Role
 from app.services.membership_service import MembershipService
-from app.exceptions import NotFoundError, ValidationError
+from app.core.exceptions import NotFoundError, ValidationError
 
 logger = logging.getLogger(__name__)
 

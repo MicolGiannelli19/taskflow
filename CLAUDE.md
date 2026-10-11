@@ -51,7 +51,7 @@ pytest -k authorization       # one topic
 
 Tests need no Clerk key, no database and no network: `get_current_user` is
 overridden with a known user and the schema is built in SQLite in memory. A
-test that opens a socket fails deliberately. See `backend/docs/testing.md`.
+test that opens a socket fails deliberately. See `docs/backend/testing.md`.
 
 ## Architecture
 
@@ -70,7 +70,7 @@ React component (useState + useEffect)
 
 ### Auth
 
-Authentication is delegated to **Clerk**. See `backend/docs/auth.md` for the full picture.
+Authentication is delegated to **Clerk**. See `docs/backend/auth.md` for the full picture.
 
 - Backend: `clerk-backend-api` verifies session tokens (`authenticate_request`); no passwords, no local token signing
 - Token claim: `sub` = **Clerk** user id (e.g. `user_2abc…`), *not* a TaskFlow UUID
@@ -86,15 +86,15 @@ Authentication is delegated to **Clerk**. See `backend/docs/auth.md` for the ful
 | File | Purpose |
 |------|---------|
 | `backend/app/models.py` | SQLAlchemy ORM models |
-| `backend/app/schemas.py` | Pydantic request/response schemas |
-| `backend/app/routers/` | Auth, board, ticket route handlers |
+| `backend/app/schemas/` | Pydantic request/response schemas, one module per entity |
+| `backend/app/routers/` | Board, ticket, column, member, user and webhook route handlers |
 | `backend/app/dependencies.py` | `get_current_user()` dependency |
 | `frontend/src/api/axios.ts` | Axios instance with auth interceptors |
 | `frontend/src/hooks/useAuth.ts` | Clerk session + local user record |
 | `frontend/src/api/clerkToken.ts` | Bridges Clerk's `getToken` to axios |
 | `backend/app/services/identity_service.py` | Clerk account → TaskFlow user |
 | `backend/app/routers/webhook.py` | Clerk webhook, verified by signature |
-| `backend/app/security_headers.py` | CSP + security headers on API responses |
+| `backend/app/core/security_headers.py` | CSP + security headers on API responses |
 | `backend/tests/conftest.py` | Test fixtures (dependency overrides, in-memory DB) |
 | `frontend/csp.ts` | CSP for the app page, applied by `vite.config.ts` |
 | `frontend/src/types.ts` | TypeScript interfaces |
@@ -121,4 +121,10 @@ Server state is **React Query** (`@tanstack/react-query`): one hook per operatio
 
 CORS origins come from `CORS_ALLOWED_ORIGINS` (default `http://localhost:5173`), not a literal in `main.py`.
 
-Every API response carries `Content-Security-Policy: default-src 'none'`, `nosniff`, a referrer policy and `frame-ancestors 'none'`. The policy that protects the *app page* — the one behind the markdown renderer — is separate and lives in `frontend/csp.ts`, because a CSP ships with the document and the API does not serve the document. It is report-only until verified against a live Clerk instance; see `backend/docs/auth.md`.
+Every API response carries `Content-Security-Policy: default-src 'none'`, `nosniff`, a referrer policy and `frame-ancestors 'none'`. The policy that protects the *app page* — the one behind the markdown renderer — is separate and lives in `frontend/csp.ts`, because a CSP ships with the document and the API does not serve the document. It is report-only until verified against a live Clerk instance; see `docs/backend/auth.md`.
+
+## Documentation
+
+All docs live under the root `docs/` folder (`backend/`, `frontend/`, `specs/`); put new ones there too.
+
+When a change adds or reshapes a feature beyond basic CRUD (a new library, a security mechanism, infrastructure behaviour such as seeding), update `docs/features.md` in the same change: an entry saying what the feature does, how it works and where its code lives, plus a line in the list at the top.

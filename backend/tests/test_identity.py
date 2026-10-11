@@ -9,7 +9,7 @@ from types import SimpleNamespace
 import pytest
 
 from app.database import User, UserIdentity
-from app.exceptions import UnauthorizedError
+from app.core.exceptions import UnauthorizedError
 from app.services.identity_service import CLERK_PROVIDER, IdentityService
 
 

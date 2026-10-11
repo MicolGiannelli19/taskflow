@@ -4,11 +4,20 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.database import get_db, User
-from app.schemas import UserSuggestion
+from app.schemas import UserResponse, UserSuggestion
 from app.dependencies import get_current_user
 from app.services import UserService
 
 router = APIRouter(prefix="/api/users", tags=["users"])
+
+
+# Registration, login and profile editing live in Clerk — see the frontend's
+# <SignUp>, <SignIn> and <UserProfile>. What remains is the one thing Clerk
+# can't answer: which TaskFlow user the caller is. The frontend needs that
+# `users.id` to tell whether a ticket or comment is theirs.
+@router.get("/me", response_model=UserResponse)
+def get_me(current_user: User = Depends(get_current_user)):
+    return current_user
 
 
 @router.get("/search", response_model=List[UserSuggestion])

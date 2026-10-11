@@ -27,9 +27,9 @@ browser verification · ⚪ §6 deferred to deployment
 | §4 Tests | ✅ Done | 80 tests. No Clerk key, no database, no network — a test that opens a socket fails deliberately. |
 | §5 CSP — API responses | ✅ Done, enforcing | `default-src 'none'` on API JSON; a looser policy on `/docs`, verified against a live Swagger UI. |
 | §5 CSP — app page | 🟡 Report-only | Written (`frontend/csp.ts`) and delivered by Vite, but the Clerk hosts come from Clerk's documentation, **not** from watching a real sign-in: this checkout has no Clerk keys. §5.4 steps 2–3 are outstanding. |
-| §6 Production | ⚪ Deferred | §6.1 done — `azp` and CORS now come from the environment. §6.2 is dashboard/DNS work; checklist in `backend/docs/auth.md`. |
+| §6 Production | ⚪ Deferred | §6.1 done — `azp` and CORS now come from the environment. §6.2 is dashboard/DNS work; checklist in `docs/backend/auth.md`. |
 | §7 Webhook | ✅ Done | `POST /api/webhooks/clerk`, Svix-verified, idempotent. Needs a Dashboard endpoint + signing secret to actually fire. |
-| §8 Token storage | ✅ Done | Recorded in `backend/docs/auth.md`; spike closed in `user-stories/todo.md`. |
+| §8 Token storage | ✅ Done | Recorded in `docs/backend/auth.md`; spike closed in `user-stories/todo.md`. |
 | §9 Stale docs | ✅ Done | All four items corrected. |
 
 Two things turned up that were not in this spec:
@@ -37,7 +37,7 @@ Two things turned up that were not in this spec:
 1. **The page CSP could not have lived in the backend middleware** as §5.2 drafts
    it. A CSP arrives with the *document*, and FastAPI does not serve the app's
    HTML — Vite does in development, a static host does in production. The policy
-   is split accordingly, which answers §12.3: see `backend/docs/auth.md`.
+   is split accordingly, which answers §12.3: see `docs/backend/auth.md`.
 2. **`requirements.txt` was missing a bcrypt backend.** `passlib` was pinned
    without one, so `seed()` raised `MissingBackendError` and the app failed to
    start against a fresh database. Fixed by pinning `bcrypt==4.0.1` (passlib
@@ -65,7 +65,7 @@ Two things turned up that were not in this spec:
   `authorization-data-model.md`). Revisit only if TaskFlow needs real
   multi-tenancy.
 - **Replacing the seed's Clerk push.** It is best-effort by design and documented
-  in `backend/docs/auth.md`; without a secret key the local rows still exist and
+  in `docs/backend/auth.md`; without a secret key the local rows still exist and
   the first matching Clerk account adopts one.
 - **Removing `app/auth_utils.py`.** bcrypt hashing is still used by the seed's
   Clerk user-import. It is off the request path and correctly documented.
@@ -88,7 +88,7 @@ Two things turned up that were not in this spec:
 | No CSP header is set anywhere | No middleware in `app/main.py`; nothing in `frontend/index.html` |
 | User-supplied markdown is rendered | `frontend/src/pages/Board/TicketDetailContent.tsx:2` — `react-markdown`, no `rehype-raw` (safe config) |
 | No webhook endpoint exists | No route matches `/webhook` in `app/routers/` |
-| Profile drift is a known limitation | `backend/docs/auth.md` → "Limitations (current MVP)" |
+| Profile drift is a known limitation | `docs/backend/auth.md` → "Limitations (current MVP)" |
 | `CLAUDE.md` references a test file that does not exist | `pytest tests/test_auth.py` — deleted with the password auth |
 
 ---
@@ -259,11 +259,11 @@ reports instead of breaking sign-in.
       (`frontend/csp.ts`) ships report-only
 - [ ] **Outstanding.** Exercise every auth flow; collect violations from the
       console. Needs Clerk keys, which this checkout does not have — run
-      `npx clerk@latest env pull` first. Procedure in `backend/docs/auth.md`
+      `npx clerk@latest env pull` first. Procedure in `docs/backend/auth.md`
 - [ ] **Outstanding.** Narrow the policy to the observed hosts; switch to
       enforcing (`VITE_CSP_MODE=enforce`)
 - [x] Document the final directives and *why each host is needed* in
-      `backend/docs/auth.md` — one table, one row per host
+      `docs/backend/auth.md` — one table, one row per host
 - [x] Add a note that the policy needs revisiting when moving to a production
       Clerk domain. The Frontend API host is now *derived from the publishable
       key* rather than wildcarded, so it follows the key automatically — but the
@@ -316,7 +316,7 @@ removing it disables the replay protection entirely — do neither.
 
 ### 6.2 Claim the Clerk application
 
-`backend/docs/auth.md` records the app as unclaimed, which makes it
+`docs/backend/auth.md` records the app as unclaimed, which makes it
 development-only. A development instance is not production-ready: it has
 relaxed cookie handling (the `__clerk_db_jwt` mechanism that works around
 third-party cookie blocking) and is not intended to carry real users.
@@ -385,7 +385,7 @@ The `clerk-webhooks` skill covers the handler patterns.
 - [x] Return 2xx quickly; Clerk retries on non-2xx. Unhandled event types get
       204 rather than an error, so Clerk does not retry them forever
 - [ ] **Outstanding** (needs a Clerk instance). Local testing needs a public URL —
-      command and Dashboard steps are in `backend/docs/auth.md`
+      command and Dashboard steps are in `docs/backend/auth.md`
 
 ### 7.4 Acceptance criteria
 
@@ -414,9 +414,9 @@ domain and `getToken()` holds short-lived JWTs in memory. The httpOnly-login
 proof-of-concept in FastAPI is moot; that code will never be written.
 
 The third criterion is genuinely outstanding: *"Decision documented in
-`backend/docs/auth.md` with rationale."*
+`docs/backend/auth.md` with rationale."*
 
-- [x] Add a "Token storage" section to `backend/docs/auth.md`
+- [x] Add a "Token storage" section to `docs/backend/auth.md`
 - [x] State the blast-radius reasoning explicitly
 - [x] Mark the spike closed in `user-stories/todo.md`, linking to this spec
 
@@ -511,6 +511,6 @@ Surfaced alongside this work but **not Clerk integration**:
 4. **Is one integration test against a real Clerk token worth the CI complexity?**
    Still open, and still "probably not at MVP". Nothing here changed the
    trade-off — but the §4.4 gap is now written down in three places
-   (`conftest.py`, `test_auth.py`, `backend/docs/testing.md`) rather than
+   (`conftest.py`, `test_auth.py`, `docs/backend/testing.md`) rather than
    assumed, so if `authorized_parties` ever does bite, the reason will be
    findable.

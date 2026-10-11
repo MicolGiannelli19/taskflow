@@ -56,7 +56,7 @@ that matters is `N passed`.
 |---|---|
 | `tests/conftest.py` | Fixtures: in-memory database, clients, a user at each board role |
 | `tests/test_api.py` | Smoke test: `GET /` answers |
-| `tests/test_auth.py` | `GET /api/auth/me`; the 401 boundary |
+| `tests/test_auth.py` | `GET /api/users/me`; the 401 boundary |
 | `tests/test_authorization.py` | The `require_board_role` matrix: 404-not-403, role hierarchy, comment ownership |
 | `tests/test_identity.py` | `IdentityService`: adoption, provisioning, the race |
 | `tests/test_webhook.py` | Signature verification, profile sync, replay |
@@ -104,7 +104,7 @@ dialects had to be named explicitly is the partial index in
 This section covers calling the running API directly — Swagger, curl or
 Postman — instead of through the board UI. Unlike the automated suite, this
 goes through real Clerk auth, so it needs the whole stack up and Clerk keys in
-the root `.env` (see the [main README](../../README.md#running-locally)). The
+the root `.env` (see the [main README](../../README.md#start-the-app)). The
 frontend is still needed once: it is where you sign in to get a token.
 
 ---
@@ -172,6 +172,6 @@ curl http://localhost:8000/api/boards \
 | `POST` | `/api/boards` | Create a board |
 | `GET` | `/api/boards/{id}/tickets/{ticket_id}` | Get one ticket, with its comments |
 | `POST` | `/api/boards/{id}/tickets` | Create a ticket |
-| `GET` | `/api/auth/me` | The local user behind your token |
+| `GET` | `/api/users/me` | The local user behind your token |
 
 > Full endpoint list is always available at `http://localhost:8000/docs`

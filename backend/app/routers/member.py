@@ -7,9 +7,9 @@ from sqlalchemy.orm import Session
 from app.database import get_db, User, BoardMember
 from app.schemas import MemberAdd, MemberRoleUpdate, MemberResponse
 from app.dependencies import require_board_role
-from app.authorization import Role, parse_role
+from app.core.authorization import Role, parse_role
 from app.services import MembershipService
-from app.exceptions import NotFoundError, ValidationError
+from app.core.exceptions import NotFoundError, ValidationError
 
 router = APIRouter(prefix="/api/boards/{board_id}/members", tags=["members"])
 

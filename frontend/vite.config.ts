@@ -11,7 +11,7 @@ import { buildPageCsp, cspHeaderName } from './csp'
  * repo, so without this the deployed app would have no policy at all. A `<meta>`
  * tag is not a complete substitute for the header — `frame-ancestors` is
  * ignored in meta form, so the host must still send the header for clickjacking
- * protection (see `backend/docs/auth.md`) — but it covers script and connect
+ * protection (see `docs/backend/auth.md`) — but it covers script and connect
  * sources, which is what stands behind the markdown renderer.
  */
 function cspMetaTag(policy: string): Plugin {

@@ -107,7 +107,7 @@ Clerk; `user_identities` links each row to its Clerk account.
 `name` and `avatar` are a local copy of the Clerk profile, kept so board members
 and assignees can be shown to *other* users (Clerk won't expose them to the
 browser). They are filled when `IdentityService` first provisions the account
-and refreshed by the `user.updated` webhook — see `docs/auth.md`.
+and refreshed by the `user.updated` webhook — see `docs/backend/auth.md`.
 
 | column | type | notes |
 |---|---|---|
@@ -186,7 +186,7 @@ Kanban columns, ordered within a board by `position`. (Model class is
 | title | varchar(500) | not null |
 | description | text | |
 | position | integer | not null — ordering within a column |
-| priority | varchar(50) | default `medium` |
+| priority | varchar(50) | default `medium`; the frontend sends `low` / `medium` / `high`, but nothing in the database or API enforces it |
 | assignee_id | uuid FK → users.id | nullable, `ON DELETE SET NULL` |
 | creator_id | uuid FK → users.id | not null, `ON DELETE CASCADE` ⚠️ (see §4) |
 | due_date | timestamp | |
@@ -234,11 +234,16 @@ automatically.
 |---|:--:|:--:|:--:|:--:|
 | View board / tickets / comments | ✅ | ✅ | ✅ | ✅ |
 | Create / edit / move / delete tickets | ✅ | ✅ | ✅ | ❌ |
-| Create / edit / delete columns | ✅ | ✅ | ✅ | ❌ |
-| Comment | ✅ | ✅ | ✅ | ❌ |
+| Create / edit / delete columns | ✅ | ✅ | ❌ | ❌ |
+| Add comments | ✅ | ✅ | ✅ | ❌ |
+| Edit your own comments | ✅ | ✅ | ✅ | ❌ |
+| Delete your own comments | ✅ | ✅ | ✅ | ❌ |
+| Delete other people's comments | ✅ | ✅ | ❌ | ❌ |
 | Add / remove members, change roles | ✅ | ✅ | ❌ | ❌ |
 | Rename / edit board settings | ✅ | ✅ | ❌ | ❌ |
-| Delete board, transfer ownership | ✅ | ❌ | ❌ | ❌ |
+| Delete board | ✅ | ❌ | ❌ | ❌ |
+
+Nobody can edit someone else's comment, not even the owner.
 
 ---
 
@@ -317,9 +322,13 @@ via `docker compose down -v`.
 - **`user_identities.password_hash` is dead** — never written since the Clerk
   migration. Dropping it needs a `docker compose down -v` reset (no migrations
   during the MVP).
-- **`backend/docs/schema.dbml`** (dbdiagram.io format) is hand-maintained and can lag
+- **No ownership transfer.** `one_owner_per_board` blocks promoting a second
+  owner and the last-owner guard blocks demoting the current one, so ownership
+  can't change hands today. Doing it needs a dedicated operation that swaps both
+  rows in one transaction.
+- **`docs/backend/schema.dbml`** (dbdiagram.io format) is hand-maintained and can lag
   the models; this file and it should be regenerated together when models change.
 - **Open in the spec (§7):** role integrity mechanism (CHECK vs enum vs lookup),
   `priority` representation, whether `admin` can demote `owner`, invitations /
-  and invitations / pending memberships. (Whether `user_identities` stays in
+  pending memberships. (Whether `user_identities` stays in
   scope was settled by the Clerk integration: it is the Clerk link.)

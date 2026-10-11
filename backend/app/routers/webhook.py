@@ -24,7 +24,7 @@ from fastapi import APIRouter, Depends, Header, Request, Response
 from sqlalchemy.orm import Session
 from svix.webhooks import Webhook, WebhookVerificationError
 
-from app.config import settings
+from app.core.config import settings
 from app.database import get_db
 from app.services import IdentityService
 
@@ -125,7 +125,7 @@ def clerk_webhook(
         # in `users` and is the key `_provision` adopts rows by, so writing it
         # from an event can collide with another row. Changing a primary email
         # in Clerk therefore still leaves the local address stale — a known
-        # limitation, recorded in `docs/auth.md`.
+        # limitation, recorded in `docs/backend/auth.md`.
         identities.sync_profile(
             clerk_user_id,
             name=_display_name(data),

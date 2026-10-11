@@ -15,7 +15,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import User, UserIdentity
-from app.exceptions import UnauthorizedError
+from app.core.exceptions import UnauthorizedError
 
 logger = logging.getLogger(__name__)
 

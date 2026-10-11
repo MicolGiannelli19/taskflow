@@ -32,17 +32,21 @@ FastAPI backend service for the taskflow board application with PostgreSQL datab
 backend/
 ├── app/
 │   ├── main.py              # FastAPI app entry point
-│   ├── config.py            # Configuration and settings
-│   ├── database.py          # Database connection
-│   ├── models.py            # SQLAlchemy database models
-│   ├── schemas.py           # Pydantic validation schemas
-│   ├── auth_utils.py        # Authentication utilities
-│   ├── dependencies.py      # Shared dependencies
-│   └── routers/             # API route modules
-│       ├── __init__.py
-│       ├── auth.py          # Login/register endpoints
-│       ├── board.py         # Board management
-│       └── ticket.py        # Ticket CRUD operations
+│   ├── core/                # App-wide foundations, imported by everything else
+│   │   ├── config.py        # Settings, read from the root .env
+│   │   ├── exceptions.py    # AppError and its subclasses
+│   │   ├── authorization.py # Board roles and their hierarchy
+│   │   ├── clerk.py         # Shared Clerk Backend API client
+│   │   └── security_headers.py  # CSP and security headers middleware
+│   ├── database/
+│   │   ├── session.py       # Engine, session, get_db
+│   │   └── models/          # SQLAlchemy ORM models, one module per entity
+│   ├── schemas/             # Pydantic schemas, one module per entity
+│   ├── services/            # Business logic, called by the routers
+│   ├── routers/             # API route modules
+│   ├── dependencies.py      # get_current_user, require_board_role
+│   └── seed.py              # Demo data, loaded on startup; the only bcrypt hashing left
+├── tests/                   # pytest suite (see docs/backend/testing.md)
 ├── requirements.txt         # Python dependencies
 └── Dockerfile               # Docker configuration
 ```
@@ -76,8 +80,8 @@ pip install -r requirements.txt -r requirements-test.txt
 ### 3. Configure Environment Variables
 
 Settings are read from the **root** `.env` (`env_file="../.env"` in
-`app/config.py`) — there is no `backend/.env`. Set it up as described in the
-[main README](../README.md#1-create-your-env). Outside Docker, the database
+`app/core/config.py`) — there is no `backend/.env`. Set it up as described in the
+[local development guide](../docs/local-development.md#the-env-file). Outside Docker, the database
 host is `localhost`, not `db`, so override `DATABASE_URL` when starting the
 server (step 5).
 
@@ -89,7 +93,7 @@ No manual schema step is needed — the app creates all tables on startup
 (`Base.metadata.create_all`, from the ORM models in `app/database/models/`) and
 loads demo data via `app/seed.py`. Just ensure the database exists and
 `DATABASE_URL` points at it. A visual model lives in
-[`database/schema.dbml`](../database/schema.dbml); the authorization design is
+[`docs/backend/schema.dbml`](../docs/backend/schema.dbml); the authorization design is
 in [`docs/specs/authorization-data-model.md`](../docs/specs/authorization-data-model.md).
 
 > Schema changes: since there are no migrations during the MVP, apply them by
@@ -125,7 +129,7 @@ pytest -k authorization       # tests whose name matches a keyword
 pytest -x                     # stop at the first failure
 ```
 
-See [docs/testing.md](./docs/testing.md) for what each file covers, how the
+See [docs/backend/testing.md](../docs/backend/testing.md) for what each file covers, how the
 auth override works, and how to call the running API by hand with a real token.
 
 ---
@@ -139,8 +143,9 @@ FastAPI automatically generates interactive API documentation:
 
 ### Key Endpoints
 
-#### Authentication
-* `GET /api/auth/me` - The signed-in user's TaskFlow record
+#### Users
+* `GET /api/users/me` - The signed-in user's TaskFlow record
+* `GET /api/users/search?q=` - Find users to add to a board
 
 Sign-up and sign-in are handled by Clerk in the frontend, not by this API.
 
@@ -163,7 +168,7 @@ Authentication is delegated to [Clerk](https://clerk.com). Clerk verifies the
 session token; `user_identities` maps the Clerk account (`provider='clerk'`) to
 the local `users` row that boards and tickets reference.
 
-For a full explanation of the auth flow see [docs/auth.md](./docs/auth.md).
+For a full explanation of the auth flow see [docs/backend/auth.md](../docs/backend/auth.md).
 
 ### Getting a Token
 
@@ -228,7 +233,7 @@ CLERK_SECRET_KEY=sk_test_...
 ### Security Checklist
 
 - [ ] Claim the Clerk app (`npx clerk@latest auth login`) and switch to production keys (`npx clerk@latest deploy`)
-- [ ] Add the production origin to `clerk_authorized_parties` in `app/config.py`
+- [ ] Add the production origin to `clerk_authorized_parties` in `app/core/config.py`
 - [ ] Update `allow_origins` in `main.py` to your production frontend domain
 - [ ] Use environment variables for all secrets
 - [ ] Enable HTTPS

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database import BoardColumn, Ticket, User
 from app.schemas import ColumnCreate, ColumnUpdate
-from app.exceptions import NotFoundError, ValidationError
+from app.core.exceptions import NotFoundError, ValidationError
 
 logger = logging.getLogger(__name__)
 

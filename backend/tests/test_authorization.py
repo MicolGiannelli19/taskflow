@@ -11,13 +11,13 @@ Three rules are asserted here, because all three are easy to break silently:
    unrecognised stored role fails closed.
 
 Authentication is stubbed (see `conftest.py`); what runs for real is every
-authorization decision in `app/dependencies.py` and `app/authorization.py`.
+authorization decision in `app/dependencies.py` and `app/core/authorization.py`.
 """
 import uuid
 
 import pytest
 
-from app.authorization import Role, role_satisfies
+from app.core.authorization import Role, role_satisfies
 
 
 # ─── Rule 1: a non-member is told nothing ────────────────────────────────────
@@ -215,7 +215,7 @@ def test_comments_can_only_be_edited_by_their_author(
 def test_admins_may_delete_anyones_comment_but_members_may_not(
     as_user, board, ticket, member, admin, viewer, db_session
 ):
-    from app.authorization import Role as R
+    from app.core.authorization import Role as R
     from app.services import MembershipService
 
     # A second plain member, to prove "delete" is not "any member's business".

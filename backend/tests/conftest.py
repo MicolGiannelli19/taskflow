@@ -26,7 +26,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.authorization import Role
+from app.core.authorization import Role
 from app.database import Base, BoardColumn, Ticket, User, UserIdentity, get_db
 from app.dependencies import get_current_user
 from app.main import app

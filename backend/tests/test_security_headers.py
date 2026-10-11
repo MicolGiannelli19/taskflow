@@ -5,11 +5,11 @@ These assert the criteria from §5.5 that can be checked without a browser: no
 criteria that need a real browser — that sign-in still works under the policy,
 and that an inline `<script>` pasted into a ticket description does not run —
 belong to the *page* policy in `frontend/csp.ts`, and are listed as manual
-steps in `backend/docs/auth.md`.
+steps in `docs/backend/auth.md`.
 """
 import pytest
 
-from app.security_headers import API_CSP, DOCS_CSP, policy_for
+from app.core.security_headers import API_CSP, DOCS_CSP, policy_for
 
 
 def _directives(policy: str) -> dict[str, str]:
@@ -43,7 +43,7 @@ def test_error_responses_carry_them_too(unauthenticated):
 
 
 def test_authenticated_responses_carry_them_too(as_user, owner):
-    response = as_user(owner).get("/api/auth/me")
+    response = as_user(owner).get("/api/users/me")
 
     assert response.headers["content-security-policy"] == API_CSP
 

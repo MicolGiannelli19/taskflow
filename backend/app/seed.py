@@ -24,18 +24,22 @@ either way; only the pre-set passwords depend on the push.
 import logging
 from datetime import datetime
 
+from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from app.database import (
     SessionLocal, User, UserIdentity, Board, BoardMember, BoardColumn,
     Ticket, Comment,
 )
-from app.auth_utils import get_password_hash
-from app.clerk import clerk_is_configured, get_clerk
-from app.config import settings
+from app.core.clerk import clerk_is_configured, get_clerk
+from app.core.config import settings
 from app.services.identity_service import CLERK_PROVIDER
 
 logger = logging.getLogger(__name__)
+
+# The only password hashing left in the app. Clerk verifies passwords at
+# sign-in; this digest exists solely to hand to Clerk's user import.
+_bcrypt = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def _push_to_clerk(users: list[User]) -> dict[str, str]:
     """Create the seed users in Clerk. Returns {email: clerk_user_id}.
@@ -57,7 +61,7 @@ def _push_to_clerk(users: list[User]) -> dict[str, str]:
         )
         return {}
 
-    password_digest = get_password_hash(settings.seed_password)
+    password_digest = _bcrypt.hash(settings.seed_password)
 
     clerk = get_clerk()
     ids: dict[str, str] = {}
