@@ -7,6 +7,9 @@
 //
 // Authorization design: docs/specs/authorization-data-model.md
 //
+// Delete rules aren't shown below. Every foreign key is ON DELETE CASCADE
+// except tickets.assignee_id, which is ON DELETE SET NULL; see schema.md.
+//
 // Timestamps are `timestamp` (no time zone): the models use TIMESTAMP and
 // store naive UTC from datetime.utcnow.
 
@@ -51,7 +54,7 @@ Table board_members {
   created_at timestamp
 
   indexes {
-    (board_id, user_id) [unique, name: 'uq_board_members_user_board']
+    (board_id, user_id) [unique]
     // Partial unique index (not expressible in DBML): UNIQUE (board_id)
     // WHERE role = 'owner' — enforces at most one owner per board.
     board_id [name: 'one_owner_per_board', note: 'partial unique WHERE role=owner']
@@ -74,7 +77,7 @@ Table tickets {
   title varchar(500) [not null]
   description text
   position integer [not null]
-  priority varchar(50) [default: 'medium', note: "'low', 'medium', 'high'"]
+  priority varchar(50) [default: 'medium', note: "'low' | 'medium' | 'high' by convention; not enforced"]
   assignee_id uuid [ref: > users.id]
   creator_id uuid [not null, ref: > users.id]
   due_date timestamp
