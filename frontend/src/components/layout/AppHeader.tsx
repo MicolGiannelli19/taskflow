@@ -1,6 +1,13 @@
 import { UserButton } from "@clerk/react";
 import { Link, useParams } from "react-router-dom";
+import { Search } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { ShortcutKbd } from "@/components/shortcuts/Kbd";
+import ShortcutTooltip from "@/components/shortcuts/ShortcutTooltip";
+import { usePalette } from "@/hooks/useShortcut";
+import { ariaKeyShortcuts } from "@/lib/shortcuts/format";
+import { PLATFORM } from "@/lib/shortcuts/keyboard";
+import { SHORTCUT_BY_ID } from "@/lib/shortcuts/registry";
 import { useBoards } from "@/hooks/useBoards";
 import { useTicketDetail } from "@/hooks/useTicketDetail";
 import { paths } from "@/routes";
@@ -14,6 +21,7 @@ import styles from "./AppHeader.module.css";
 export default function AppHeader() {
   const { boardId, ticketId } = useParams();
   const { data: boards } = useBoards();
+  const palette = usePalette();
 
   const boardName = boards?.find((b) => String(b.id) === String(boardId))?.name;
 
@@ -27,7 +35,11 @@ export default function AppHeader() {
 
   return (
     <header className={styles.header}>
-      <SidebarTrigger />
+      <ShortcutTooltip id="sidebar.toggle" label="Toggle sidebar">
+        <SidebarTrigger
+          aria-keyshortcuts={ariaKeyShortcuts(SHORTCUT_BY_ID["sidebar.toggle"].keys, PLATFORM)}
+        />
+      </ShortcutTooltip>
       <Link className={styles.brand} to={paths.home}>
         Task Flow
       </Link>
@@ -49,6 +61,18 @@ export default function AppHeader() {
       )}
 
       <div className={styles.actions}>
+        {/* The palette's visible door: for the mouse, for touch screens, and
+            for anyone who hasn't learned ⌘K yet. */}
+        <button
+          type="button"
+          className={styles.search}
+          onClick={() => palette.setOpen(true)}
+          aria-keyshortcuts={ariaKeyShortcuts(SHORTCUT_BY_ID["palette.open"].keys, PLATFORM)}
+        >
+          <Search aria-hidden="true" />
+          <span className={styles.searchLabel}>Search</span>
+          <ShortcutKbd id="palette.open" />
+        </button>
         {/* Replaces the old Log out button: account menu, profile link and
             sign-out, all owned by Clerk. */}
         <UserButton userProfileUrl={paths.profile} />

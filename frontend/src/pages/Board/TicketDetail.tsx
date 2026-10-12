@@ -16,6 +16,8 @@ interface TicketDetailProps {
   ticketId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Where focus goes on close; the board hands it back to the card. */
+  onCloseAutoFocus?: (e: Event) => void;
 }
 
 export default function TicketDetail({
@@ -23,6 +25,7 @@ export default function TicketDetail({
   ticketId,
   open,
   onOpenChange,
+  onCloseAutoFocus,
 }: TicketDetailProps) {
   const editor = useTicketEditor(boardId, ticketId, open);
   const { isSaving } = editor;
@@ -36,7 +39,11 @@ export default function TicketDetail({
         onOpenChange(next);
       }}
     >
-      <DialogContent className={styles.content} showClose={false}>
+      <DialogContent
+        className={styles.content}
+        showClose={false}
+        onCloseAutoFocus={onCloseAutoFocus}
+      >
         <TicketDetailContent
           editor={editor}
           boardId={boardId}

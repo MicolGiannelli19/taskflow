@@ -7,7 +7,7 @@ export function useCreateTicket(boardId: string) {
 
   return useMutation({
     mutationFn: (data: TicketFormData) =>
-      instance.post(`/boards/${boardId}/tickets`, data),
+      instance.post<{ id: string }>(`/boards/${boardId}/tickets`, data),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["board", boardId] }),
     onError: (err) => console.error("failed to create ticket:", err),

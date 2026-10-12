@@ -6,17 +6,16 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { paths } from "../../routes";
-
-interface BoardOutletContext {
-  handleNewTicket: (formData: TicketFormData) => void;
-}
+import type { BoardOutletContext } from "./Board";
+import { focusBoardCursor } from "./boardFocus";
 
 export default function NewTicketForm() {
-  const { handleNewTicket: handleSubmit } = useOutletContext<BoardOutletContext>();
+  const { handleNewTicket: handleSubmit, columnName } = useOutletContext<BoardOutletContext>();
   const navigate = useNavigate();
   const { boardId } = useParams();
   const [formData, setFormData] = useState<TicketFormData>({
@@ -40,9 +39,16 @@ export default function NewTicketForm() {
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) close(); }}>
-      <DialogContent>
+      <DialogContent
+        // Back to the board's cursor; a created ticket then takes it over.
+        onCloseAutoFocus={(e) => {
+          e.preventDefault();
+          focusBoardCursor();
+        }}
+      >
         <DialogHeader>
           <DialogTitle>New Ticket</DialogTitle>
+          {columnName && <DialogDescription>Adds to {columnName}.</DialogDescription>}
         </DialogHeader>
 
         <form

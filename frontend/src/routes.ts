@@ -30,7 +30,9 @@ export const paths = {
   newBoard: "/new-board",
   profile: "/profile",
   board: (boardId: string) => `/board/${boardId}`,
-  newTicket: (boardId: string) => `/board/${boardId}/new-ticket`,
+  /** `columnId` pre-selects the column the ticket is created in. */
+  newTicket: (boardId: string, columnId?: string) =>
+    `/board/${boardId}/new-ticket${columnId ? `?column=${encodeURIComponent(columnId)}` : ""}`,
   ticket: (boardId: string, ticketId: string) =>
     `/board/${boardId}/ticket/${ticketId}`,
   boardHistory: (boardId: string) => `/board/${boardId}/history`,

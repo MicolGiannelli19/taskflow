@@ -15,6 +15,7 @@ import UserAvatar from "@/components/UserAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { paths } from "@/routes";
 import BoardSwitcher from "./BoardSwitcher";
+import { ShortcutKbd } from "@/components/shortcuts/Kbd";
 
 export default function AppSidebar() {
   const { boardId } = useParams();
@@ -42,6 +43,10 @@ export default function AppSidebar() {
                     <Link to={paths.newTicket(boardId)}>
                       <Plus />
                       <span>Add New Ticket</span>
+                      <ShortcutKbd
+                        id="ticket.create"
+                        className="ml-auto group-data-[collapsible=icon]:hidden"
+                      />
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

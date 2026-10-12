@@ -31,7 +31,10 @@ yarn install
 yarn dev         # dev server
 yarn build       # production build (runs tsc first)
 yarn lint        # ESLint
+yarn test        # node --test on src/**/*.test.ts (no test framework; Node ≥ 22.18)
 ```
+
+Keyboard shortcuts are declared once in `src/lib/shortcuts/registry.ts`; `yarn test` fails if one collides with a browser, OS or screen-reader combo listed in `reserved.ts`. Plan: `docs/specs/keyboard-shortcuts.md`.
 
 ## Backend (FastAPI + Python)
 

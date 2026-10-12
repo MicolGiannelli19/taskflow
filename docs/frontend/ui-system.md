@@ -28,6 +28,7 @@ shadcn/ui was added because it provides accessible, composable primitives (butto
 | `label` | `src/components/ui/label.tsx` |
 | `avatar` | `src/components/ui/avatar.tsx` |
 | `separator` | `src/components/ui/separator.tsx` |
+| `command` | `src/components/ui/command.tsx` (command palette, built on `cmdk`) |
 
 To add more components:
 ```bash
@@ -42,6 +43,10 @@ npx shadcn@latest add <component-name>
 4. Ran `npx shadcn@latest add <components>` to scaffold each component.
 
 > **Do not edit files inside `src/components/ui/`** — they are intended to be consumed as-is. Override their appearance through CSS variables (see below).
+>
+> Known exceptions, kept deliberately small:
+> - `sidebar.tsx`: shadcn's built-in ⌘B listener is removed, because it fired inside text fields. The shortcut is registered through `src/lib/shortcuts/registry.ts` instead.
+> - `command.tsx` was written by hand from shadcn's new-york template (not via the CLI, which would also have rewritten `package-lock.json`), with resets for the global input styles.
 
 ---
 

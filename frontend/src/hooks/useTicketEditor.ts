@@ -6,15 +6,12 @@ import { useCreateComment } from "./useCreateComment";
 import { useUpdateComment } from "./useUpdateComment";
 import { useDeleteComment } from "./useDeleteComment";
 import { useAuth } from "./useAuth";
+import { useBoardPermissions } from "./useBoardPermissions";
 import type { TicketDetailed } from "../types";
 import { toDateInput, fromDateInput } from "../lib/date";
 
 export type Priority = "low" | "medium" | "high";
 export const PRIORITIES: Priority[] = ["low", "medium", "high"];
-
-const EDIT_ROLES = ["owner", "admin", "member"];
-// Deleting someone else's comment is moderation, not authorship.
-const MODERATE_ROLES = ["owner", "admin"];
 
 export interface FormState {
   title: string;
@@ -110,9 +107,7 @@ export function useTicketEditor(
     }
   }, [active]);
 
-  const myRole = members?.find((m) => m.user_id === user?.id)?.role;
-  const canEdit = !!myRole && EDIT_ROLES.includes(myRole);
-  const canModerate = !!myRole && MODERATE_ROLES.includes(myRole);
+  const { canEdit, canModerate } = useBoardPermissions(boardId, active);
 
   function startEdit() {
     if (!ticket) return;

@@ -2,6 +2,7 @@ import Editor from "react-simple-code-editor";
 import Prism from "prismjs";
 import "prismjs/components/prism-markdown";
 import styles from "./MarkdownEditor.module.css";
+import { matchShortcut } from "@/lib/shortcuts/keyboard";
 
 // CommonMark (what react-markdown renders) only treats an ATX heading as a
 // heading when the '#' is followed by a space at the start of a line — "# Title".
@@ -24,6 +25,8 @@ interface MarkdownEditorProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  /** ⌘Enter / Ctrl+Enter: save or post without reaching for the button. */
+  onSubmit?: () => void;
 }
 
 // A textarea with live markdown syntax highlighting: Prism tokenises the raw
@@ -34,6 +37,7 @@ export default function MarkdownEditor({
   value,
   onChange,
   placeholder,
+  onSubmit,
 }: MarkdownEditorProps) {
   return (
     <div className={styles.editor}>
@@ -44,6 +48,15 @@ export default function MarkdownEditor({
           Prism.highlight(code, Prism.languages.markdown, "markdown")
         }
         placeholder={placeholder}
+        // Runs before the editor's own Enter handling; preventDefault stops it
+        // inserting a newline.
+        onKeyDown={(e) => {
+          if (onSubmit && matchShortcut(e, "ticket.save")) {
+            e.preventDefault();
+            e.stopPropagation();
+            onSubmit();
+          }
+        }}
         padding={12}
         textareaClassName={styles.textarea}
         preClassName={styles.pre}

@@ -10,6 +10,7 @@ lives.
 - [Role-based board permissions](#role-based-board-permissions)
 - [Automatic database setup and seeding](#automatic-database-setup-and-seeding)
 - [Drag and drop](#drag-and-drop)
+- [Keyboard shortcuts and command palette](#keyboard-shortcuts-and-command-palette)
 - [Server state with React Query and optimistic updates](#server-state-with-react-query-and-optimistic-updates)
 - [Markdown editor with live highlighting](#markdown-editor-with-live-highlighting)
 - [Ticket permalinks](#ticket-permalinks)
@@ -97,13 +98,47 @@ Tickets can be dragged from one column to another. This uses Atlassian's
 [Pragmatic drag and drop](https://atlassian.design/components/pragmatic-drag-and-drop/)
 library: each ticket card is registered as `draggable`, and each column as a
 `dropTargetForElements` that highlights while a ticket is over it. Dropping a
-ticket on a new column saves the move through `useMoveTicket` (see the next
-section). Reordering tickets within a column and reordering columns are not
+ticket on a new column hands the move to the board grid, which saves it
+through `useMoveTicket` (see below) and announces it to screen readers, the
+same path a keyboard move takes. Reordering tickets within a column and reordering columns are not
 built yet.
 
 Code: `frontend/src/pages/Board/componets/Ticket.tsx`,
 `frontend/src/pages/Board/componets/Column.tsx`,
+`frontend/src/pages/Board/componets/BoardGrid.tsx`,
 `frontend/src/hooks/useMoveTicket.ts`.
+
+## Keyboard shortcuts and command palette
+
+Every core board action works without the mouse, using ⌘/Ctrl combos for
+actions and plain arrow keys for moving around. The full key map and the
+reasoning behind it are in [specs/keyboard-shortcuts.md](./specs/keyboard-shortcuts.md).
+
+- **One registry.** Every shortcut is declared once in
+  `frontend/src/lib/shortcuts/registry.ts`. Listeners match key presses through
+  `matchShortcut` (`keyboard.ts`), which ignores keys pressed while typing and
+  during input-method composition, and falls back to the physical key on
+  non-Latin layouts. Key hints (`<Kbd>`, tooltips, palette rows) render from
+  the same entries, showing `⌘` on a Mac and `Ctrl` elsewhere.
+- **No clashes with the browser.** `reserved.ts` lists about 200 combos owned by
+  Chrome, Safari, Firefox, macOS and VoiceOver, with their sources. `yarn test`
+  fails if a shortcut lands on one without a written reason, takes one the
+  browser never gives up (⌘T, ⌘W), or collides with another TaskFlow shortcut.
+- **Board navigation.** Exactly one card is in the tab order (a "roving
+  tabindex"); arrow keys, Home and End move it. Focus follows a ticket when it
+  moves column, goes to a neighbour after a delete, returns to the card when a
+  dialog closes, and comes back to the last-focused ticket when you return to a
+  board (kept in `sessionStorage`). Every move, delete and edit is announced
+  through one polite live region, and confirmed briefly on the card itself.
+- **Command palette.** ⌘K (or the "Search" button in the top bar) opens a
+  palette built on shadcn's `command` component (`cmdk`). With a card focused,
+  that ticket's actions come first: move, priority, assignee, due date, copy
+  link, delete. Then boards, tickets on the current board, and app actions.
+  Viewers never see actions that change data.
+
+Code: `frontend/src/lib/shortcuts/`, `frontend/src/components/shortcuts/`,
+`frontend/src/hooks/useShortcut.ts`,
+`frontend/src/pages/Board/componets/BoardGrid.tsx`.
 
 ## Server state with React Query and optimistic updates
 
@@ -113,8 +148,8 @@ with one hook per operation in `frontend/src/hooks/` (`useBoards`,
 the affected cached data as stale so it is fetched again. This replaced an
 earlier approach that refetched everything when a manual counter changed.
 
-Moving a ticket, deleting a board and removing a member use **optimistic
-updates**: the screen changes immediately, before the server replies. If the
+Moving a ticket, deleting a ticket or a board, editing a ticket from the
+command palette and removing a member use **optimistic updates**: the screen changes immediately, before the server replies. If the
 request fails, the hook puts the previous data back.
 
 Code: `frontend/src/hooks/`, `frontend/src/lib/queryClient.ts`.

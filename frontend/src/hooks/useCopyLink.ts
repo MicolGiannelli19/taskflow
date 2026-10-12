@@ -54,6 +54,7 @@ export function useCopyLink(resetMs = 1900) {
       setBurst((b) => b + 1);
       window.clearTimeout(timer.current);
       timer.current = window.setTimeout(() => setStatus("idle"), resetMs);
+      return ok;
     },
     [resetMs]
   );
