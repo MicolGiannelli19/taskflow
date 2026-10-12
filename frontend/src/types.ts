@@ -89,10 +89,17 @@ export interface TicketDetailed {
   updated_at: string;
 }
 
-export type TicketFormData = Omit<
-  TicketType,
-  "id" | "board_id" | "creator_id" | "assignee_id" | "created_at" | "updated_at" | "assignee_name" | "assignee_avatar"
->;
+// Body of POST /boards/:boardId/tickets. Only column_id and title are required;
+// leave the optional fields out (not "") so the backend applies its defaults.
+export interface TicketFormData {
+  column_id: string;
+  title: string;
+  description?: string;
+  priority?: "low" | "medium" | "high";
+  /** Omitted → the creator; null → unassigned. */
+  assignee_id?: string | null;
+  due_date?: string;
+}
 
 export type LogInFromData = {
   email: string;

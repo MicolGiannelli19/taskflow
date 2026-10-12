@@ -24,7 +24,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import ShortcutTooltip from "@/components/shortcuts/ShortcutTooltip";
+import { ShortcutKbd } from "@/components/shortcuts/Kbd";
 import { PRIORITIES, type Priority, type TicketEditor } from "@/hooks/useTicketEditor";
+import { matchShortcut } from "@/lib/shortcuts/keyboard";
 import type { CommentType } from "@/types";
 import styles from "./TicketDetail.module.css";
 import { paths } from "@/routes";
@@ -37,6 +40,10 @@ interface TicketDetailContentProps {
   variant: "modal" | "page";
   /** Shell-owned header controls (open-full-page, close…), right of Edit. */
   headerActions?: ReactNode;
+  /** The ticket's column on the board. */
+  status?: string;
+  /** Show ⇧⌘← ⇧⌘→ beside the status: the shell handles those keys. */
+  showMoveHint?: boolean;
 }
 
 const NO_ASSIGNEE = "__none__"; // Radix Select forbids an empty-string value.
@@ -76,6 +83,8 @@ export default function TicketDetailContent({
   ticketId,
   variant,
   headerActions,
+  status,
+  showMoveHint = false,
 }: TicketDetailContentProps) {
   const {
     ticket,
@@ -114,6 +123,17 @@ export default function TicketDetailContent({
 
   const isModal = variant === "modal";
 
+  // ⌘Enter from any editor or field: the same as pressing its Save button.
+  const saveTicket = () => {
+    if (titleValid && !isSaving) save();
+  };
+  const saveCommentEdit = () => {
+    if (commentEditDraft.trim() && !isSavingComment) saveComment();
+  };
+  const postNewComment = () => {
+    if (commentDraft.trim() && !isPostingComment) postComment();
+  };
+
   if (isLoading || isError || !ticket) {
     return (
       <>
@@ -133,6 +153,12 @@ export default function TicketDetailContent({
           id="ticket-title"
           value={form?.title ?? ""}
           onChange={(e) => setForm((f) => f && { ...f, title: e.target.value })}
+          onKeyDown={(e) => {
+            if (matchShortcut(e, "ticket.save")) {
+              e.preventDefault();
+              saveTicket();
+            }
+          }}
           placeholder="Ticket title"
         />
       </div>
@@ -183,7 +209,17 @@ export default function TicketDetailContent({
       )}
 
       {/* Scrollable body: header (above) and edit footer (below) stay pinned. */}
-      <div className={cn(styles.body, !isModal && styles.bodyPage)}>
+      <div
+        className={cn(styles.body, !isModal && styles.bodyPage)}
+        // Catches ⌘Enter from the edit form's selects and date picker; the
+        // markdown editors handle their own.
+        onKeyDown={(e) => {
+          if (mode === "edit" && matchShortcut(e, "ticket.save")) {
+            e.preventDefault();
+            saveTicket();
+          }
+        }}
+      >
         {/* ─── Description: always shown, markdown, editable ───────────── */}
         <section className={styles.section}>
           <h3 className={styles.sectionHeading}>Description</h3>
@@ -191,6 +227,7 @@ export default function TicketDetailContent({
             <MarkdownEditor
               value={form?.description ?? ""}
               onChange={(v) => setForm((f) => f && { ...f, description: v })}
+              onSubmit={saveTicket}
               placeholder="Write a description… Markdown supported."
             />
           ) : ticket.description ? (
@@ -213,6 +250,20 @@ export default function TicketDetailContent({
 
         {/* ─── Meta ────────────────────────────────────────────────────── */}
         <div className={styles.meta}>
+          {status && (
+            <div className={styles.metaRow}>
+              <span className={styles.metaLabel}>Status</span>
+              <span>{status}</span>
+              {showMoveHint && canEdit && (
+                <span className={styles.moveHint}>
+                  <ShortcutKbd id="ticket.moveLeft" />
+                  <ShortcutKbd id="ticket.moveRight" />
+                  <span>to move</span>
+                </span>
+              )}
+            </div>
+          )}
+
           <div className={styles.metaRow}>
             <span className={styles.metaLabel}>Priority</span>
             {mode === "edit" ? (
@@ -376,6 +427,7 @@ export default function TicketDetailContent({
                         <MarkdownEditor
                           value={commentEditDraft}
                           onChange={setCommentEditDraft}
+                          onSubmit={saveCommentEdit}
                           placeholder="Edit your comment…"
                         />
                         <div className={styles.commentEditActions}>
@@ -387,15 +439,17 @@ export default function TicketDetailContent({
                           >
                             Cancel
                           </Button>
-                          <Button
-                            size="sm"
-                            onClick={saveComment}
-                            disabled={
-                              !commentEditDraft.trim() || isSavingComment
-                            }
-                          >
-                            {isSavingComment ? "Saving…" : "Save"}
-                          </Button>
+                          <ShortcutTooltip id="ticket.save" label="Save" side="top">
+                            <Button
+                              size="sm"
+                              onClick={saveComment}
+                              disabled={
+                                !commentEditDraft.trim() || isSavingComment
+                              }
+                            >
+                              {isSavingComment ? "Saving…" : "Save"}
+                            </Button>
+                          </ShortcutTooltip>
                         </div>
                       </div>
                     ) : (
@@ -414,19 +468,22 @@ export default function TicketDetailContent({
                 <MarkdownEditor
                   value={commentDraft}
                   onChange={setCommentDraft}
+                  onSubmit={postNewComment}
                   placeholder="Add a comment… Markdown supported."
                 />
                 <div className={styles.composerActions}>
                   {commentError && (
                     <span className={styles.error}>{commentError}</span>
                   )}
-                  <Button
-                    size="sm"
-                    onClick={postComment}
-                    disabled={!commentDraft.trim() || isPostingComment}
-                  >
-                    {isPostingComment ? "Posting…" : "Comment"}
-                  </Button>
+                  <ShortcutTooltip id="ticket.save" label="Comment" side="top">
+                    <Button
+                      size="sm"
+                      onClick={postComment}
+                      disabled={!commentDraft.trim() || isPostingComment}
+                    >
+                      {isPostingComment ? "Posting…" : "Comment"}
+                    </Button>
+                  </ShortcutTooltip>
                 </div>
               </div>
             )}
@@ -484,9 +541,11 @@ export default function TicketDetailContent({
             >
               Cancel
             </Button>
-            <Button size="sm" onClick={save} disabled={!titleValid || isSaving}>
-              {isSaving ? "Saving…" : "Save"}
-            </Button>
+            <ShortcutTooltip id="ticket.save" label="Save" side="top">
+              <Button size="sm" onClick={save} disabled={!titleValid || isSaving}>
+                {isSaving ? "Saving…" : "Save"}
+              </Button>
+            </ShortcutTooltip>
           </div>
         </div>
       )}

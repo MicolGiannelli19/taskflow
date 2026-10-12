@@ -58,3 +58,43 @@
   background: var(--color-border);
   border-radius: 3px;
 }
+
+/* ─── New ticket in this column ─────────────────────────────────────────────── */
+/* Quiet until reached for: muted text, no fill, a frame only on hover. It is
+   also the keyboard cursor's landing spot in an empty column. */
+.add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 2px;
+  padding: 7px 10px;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--card-radius);
+  cursor: pointer;
+  transition: color 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.add svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.add:hover:not(:disabled) {
+  color: var(--color-text);
+  background-color: color-mix(in srgb, var(--color-card) 70%, transparent);
+  border-color: var(--color-border);
+}
+
+.add:focus-visible {
+  color: var(--color-text);
+  background-color: var(--color-card);
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}

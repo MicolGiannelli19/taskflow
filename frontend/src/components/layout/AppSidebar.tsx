@@ -1,5 +1,5 @@
-import { Link, useParams } from "react-router-dom";
-import { History, Home, Plus, Settings } from "lucide-react";
+import { Link, useMatch, useParams } from "react-router-dom";
+import { History, Home, Plus, Settings, SquareKanban } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -13,57 +13,85 @@ import {
 } from "@/components/ui/sidebar";
 import UserAvatar from "@/components/UserAvatar";
 import { useAuth } from "@/hooks/useAuth";
-import { paths } from "@/routes";
-import BoardSwitcher from "./BoardSwitcher";
+import { paths, routePatterns } from "@/routes";
+import { ShortcutKbd } from "@/components/shortcuts/Kbd";
 
 export default function AppSidebar() {
   const { boardId } = useParams();
   const { user } = useAuth();
+  const onSettings = useMatch(routePatterns.boardSettings) !== null;
+  const onHistory = useMatch(routePatterns.boardHistory) !== null;
+  // Tickets and the new-ticket dialog belong to the board view.
+  const onBoard = !onSettings && !onHistory;
 
   return (
     <Sidebar collapsible="icon">
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Board</SidebarGroupLabel>
-          <SidebarGroupContent className="px-2 group-data-[collapsible=icon]:hidden">
-            <BoardSwitcher />
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Board actions only make sense once a board is in the URL. */}
+        {/* Switching boards lives in the header's search (⌘K), not here.
+            Views and actions only make sense once a board is in the URL. */}
         {boardId && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Actions</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Add New Ticket">
-                    <Link to={paths.newTicket(boardId)}>
-                      <Plus />
-                      <span>Add New Ticket</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Board Settings">
-                    <Link to={paths.boardSettings(boardId)}>
-                      <Settings />
-                      <span>Board Settings</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Board History">
-                    <Link to={paths.boardHistory(boardId)}>
-                      <History />
-                      <span>Board History</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          <>
+            <SidebarGroup>
+              <SidebarGroupLabel>Views</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={onBoard} tooltip="Board">
+                      <Link to={paths.board(boardId)}>
+                        <SquareKanban />
+                        <span>Board</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={onSettings}
+                      tooltip="Board Settings"
+                    >
+                      <Link to={paths.boardSettings(boardId)}>
+                        <Settings />
+                        <span>Board Settings</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={onHistory}
+                      tooltip="Board History"
+                    >
+                      <Link to={paths.boardHistory(boardId)}>
+                        <History />
+                        <span>Board History</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel>Actions</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild tooltip="Add New Ticket">
+                      <Link to={paths.newTicket(boardId)}>
+                        <Plus />
+                        <span>Add New Ticket</span>
+                        <ShortcutKbd
+                          id="ticket.create"
+                          className="ml-auto group-data-[collapsible=icon]:hidden"
+                        />
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
         )}
       </SidebarContent>
 

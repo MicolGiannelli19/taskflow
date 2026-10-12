@@ -94,6 +94,10 @@ class TicketService:
 
         max_position = self.db.query(Ticket).filter(Ticket.column_id == ticket.column_id).count()
 
+        # Leaving assignee_id out assigns the creator; sending null leaves it unassigned.
+        assignee_id = (ticket.assignee_id if "assignee_id" in ticket.model_fields_set
+                       else creator.id)
+
         new_ticket = Ticket(
             board_id=board_id,
             column_id=ticket.column_id,
@@ -101,7 +105,7 @@ class TicketService:
             description=ticket.description,
             position=max_position,
             priority=ticket.priority,
-            assignee_id=ticket.assignee_id,
+            assignee_id=assignee_id,
             creator_id=creator.id,
             due_date=ticket.due_date
         )

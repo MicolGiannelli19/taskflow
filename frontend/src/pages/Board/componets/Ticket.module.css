@@ -25,6 +25,14 @@
   opacity: 0.4;
 }
 
+/* The keyboard cursor. Inset, because the column's scroll area would clip a
+   ring drawn outside the card. */
+.ticket:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -1px;
+  border-color: var(--color-primary);
+}
+
 .ticket:hover {
   box-shadow: var(--shadow-sm);
   transform: translateY(-1px);
@@ -113,6 +121,7 @@
 }
 
 .ticket:hover header button,
+.ticket:focus-within header button,
 .ticket header button.active {
   opacity: 1;
 }
@@ -126,4 +135,37 @@
 .ticket header button:disabled {
   cursor: not-allowed;
   opacity: 0.3;
+}
+
+/* ─── Confirmation after a keyboard action ("Link copied") ──────────────────── */
+/* Takes the move button's slot for a moment; the grid also announces it. */
+.notice {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  padding: 4px 7px;
+  border-radius: 4px;
+  color: var(--priority-low-color);
+  background-color: var(--priority-low-bg);
+  animation: notice-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.notice[data-tone="error"] {
+  color: var(--priority-high-color);
+  background-color: var(--priority-high-bg);
+}
+
+@keyframes notice-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notice {
+    animation: none;
+  }
 }

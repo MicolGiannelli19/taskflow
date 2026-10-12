@@ -28,3 +28,15 @@
   background: var(--color-border);
   border-radius: 3px;
 }
+
+/* ─── Delete confirmation ───────────────────────────────────────────────────── */
+.confirm {
+  width: min(92vw, 420px);
+  gap: 14px;
+}
+
+/* A long title wraps instead of widening the dialog. */
+.confirm h2 {
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}

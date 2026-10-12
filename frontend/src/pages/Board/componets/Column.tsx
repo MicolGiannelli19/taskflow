@@ -1,22 +1,54 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Plus } from "lucide-react";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import Ticket from "./Ticket";
 import styles from "./Column.module.css";
-import { useMoveTicket } from "@/hooks/useMoveTicket";
 import type { ColumnType, TicketTypeSmall } from "../../../types";
+import { paths } from "@/routes";
+import type { CardNotice, Cursor } from "./cursor";
 
 interface ColumnProps {
   boardId: string;
-  columnId: string;
-  title: string;
+  column: ColumnType;
   columns: ColumnType[];
   tickets: TicketTypeSmall[];
+  /** The board's keyboard cursor; the matching card or button is tabbable. */
+  cursor: Cursor | null;
+  canEdit: boolean;
+  onOpenTicket: (ticketId: string) => void;
+  onCursorFocus: (cursor: Cursor) => void;
+  onMoveTicket: (ticketId: string, columnId: string) => void;
+  notice: CardNotice | null;
+  /** Id of the board's keyboard instructions, read with each card. */
+  describedBy: string;
 }
 
-export default function Column({ boardId, columnId, title, columns, tickets }: ColumnProps) {
-  const moveTicket = useMoveTicket(boardId);
+export default function Column({
+  boardId,
+  column,
+  columns,
+  tickets,
+  cursor,
+  canEdit,
+  onOpenTicket,
+  onCursorFocus,
+  onMoveTicket,
+  notice,
+  describedBy,
+}: ColumnProps) {
+  const navigate = useNavigate();
   const ref = useRef<HTMLDivElement>(null);
+  const headingId = useId();
   const [isDraggedOver, setIsDraggedOver] = useState(false)
+  const columnId = column.id;
+
+  // The drop handler is registered once per column; read the latest move
+  // function through a ref so it never acts on stale board data.
+  const onMoveRef = useRef(onMoveTicket);
+  useEffect(() => {
+    onMoveRef.current = onMoveTicket;
+  });
 
   useEffect(() => {
     const el = ref.current;
@@ -29,18 +61,26 @@ export default function Column({ boardId, columnId, title, columns, tickets }: C
         const ticketId = source.data.ticketId as string;
         const fromColumnId = source.data.fromColumnId as string;
         const toColumnId = self.data.columnId as string;
-        if (fromColumnId === toColumnId) return;
-        moveTicket.mutate({ ticketId, columnId: toColumnId });
         setIsDraggedOver(false)
+        if (fromColumnId === toColumnId) return;
+        onMoveRef.current(ticketId, toColumnId);
       },
       onDragEnter: () => setIsDraggedOver(true),
       onDragLeave: () => setIsDraggedOver(false),
     });
   }, [columnId]); // (Micol) why is this use effect on change of column id
 
+  const addActive = cursor?.kind === "add" && cursor.columnId === columnId;
+
   return (
-    <div className={`${styles.column} ${isDraggedOver ? styles.over : ""}`} ref={ref}>
-      <h2>{title}</h2>
+    <div
+      className={`${styles.column} ${isDraggedOver ? styles.over : ""}`}
+      ref={ref}
+      data-column-id={columnId}
+      role="group"
+      aria-labelledby={headingId}
+    >
+      <h2 id={headingId}>{column.name}</h2>
       <div className={styles.tickets}>
         {tickets.map((ticket) => (
           <Ticket
@@ -48,9 +88,30 @@ export default function Column({ boardId, columnId, title, columns, tickets }: C
             boardId={boardId}
             columns={columns}
             ticket={ticket}
-            moveTicket={moveTicket.mutate}
+            isActive={cursor?.kind === "ticket" && cursor.id === ticket.id}
+            onOpen={() => onOpenTicket(ticket.id)}
+            onFocusCard={() => onCursorFocus({ kind: "ticket", id: ticket.id })}
+            onMoveTicket={onMoveTicket}
+            notice={notice?.ticketId === ticket.id ? notice : null}
+            describedBy={describedBy}
           />
         ))}
+
+        {canEdit && (
+          <button
+            type="button"
+            className={styles.add}
+            data-roving=""
+            data-add-column={columnId}
+            tabIndex={addActive ? 0 : -1}
+            aria-label={`New ticket in ${column.name}`}
+            onFocus={() => onCursorFocus({ kind: "add", columnId })}
+            onClick={() => navigate(paths.newTicket(boardId, columnId))}
+          >
+            <Plus aria-hidden="true" />
+            New ticket
+          </button>
+        )}
       </div>
     </div>
   );

@@ -313,7 +313,7 @@ export function useBoards() {
 }
 ```
 
-Now any component anywhere in the tree can call `useBoards()` and get cached, deduplicated, refetch-aware data. That's exactly what `BoardSwitcher` does inside the board page, and what `Home` does on the listing page — neither knows the other exists, but they share the same cache entry.
+Now any component anywhere in the tree can call `useBoards()` and get cached, deduplicated, refetch-aware data. That's exactly what `AppHeader` does to show the current board's name, and what `Home` does on the listing page — neither knows the other exists, but they share the same cache entry.
 
 ### 5b. Writes: `useMutation` + `invalidateQueries`
 
