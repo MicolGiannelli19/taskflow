@@ -48,7 +48,13 @@ createRoot(document.getElementById("root")!).render(
     <ClerkProvider
       publishableKey={publishableKey}
       afterSignOutUrl="/login"
-      appearance={{ theme: shadcn, variables: clerkColors }}
+      appearance={{
+        theme: shadcn,
+        variables: clerkColors,
+        // Without these Clerk shows the Dashboard logo and links it to the
+        // Dashboard's Home URL, which isn't this dev server.
+        options: { logoImageUrl: "/logo.png", logoLinkUrl: "/" },
+      }}
     >
       <QueryClientProvider client={queryClient}>
         {/* Hands Clerk's getToken to the axios interceptor, which has no hooks. */}

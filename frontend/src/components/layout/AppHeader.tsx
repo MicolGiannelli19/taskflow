@@ -41,6 +41,8 @@ export default function AppHeader() {
         />
       </ShortcutTooltip>
       <Link className={styles.brand} to={paths.home}>
+        {/* Decorative: the text next to it already names the link. */}
+        <img className={styles.logo} src="/logo.png" alt="" />
         Task Flow
       </Link>
 
