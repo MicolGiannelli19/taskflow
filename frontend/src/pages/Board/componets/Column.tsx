@@ -16,8 +16,7 @@ interface ColumnProps {
   /** The board's keyboard cursor; the matching card or button is tabbable. */
   cursor: Cursor | null;
   canEdit: boolean;
-  openTicketId: string | null;
-  onOpenTicketChange: (ticketId: string | null) => void;
+  onOpenTicket: (ticketId: string) => void;
   onCursorFocus: (cursor: Cursor) => void;
   onMoveTicket: (ticketId: string, columnId: string) => void;
   notice: CardNotice | null;
@@ -32,8 +31,7 @@ export default function Column({
   tickets,
   cursor,
   canEdit,
-  openTicketId,
-  onOpenTicketChange,
+  onOpenTicket,
   onCursorFocus,
   onMoveTicket,
   notice,
@@ -91,8 +89,7 @@ export default function Column({
             columns={columns}
             ticket={ticket}
             isActive={cursor?.kind === "ticket" && cursor.id === ticket.id}
-            detailOpen={openTicketId === ticket.id}
-            onDetailOpenChange={(open) => onOpenTicketChange(open ? ticket.id : null)}
+            onOpen={() => onOpenTicket(ticket.id)}
             onFocusCard={() => onCursorFocus({ kind: "ticket", id: ticket.id })}
             onMoveTicket={onMoveTicket}
             notice={notice?.ticketId === ticket.id ? notice : null}

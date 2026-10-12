@@ -4,7 +4,6 @@ import styles from "./Ticket.module.css";
 import { Button } from "@/components/ui/button";
 import type { ColumnType, TicketTypeSmall } from "../../../types";
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import TicketDetail from "../TicketDetail";
 import UserAvatar from "@/components/UserAvatar";
 import { ShortcutKbd } from "@/components/shortcuts/Kbd";
 import { useBoardMembers } from "@/hooks/useBoardMembers";
@@ -17,8 +16,8 @@ interface TicketProps {
   ticket: TicketTypeSmall;
   /** This card is the board's keyboard cursor: the one in the tab order. */
   isActive: boolean;
-  detailOpen: boolean;
-  onDetailOpenChange: (open: boolean) => void;
+  /** Open the ticket's dialog (the grid owns it). */
+  onOpen: () => void;
   onFocusCard: () => void;
   onMoveTicket: (ticketId: string, columnId: string) => void;
   notice: CardNotice | null;
@@ -30,8 +29,7 @@ export default function Ticket({
   columns,
   ticket,
   isActive,
-  detailOpen,
-  onDetailOpenChange,
+  onOpen,
   onFocusCard,
   onMoveTicket,
   notice,
@@ -93,7 +91,7 @@ export default function Ticket({
         ref={ref}
         data-roving=""
         data-ticket-id={ticket.id}
-        onClick={() => onDetailOpenChange(true)}
+        onClick={onOpen}
         role="button"
         tabIndex={isActive ? 0 : -1}
         aria-describedby={describedBy}
@@ -108,7 +106,7 @@ export default function Ticket({
           if (e.target !== e.currentTarget) return;
           if (matchShortcut(e, "ticket.open")) {
             e.preventDefault();
-            onDetailOpenChange(true);
+            onOpen();
           }
         }}
       >
@@ -190,18 +188,6 @@ export default function Ticket({
 
         </header>
       </div>
-
-      <TicketDetail
-        boardId={boardId}
-        ticketId={ticket.id}
-        open={detailOpen}
-        onOpenChange={onDetailOpenChange}
-        // Back to this card when the dialog closes, not to the top of the page.
-        onCloseAutoFocus={(e) => {
-          e.preventDefault();
-          ref.current?.focus();
-        }}
-      />
     </>
   );
 }

@@ -11,9 +11,12 @@ export interface Conflict {
   reason: string;
 }
 
-/** A card has focus inside the board, so board and card shortcuts are live together. */
+/**
+ * A card has focus inside the board, so board and card shortcuts are live
+ * together; a `ticket` shortcut is live wherever a ticket is (card, dialog, page).
+ */
 function scopesOverlap(a: ShortcutScope, b: ShortcutScope): boolean {
-  if (a === b || a === "global" || b === "global") return true;
+  if (a === b || a === "global" || b === "global" || a === "ticket" || b === "ticket") return true;
   const pair = new Set([a, b]);
   return pair.has("board") && pair.has("ticket-card");
 }

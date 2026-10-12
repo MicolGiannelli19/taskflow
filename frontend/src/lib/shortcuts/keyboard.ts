@@ -53,3 +53,10 @@ export function matchShortcut(e: KeyboardEvent | ReactKeyboardEvent, id: Shortcu
   if (!def.firesInText && isTypingTarget(e.target)) return false;
   return def.keys.some((k) => eventMatches(resolveCombo(k, PLATFORM), e));
 }
+
+/** -1 / 1 when `e` is the move-ticket-left / -right shortcut, else 0. */
+export function moveStep(e: KeyboardEvent | ReactKeyboardEvent): -1 | 0 | 1 {
+  if (matchShortcut(e, "ticket.moveLeft")) return -1;
+  if (matchShortcut(e, "ticket.moveRight")) return 1;
+  return 0;
+}

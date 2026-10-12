@@ -199,6 +199,22 @@
   max-width: 220px;
 }
 
+/* Teaches the move shortcut where the column is shown; quiet beside the value. */
+.moveHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 4px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .moveHint {
+    display: none;
+  }
+}
+
 .priority_low {
   background: var(--priority-low-bg);
   color: var(--priority-low-color);

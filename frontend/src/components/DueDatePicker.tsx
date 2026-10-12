@@ -23,6 +23,9 @@ interface DueDatePickerProps {
   value: string;
   onChange: (value: string) => void;
   className?: string;
+  id?: string;
+  /** The visible label's id: it is read out first, then the picked date. */
+  labelId?: string;
 }
 
 /**
@@ -37,6 +40,8 @@ export default function DueDatePicker({
   value,
   onChange,
   className,
+  id,
+  labelId,
 }: DueDatePickerProps) {
   const [open, setOpen] = React.useState(false);
   const selected = parseDateInput(value);
@@ -70,6 +75,8 @@ export default function DueDatePicker({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          id={id}
+          aria-labelledby={labelId && id ? `${labelId} ${id}` : undefined}
           variant="outline"
           className={cn(
             "justify-start text-left font-normal",

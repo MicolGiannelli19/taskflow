@@ -5,3 +5,44 @@
   gap: 16px;
   margin-top: 4px;
 }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Priority and assignee side by side; stacked on narrow screens. */
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.person {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.invalid {
+  border-color: hsl(var(--destructive));
+}
+
+.invalid:focus-visible {
+  --tw-ring-color: hsl(var(--destructive));
+}
+
+.error {
+  color: hsl(var(--destructive));
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Quieter than the label it follows; still ≥4.5:1 on the dialog surface. */
+.optional {
+  font-weight: 400;
+  color: hsl(var(--muted-foreground));
+}

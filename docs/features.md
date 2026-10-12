@@ -128,7 +128,8 @@ reasoning behind it are in [specs/keyboard-shortcuts.md](./specs/keyboard-shortc
   tabindex"); arrow keys, Home and End move it. Focus follows a ticket when it
   moves column, goes to a neighbour after a delete, returns to the card when a
   dialog closes, and comes back to the last-focused ticket when you return to a
-  board (kept in `sessionStorage`). Every move, delete and edit is announced
+  board (kept in `sessionStorage`). ⇧⌘←/→ also moves a ticket while it is open
+  in its dialog or on its own page. Every move, delete and edit is announced
   through one polite live region, and confirmed briefly on the card itself.
 - **Command palette.** ⌘K (or the "Search" button in the top bar) opens a
   palette built on shadcn's `command` component (`cmdk`). With a card focused,

@@ -61,7 +61,7 @@ Mozilla's help page blocked automated reading. They are marked
 | New ticket | ⌘Enter | Board, in the focused card's column | live |
 | Open ticket | Enter, Space | Focused card | live |
 | Move focus | ↑ ↓ ← →, Home, End | Focused card | live |
-| Move ticket a column | ⇧⌘← / ⇧⌘→ | Focused card | live |
+| Move ticket a column | ⇧⌘← / ⇧⌘→ | Focused card, open ticket dialog, ticket page | live |
 | Copy ticket link | ⌘C (nothing selected) | Focused card | live |
 | Delete ticket | ⌘⌫ / Ctrl+Backspace, then confirm | Focused card | live |
 | Save | ⌘Enter | Ticket detail, including text fields | live |
@@ -209,6 +209,11 @@ lives) plus a line in its list at the top.
   the cursor lands in an empty column, and it creates the ticket in that column.
 - **Card notices.** Keyboard actions confirm visibly on the card for 1.8 s
   ("Link copied", "Saved", "View only") as well as to screen readers.
+- **Moving works on an open ticket too.** Clicking a card opens its dialog, so
+  a shortcut that only worked on a focused card did nothing for people who
+  picked a ticket with the mouse. ⇧⌘←/→ now also moves the ticket in its dialog
+  and on its full page, and both show the ticket's column as "Status". The
+  board renders one shared dialog, so it stays open while its ticket moves.
 - **The palette lists all boards, not "recent" ones.** Nothing records which
   boards were opened recently yet.
 - **Screen readers in browse mode** may read arrow keys instead of sending them

@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useLocation } from "react-router-dom";
 import Column from "./Column";
+import TicketDetail from "../TicketDetail";
 import styles from "./BoardGrid.module.css";
 import type { ColumnType, TicketTypeSmall } from "../../../types";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ import { useMoveTicket } from "@/hooks/useMoveTicket";
 import { useAnnounce, useBoardCommandsSlot } from "@/hooks/useShortcut";
 import { useUpdateBoardTicket } from "@/hooks/useUpdateBoardTicket";
 import type { TicketEditPatch } from "@/hooks/useUpdateTicket";
-import { PLATFORM, matchShortcut } from "@/lib/shortcuts/keyboard";
+import { PLATFORM, matchShortcut, moveStep } from "@/lib/shortcuts/keyboard";
 import { paths } from "@/routes";
 import { readLastTicket, writeLastTicket } from "../boardFocus";
 import type { CardNotice, Cursor } from "./cursor";
@@ -78,7 +79,10 @@ export default function BoardGrid({ boardId, columns, tickets }: BoardGridProps)
   const noticeTimer = useRef<number | undefined>(undefined);
 
   const [cursorState, setCursorState] = useState<Cursor | null>(null);
-  const [openTicketId, setOpenTicketId] = useState<string | null>(null);
+  // One ticket dialog for the whole board. It stays mounted while its ticket
+  // moves column (a per-card dialog would close and reopen) and keeps its
+  // exit animation by holding the last id after `open` goes false.
+  const [detail, setDetail] = useState<{ id: string; open: boolean } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<TicketTypeSmall | null>(null);
   const [notice, setNotice] = useState<CardNotice | null>(null);
 
@@ -187,14 +191,16 @@ export default function BoardGrid({ boardId, columns, tickets }: BoardGridProps)
 
   // ─── Actions (keyboard, drag and drop, move menu and palette) ─────────────
 
-  function move(ticketId: string, toColumnId: string) {
+  /** `focus: false` when the ticket is open in its dialog, which keeps focus. */
+  function move(ticketId: string, toColumnId: string, { focus = true } = {}) {
     const ticket = tickets.find((t) => t.id === ticketId);
     const from = columns.find((c) => c.id === ticket?.column_id);
     const to = columns.find((c) => c.id === toColumnId);
     if (!ticket || !from || !to || from.id === to.id) return;
     if (!canEdit) return viewOnly(ticketId);
 
-    focusCursor({ kind: "ticket", id: ticketId }, to.id);
+    if (focus) focusCursor({ kind: "ticket", id: ticketId }, to.id);
+    else setCursorState({ kind: "ticket", id: ticketId });
     announce(`Moved “${ticket.title}” to ${to.name}.`);
     moveTicket.mutate(
       { ticketId, columnId: to.id },
@@ -202,7 +208,7 @@ export default function BoardGrid({ boardId, columns, tickets }: BoardGridProps)
         onError: () => {
           announce(`Couldn't move “${ticket.title}”. It's back in ${from.name}.`);
           flash(ticketId, "Couldn't move", "error");
-          focusCursor({ kind: "ticket", id: ticketId }, from.id);
+          if (focus) focusCursor({ kind: "ticket", id: ticketId }, from.id);
         },
       }
     );
@@ -260,10 +266,21 @@ export default function BoardGrid({ boardId, columns, tickets }: BoardGridProps)
     );
   }
 
+  /** Move a ticket one column left (-1) or right (1), if there is one. */
+  function moveByStep(ticketId: string, step: -1 | 1, options?: { focus?: boolean }) {
+    const ticket = tickets.find((t) => t.id === ticketId);
+    const index = columns.findIndex((c) => c.id === ticket?.column_id);
+    const target = columns[index + step];
+    if (ticket && target) move(ticketId, target.id, options);
+  }
+
   function openTicket(ticketId: string) {
     setCursorState({ kind: "ticket", id: ticketId });
-    setOpenTicketId(ticketId);
+    setDetail({ id: ticketId, open: true });
   }
+
+  const detailTicket = detail ? tickets.find((t) => t.id === detail.id) : undefined;
+  const detailStatus = columns.find((c) => c.id === detailTicket?.column_id)?.name;
 
   // Lend the palette the current versions of these actions.
   useEffect(() => {
@@ -330,10 +347,9 @@ export default function BoardGrid({ boardId, columns, tickets }: BoardGridProps)
       }
 
       if (!ticketId) return false;
-      const moveLeft = matchShortcut(e, "ticket.moveLeft");
-      if (moveLeft || matchShortcut(e, "ticket.moveRight")) {
-        const target = lanes[colIndex + (moveLeft ? -1 : 1)];
-        if (target) move(ticketId, target.col.id);
+      const step = moveStep(e);
+      if (step) {
+        moveByStep(ticketId, step);
         return true;
       }
       if (matchShortcut(e, "ticket.delete")) {
@@ -375,8 +391,7 @@ export default function BoardGrid({ boardId, columns, tickets }: BoardGridProps)
             tickets={laneTickets}
             cursor={cursor}
             canEdit={canEdit}
-            openTicketId={openTicketId}
-            onOpenTicketChange={setOpenTicketId}
+            onOpenTicket={openTicket}
             onCursorFocus={handleCursorFocus}
             onMoveTicket={move}
             notice={notice}
@@ -384,6 +399,22 @@ export default function BoardGrid({ boardId, columns, tickets }: BoardGridProps)
           />
         ))}
       </div>
+
+      {detail && (
+        <TicketDetail
+          boardId={boardId}
+          ticketId={detail.id}
+          open={detail.open}
+          onOpenChange={(open) => setDetail((d) => d && { ...d, open })}
+          status={detailStatus}
+          onMoveStep={(step) => moveByStep(detail.id, step, { focus: false })}
+          // Back to the card, wherever it now sits, not to the top of the page.
+          onCloseAutoFocus={(e) => {
+            e.preventDefault();
+            focusCursor({ kind: "ticket", id: detail.id });
+          }}
+        />
+      )}
 
       {/* Deleting a ticket is not recoverable, so confirm first. */}
       <Dialog

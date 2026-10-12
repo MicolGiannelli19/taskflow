@@ -8,7 +8,7 @@ import { useAnnounce, useShortcut } from "../../hooks/useShortcut";
 import { paths } from "../../routes";
 
 export interface BoardOutletContext {
-  handleNewTicket: (formData: TicketFormData) => void;
+  handleNewTicket: (formData: Omit<TicketFormData, "column_id">) => void;
   /** The column the new ticket goes into, shown in the dialog. */
   columnName?: string;
 }
@@ -48,7 +48,7 @@ export default function Board() {
     !!boardId && !isLoading && !isError
   );
 
-  const handleNewTicket = (newTicketData: TicketFormData) => {
+  const handleNewTicket = (newTicketData: Omit<TicketFormData, "column_id">) => {
     if (!targetColumn) return;
     createTicket.mutate(
       { ...newTicketData, column_id: targetColumn.id },

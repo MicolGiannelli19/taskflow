@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import Optional, List
+from pydantic import BaseModel, field_validator
+from typing import Literal, Optional, List
 from datetime import datetime
 import uuid
 from app.schemas.user import UserResponse
@@ -21,13 +21,24 @@ class TicketBasic(BaseModel):
         from_attributes = True
 
 
+Priority = Literal["low", "medium", "high"]
+
+
 class TicketCreate(BaseModel):
     column_id: uuid.UUID
     title: str
     description: Optional[str] = None
-    priority: Optional[str] = "medium"
+    priority: Priority = "medium"
+    # Omitted → the creator (see TicketService.create_ticket); null → unassigned.
     assignee_id: Optional[uuid.UUID] = None
     due_date: Optional[datetime] = None
+
+    @field_validator("title")
+    @classmethod
+    def title_not_blank(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("title must not be blank")
+        return v.strip()
 
 class TicketUpdate(BaseModel):
     title: Optional[str] = None

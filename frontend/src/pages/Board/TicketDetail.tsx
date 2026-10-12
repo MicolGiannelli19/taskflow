@@ -10,6 +10,7 @@ import TicketDetailContent from "./TicketDetailContent";
 import { useTicketEditor } from "@/hooks/useTicketEditor";
 import styles from "./TicketDetail.module.css";
 import { paths } from "@/routes";
+import { moveStep } from "@/lib/shortcuts/keyboard";
 
 interface TicketDetailProps {
   boardId: string;
@@ -18,6 +19,10 @@ interface TicketDetailProps {
   onOpenChange: (open: boolean) => void;
   /** Where focus goes on close; the board hands it back to the card. */
   onCloseAutoFocus?: (e: Event) => void;
+  /** The ticket's column, shown as its status. */
+  status?: string;
+  /** ⇧⌘← / ⇧⌘→ while the ticket is open: move it a column. */
+  onMoveStep?: (step: -1 | 1) => void;
 }
 
 export default function TicketDetail({
@@ -26,6 +31,8 @@ export default function TicketDetail({
   open,
   onOpenChange,
   onCloseAutoFocus,
+  status,
+  onMoveStep,
 }: TicketDetailProps) {
   const editor = useTicketEditor(boardId, ticketId, open);
   const { isSaving } = editor;
@@ -43,12 +50,21 @@ export default function TicketDetail({
         className={styles.content}
         showClose={false}
         onCloseAutoFocus={onCloseAutoFocus}
+        onKeyDown={(e) => {
+          const step = onMoveStep ? moveStep(e) : 0;
+          if (step) {
+            e.preventDefault();
+            onMoveStep?.(step);
+          }
+        }}
       >
         <TicketDetailContent
           editor={editor}
           boardId={boardId}
           ticketId={ticketId}
           variant="modal"
+          status={status}
+          showMoveHint={!!onMoveStep}
           headerActions={
             <>
               <Button

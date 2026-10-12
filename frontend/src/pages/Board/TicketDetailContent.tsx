@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import ShortcutTooltip from "@/components/shortcuts/ShortcutTooltip";
+import { ShortcutKbd } from "@/components/shortcuts/Kbd";
 import { PRIORITIES, type Priority, type TicketEditor } from "@/hooks/useTicketEditor";
 import { matchShortcut } from "@/lib/shortcuts/keyboard";
 import type { CommentType } from "@/types";
@@ -39,6 +40,10 @@ interface TicketDetailContentProps {
   variant: "modal" | "page";
   /** Shell-owned header controls (open-full-page, close…), right of Edit. */
   headerActions?: ReactNode;
+  /** The ticket's column on the board. */
+  status?: string;
+  /** Show ⇧⌘← ⇧⌘→ beside the status: the shell handles those keys. */
+  showMoveHint?: boolean;
 }
 
 const NO_ASSIGNEE = "__none__"; // Radix Select forbids an empty-string value.
@@ -78,6 +83,8 @@ export default function TicketDetailContent({
   ticketId,
   variant,
   headerActions,
+  status,
+  showMoveHint = false,
 }: TicketDetailContentProps) {
   const {
     ticket,
@@ -243,6 +250,20 @@ export default function TicketDetailContent({
 
         {/* ─── Meta ────────────────────────────────────────────────────── */}
         <div className={styles.meta}>
+          {status && (
+            <div className={styles.metaRow}>
+              <span className={styles.metaLabel}>Status</span>
+              <span>{status}</span>
+              {showMoveHint && canEdit && (
+                <span className={styles.moveHint}>
+                  <ShortcutKbd id="ticket.moveLeft" />
+                  <ShortcutKbd id="ticket.moveRight" />
+                  <span>to move</span>
+                </span>
+              )}
+            </div>
+          )}
+
           <div className={styles.metaRow}>
             <span className={styles.metaLabel}>Priority</span>
             {mode === "edit" ? (

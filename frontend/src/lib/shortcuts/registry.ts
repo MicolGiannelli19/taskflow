@@ -15,6 +15,8 @@ export type ShortcutScope =
   | "board"
   /** While a ticket card has focus. */
   | "ticket-card"
+  /** On one ticket wherever it is: a focused card, its dialog or its page. */
+  | "ticket"
   /** Inside the ticket detail dialog or page. */
   | "ticket-detail";
 
@@ -150,7 +152,7 @@ export const SHORTCUTS = [
     id: "ticket.moveLeft",
     keys: ["Mod+Shift+ArrowLeft"],
     label: "Move ticket to previous column",
-    scope: "ticket-card",
+    scope: "ticket",
     firesInText: false,
     status: "live",
   },
@@ -158,7 +160,7 @@ export const SHORTCUTS = [
     id: "ticket.moveRight",
     keys: ["Mod+Shift+ArrowRight"],
     label: "Move ticket to next column",
-    scope: "ticket-card",
+    scope: "ticket",
     firesInText: false,
     status: "live",
   },
