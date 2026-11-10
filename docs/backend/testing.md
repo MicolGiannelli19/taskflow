@@ -50,6 +50,8 @@ pytest --cov                    # plus a coverage report (see below)
 
 Without activating the venv: `.venv/bin/python -m pytest`.
 
+CI runs the full suite, every layer, on each pull request (`.github/workflows/ci.yml`).
+
 The full run takes about a second. The long warnings summary at the end
 (`.dict()`, `datetime.utcnow()`) is deprecation noise, not failures — the line
 that matters is `N passed`.

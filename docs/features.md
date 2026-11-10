@@ -16,6 +16,7 @@ lives.
 - [Ticket permalinks](#ticket-permalinks)
 - [Security headers and Content Security Policy](#security-headers-and-content-security-policy)
 - [Offline backend test suite](#offline-backend-test-suite)
+- [Continuous integration on pull requests](#continuous-integration-on-pull-requests)
 
 ## Authentication with Clerk
 
@@ -209,3 +210,19 @@ The tests are split into three layers by how much of the app they run:
 using `pytest-cov` with settings in `backend/.coveragerc`.
 
 Code: `backend/tests/`. Details: [backend/testing.md](./backend/testing.md).
+
+## Continuous integration on pull requests
+
+Every pull request, and every push to `main`, runs two GitHub Actions jobs side
+by side. The backend job installs the Python dependencies and runs the whole
+pytest suite with a coverage report. The frontend job installs with
+`yarn install --frozen-lockfile`, then runs `yarn lint`, `yarn test` and
+`yarn build`, which includes the TypeScript check. Both suites run offline, so
+the workflow uses no secrets. A newer push to the same pull request cancels the
+run still in progress.
+
+The frontend install fails if `yarn.lock` is out of date with `package.json`.
+After adding or changing a dependency, run `yarn install` and commit the updated
+lockfile.
+
+Code: `.github/workflows/ci.yml`.
