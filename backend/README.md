@@ -124,7 +124,8 @@ With the venv from steps 1–2 active:
 
 ```bash
 pytest                        # everything
-pytest tests/test_auth.py     # one file
+pytest tests/unit             # one layer: unit, services or api
+pytest tests/api/test_auth.py # one file
 pytest -k authorization       # tests whose name matches a keyword
 pytest -x                     # stop at the first failure
 ```

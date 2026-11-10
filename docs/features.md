@@ -196,10 +196,16 @@ Code: `backend/app/core/security_headers.py`, `frontend/csp.ts`,
 
 ## Offline backend test suite
 
-The backend has 80 pytest tests that need no Docker, database, Clerk key or
-network connection, and run in under a second. The tests swap in a known user
-for `get_current_user` and build the schema in an in-memory SQLite database
-for each test. Any test that tries to open a network connection fails on
-purpose, so nothing can quietly depend on an outside service.
+The backend has about 170 pytest tests that need no Docker, database, Clerk
+key or network connection, and run in about a second. The tests swap in a known
+user for `get_current_user` and build the schema in an in-memory SQLite
+database for each test. Any test that tries to open a network connection fails
+on purpose, so nothing can quietly depend on an outside service.
+
+The tests are split into three layers by how much of the app they run:
+`tests/unit/` (schemas and pure functions, no database), `tests/services/`
+(service classes against the in-memory database) and `tests/api/` (HTTP through
+`TestClient`). `pytest --cov` reports which lines and branches no test runs,
+using `pytest-cov` with settings in `backend/.coveragerc`.
 
 Code: `backend/tests/`. Details: [backend/testing.md](./backend/testing.md).

@@ -1,0 +1,9 @@
+# Read by `pytest --cov`. Measures the app only, never the tests themselves.
+[run]
+source = app
+# Branch coverage: an `if` counts as covered only once both outcomes have run.
+branch = True
+
+[report]
+show_missing = True
+skip_covered = True

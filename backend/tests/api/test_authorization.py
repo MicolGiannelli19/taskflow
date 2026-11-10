@@ -8,7 +8,8 @@ Three rules are asserted here, because all three are easy to break silently:
 2. **A role too weak gets 403.** The caller is a member; there is nothing to
    hide, so say what happened.
 3. **The hierarchy holds** — owner ⊃ admin ⊃ member ⊃ viewer — and an
-   unrecognised stored role fails closed.
+   unrecognised stored role fails closed. The pure rule is unit-tested in
+   `tests/unit/test_roles.py`; here, the database's refusal to store one.
 
 Authentication is stubbed (see `conftest.py`); what runs for real is every
 authorization decision in `app/dependencies.py` and `app/core/authorization.py`.
@@ -16,8 +17,6 @@ authorization decision in `app/dependencies.py` and `app/core/authorization.py`.
 import uuid
 
 import pytest
-
-from app.core.authorization import Role, role_satisfies
 
 
 # ─── Rule 1: a non-member is told nothing ────────────────────────────────────
@@ -143,40 +142,14 @@ def test_owner_can_delete_the_board(as_user, owner, board):
     assert as_user(owner).delete(f"/api/boards/{board.id}").status_code == 204
 
 
-# ─── Rule 3: the hierarchy itself ────────────────────────────────────────────
-
-@pytest.mark.parametrize(
-    "stored,minimum,expected",
-    [
-        ("owner", Role.OWNER, True),
-        ("owner", Role.ADMIN, True),
-        ("owner", Role.VIEWER, True),
-        ("admin", Role.OWNER, False),
-        ("admin", Role.ADMIN, True),
-        ("admin", Role.MEMBER, True),
-        ("member", Role.ADMIN, False),
-        ("member", Role.MEMBER, True),
-        ("member", Role.VIEWER, True),
-        ("viewer", Role.MEMBER, False),
-        ("viewer", Role.VIEWER, True),
-    ],
-)
-def test_role_hierarchy(stored, minimum, expected):
-    assert role_satisfies(stored, minimum) is expected
-
-
-@pytest.mark.parametrize("stored", ["", "superuser", "OWNER", None])
-def test_unknown_roles_fail_closed(stored):
-    """A role the code does not recognise grants nothing, not everything."""
-    assert role_satisfies(stored, Role.VIEWER) is False
-
+# ─── Rule 3: an unknown role cannot even be stored ──────────────────────────
 
 def test_the_database_refuses_an_unknown_role(db_session, board, member):
     """The `role_satisfies` fail-closed branch is the *second* line of defence.
 
     The first is `valid_board_role`, the CHECK constraint on `board_members`:
     a role outside the four cannot be stored in the first place. Both are
-    asserted — the constraint here, the fallback in the parametrised test above
+    asserted — the constraint here, the fallback in `tests/unit/test_roles.py`
     — because either one alone could be removed without the other complaining.
     """
     from sqlalchemy.exc import IntegrityError

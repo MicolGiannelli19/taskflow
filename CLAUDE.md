@@ -48,7 +48,8 @@ Tests:
 ```bash
 cd backend
 pytest                        # all tests
-pytest tests/test_auth.py     # single file
+pytest tests/unit              # one layer: unit, services or api
+pytest tests/api/test_auth.py # single file
 pytest -k authorization       # one topic
 ```
 

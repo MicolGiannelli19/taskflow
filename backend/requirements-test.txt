@@ -1,3 +1,5 @@
 pytest==7.4.3
 httpx==0.28.1
 pytest-asyncio==0.21.1
+# `pytest --cov` — which lines the suite never runs (config in .coveragerc).
+pytest-cov==5.0.0
