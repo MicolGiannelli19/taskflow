@@ -1,0 +1,66 @@
+# Runs every test suite on each pull request, and again once it lands on main.
+# Both jobs are offline by design (see docs/backend/testing.md), so no secrets
+# are needed: no Clerk key, no database.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A new push to a PR cancels the run still going for the previous one.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Read the code, nothing else. Pull requests from forks get this anyway; saying
+# it here keeps a future step from quietly gaining write access.
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend (pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      # 3.11 matches the Docker image. 3.14 can't install the pinned psycopg2-binary.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+
+      - run: pip install -r requirements.txt -r requirements-test.txt
+
+      # --cov prints the untested lines into the log; there is no minimum to fail on.
+      - run: pytest --cov -p no:warnings
+
+  frontend:
+    name: Frontend (lint, test, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      # 22 matches the Docker image; `yarn test` needs ≥ 22.18 for TypeScript in node --test.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: yarn
+          cache-dependency-path: frontend/yarn.lock
+
+      # --frozen-lockfile fails if yarn.lock is out of date with package.json,
+      # instead of silently resolving something different from local installs.
+      - run: yarn install --frozen-lockfile
+
+      - run: yarn lint
+      - run: yarn test
+      # `tsc -b` then `vite build`: this is the type check.
+      - run: yarn build

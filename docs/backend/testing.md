@@ -39,28 +39,70 @@ Then, with the venv active:
 
 ```bash
 pytest                          # everything
-pytest tests/test_auth.py       # one file
+pytest tests/unit               # one layer (unit, services or api)
+pytest tests/api/test_auth.py   # one file
 pytest -k authorization         # tests whose name matches a keyword
 pytest -x                       # stop at the first failure
 pytest -v                       # print each test's name
 pytest -p no:warnings           # hide the deprecation-warning summary
+pytest --cov                    # plus a coverage report (see below)
 ```
 
 Without activating the venv: `.venv/bin/python -m pytest`.
 
-The full run takes well under a second. The long warnings summary at the end
+CI runs the full suite, every layer, on each pull request (`.github/workflows/ci.yml`).
+
+The full run takes about a second. The long warnings summary at the end
 (`.dict()`, `datetime.utcnow()`) is deprecation noise, not failures — the line
 that matters is `N passed`.
 
+### The three layers
+
+The suite is split by how much of the app each test runs. A rule belongs in the
+lowest layer that can see it; a test placed higher than that is slower and
+fails for more unrelated reasons.
+
+| Folder | Runs | Uses | Belongs here |
+|---|---|---|---|
+| `tests/unit/` | One function or Pydantic model | Nothing: no database, no `TestClient` | Validation rules, parsing, the role hierarchy |
+| `tests/services/` | A service class against a real session | `db_session` (SQLite in memory) | Business rules: ordering, invariants, what gets written |
+| `tests/api/` | The app over HTTP via `TestClient` | `as_user`, `unauthenticated` | Status codes, auth and authorization wiring, response shapes |
+
+Unit tests call the code directly and need no fixtures: building
+`TicketUpdate(priority="urgent")` is exactly what FastAPI does with a request
+body, minus the HTTP. Services are tested against SQLite rather than a mocked
+`Session` because a mock only checks *which* query methods were called, so it
+breaks on a harmless refactor and still passes when the query is wrong. Mocks
+and fakes are kept for what this app does not own: Clerk.
+
 | File | Covers |
 |---|---|
-| `tests/conftest.py` | Fixtures: in-memory database, clients, a user at each board role |
-| `tests/test_api.py` | Smoke test: `GET /` answers |
-| `tests/test_auth.py` | `GET /api/users/me`; the 401 boundary |
-| `tests/test_authorization.py` | The `require_board_role` matrix: 404-not-403, role hierarchy, comment ownership |
-| `tests/test_identity.py` | `IdentityService`: adoption, provisioning, the race |
-| `tests/test_webhook.py` | Signature verification, profile sync, replay |
-| `tests/test_security_headers.py` | CSP and friends on API responses |
+| `tests/conftest.py` | Fixtures shared by every layer: in-memory database, clients, a user at each board role |
+| `tests/unit/test_roles.py` | `role_satisfies` hierarchy and fail-closed; `parse_role` |
+| `tests/unit/test_ticket_schemas.py` | `TicketCreate` / `TicketUpdate`: blank titles, priorities, omitted vs null |
+| `tests/unit/test_comment_schemas.py` | Comment trimming and the length limit, at the boundary |
+| `tests/unit/test_config.py` | Origin lists from the environment: single, comma-separated, JSON |
+| `tests/unit/test_user_search_escaping.py` | LIKE wildcards in the user search are escaped |
+| `tests/unit/test_clerk_profile.py` | Picking the primary email and display name from a Clerk user |
+| `tests/services/test_identity_service.py` | `IdentityService`: adoption, provisioning, the race |
+| `tests/api/test_api.py` | Smoke test: `GET /` answers |
+| `tests/api/test_auth.py` | `GET /api/users/me`; the 401 boundary |
+| `tests/api/test_authorization.py` | The `require_board_role` matrix: 404-not-403, roles, comment ownership |
+| `tests/api/test_tickets.py` | Creating a ticket: defaults and rejected fields |
+| `tests/api/test_webhook.py` | Signature verification, profile sync, replay |
+| `tests/api/test_security_headers.py` | CSP and friends on API responses |
+
+### Coverage
+
+`pytest --cov` prints, per module in `app/`, the lines and branches no test ran
+(settings in `backend/.coveragerc`; fully covered files are left out). Read the
+*Missing* column as a to-do list, not the percentage as a grade: a line counts
+as covered once it has run, whether or not any test checked what it did. That
+is also why `pytest tests/unit --cov` looks better than it is — importing a
+module "covers" every `def` line in it.
+
+There is deliberately no minimum (`--cov-fail-under`): a floor rewards tests
+written to touch lines rather than to pin down behaviour.
 
 ### How authentication is faked
 

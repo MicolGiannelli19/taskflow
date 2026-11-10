@@ -20,4 +20,12 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    // shadcn/ui components are generated, and export their variants
+    // (`buttonVariants`, `useSidebar`) beside the component by design. The rule
+    // only guards dev hot-reload, so it is switched off here rather than
+    // hand-editing generated files.
+    files: ['src/components/ui/**/*.tsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
 ])

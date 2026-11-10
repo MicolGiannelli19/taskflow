@@ -16,6 +16,7 @@ lives.
 - [Ticket permalinks](#ticket-permalinks)
 - [Security headers and Content Security Policy](#security-headers-and-content-security-policy)
 - [Offline backend test suite](#offline-backend-test-suite)
+- [Continuous integration on pull requests](#continuous-integration-on-pull-requests)
 
 ## Authentication with Clerk
 
@@ -196,10 +197,32 @@ Code: `backend/app/core/security_headers.py`, `frontend/csp.ts`,
 
 ## Offline backend test suite
 
-The backend has 80 pytest tests that need no Docker, database, Clerk key or
-network connection, and run in under a second. The tests swap in a known user
-for `get_current_user` and build the schema in an in-memory SQLite database
-for each test. Any test that tries to open a network connection fails on
-purpose, so nothing can quietly depend on an outside service.
+The backend has about 170 pytest tests that need no Docker, database, Clerk
+key or network connection, and run in about a second. The tests swap in a known
+user for `get_current_user` and build the schema in an in-memory SQLite
+database for each test. Any test that tries to open a network connection fails
+on purpose, so nothing can quietly depend on an outside service.
+
+The tests are split into three layers by how much of the app they run:
+`tests/unit/` (schemas and pure functions, no database), `tests/services/`
+(service classes against the in-memory database) and `tests/api/` (HTTP through
+`TestClient`). `pytest --cov` reports which lines and branches no test runs,
+using `pytest-cov` with settings in `backend/.coveragerc`.
 
 Code: `backend/tests/`. Details: [backend/testing.md](./backend/testing.md).
+
+## Continuous integration on pull requests
+
+Every pull request, and every push to `main`, runs two GitHub Actions jobs side
+by side. The backend job installs the Python dependencies and runs the whole
+pytest suite with a coverage report. The frontend job installs with
+`yarn install --frozen-lockfile`, then runs `yarn lint`, `yarn test` and
+`yarn build`, which includes the TypeScript check. Both suites run offline, so
+the workflow uses no secrets. A newer push to the same pull request cancels the
+run still in progress.
+
+The frontend install fails if `yarn.lock` is out of date with `package.json`.
+After adding or changing a dependency, run `yarn install` and commit the updated
+lockfile.
+
+Code: `.github/workflows/ci.yml`.

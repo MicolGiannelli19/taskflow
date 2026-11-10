@@ -24,6 +24,12 @@ class TicketBasic(BaseModel):
 Priority = Literal["low", "medium", "high"]
 
 
+def _clean_title(v: str) -> str:
+    if not v.strip():
+        raise ValueError("title must not be blank")
+    return v.strip()
+
+
 class TicketCreate(BaseModel):
     column_id: uuid.UUID
     title: str
@@ -36,18 +42,33 @@ class TicketCreate(BaseModel):
     @field_validator("title")
     @classmethod
     def title_not_blank(cls, v: str) -> str:
-        if not v.strip():
-            raise ValueError("title must not be blank")
-        return v.strip()
+        return _clean_title(v)
 
 class TicketUpdate(BaseModel):
+    # Same rules as TicketCreate for any field that is sent; otherwise PATCH
+    # would be a way around them.
     title: Optional[str] = None
     description: Optional[str] = None
-    priority: Optional[str] = None
+    priority: Optional[Priority] = None
     assignee_id: Optional[uuid.UUID] = None
     due_date: Optional[datetime] = None
     column_id: Optional[uuid.UUID] = None
     position: Optional[int] = None
+
+    @field_validator("title", "priority", "column_id", "position")
+    @classmethod
+    def not_null(cls, v):
+        # Omitted fields keep their default without being validated, so this
+        # only ever sees an explicit null. Null clears description, assignee
+        # and due date; a ticket cannot exist without these four.
+        if v is None:
+            raise ValueError("cannot be null; omit the field to leave it unchanged")
+        return v
+
+    @field_validator("title")
+    @classmethod
+    def title_not_blank(cls, v: str) -> str:
+        return _clean_title(v)
 
 class AttachmentResponse(BaseModel):
     id: uuid.UUID

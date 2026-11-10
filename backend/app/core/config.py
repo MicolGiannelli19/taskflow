@@ -1,5 +1,8 @@
+import json
+from typing import Annotated
+
 from pydantic import field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 def _split_origins(value):
@@ -11,9 +14,15 @@ def _split_origins(value):
     if isinstance(value, str):
         stripped = value.strip()
         if stripped.startswith("["):
-            return value  # leave JSON for pydantic to parse
+            return json.loads(stripped)
         return [part.strip() for part in stripped.split(",") if part.strip()]
     return value
+
+
+# `NoDecode` hands the raw environment string to `_split_origins`. Without it,
+# pydantic-settings JSON-decodes any list-typed variable first, so a plain
+# `https://a.example` (or `a, b`) fails at startup before the validator runs.
+Origins = Annotated[list[str], NoDecode]
 
 
 class Settings(BaseSettings):
@@ -34,7 +43,7 @@ class Settings(BaseSettings):
     # The default is local development only. Deploying means setting
     # CLERK_AUTHORIZED_PARTIES to the production frontend origin — and never to
     # `*`, which would throw the replay protection away (spec §6.1).
-    clerk_authorized_parties: list[str] = ["http://localhost:5173"]
+    clerk_authorized_parties: Origins = ["http://localhost:5173"]
 
     # Shared secret Clerk signs webhook bodies with (Svix). Without it the
     # webhook endpoint refuses every delivery, which is the safe default: an
@@ -43,7 +52,7 @@ class Settings(BaseSettings):
 
     # Browser origins allowed to call this API. Same story as the `azp` list:
     # environment-driven, so deploying is configuration rather than a code edit.
-    cors_allowed_origins: list[str] = ["http://localhost:5173"]
+    cors_allowed_origins: Origins = ["http://localhost:5173"]
 
     @field_validator("clerk_authorized_parties", "cors_allowed_origins", mode="before")
     @classmethod

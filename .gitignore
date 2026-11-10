@@ -8,6 +8,10 @@ __pycache__/
 
 # Local / test databases
 *.db
+
+# Coverage output (pytest --cov)
+.coverage
+htmlcov/
 # design-sync (transient)
 .ds-sync/
 ds-bundle/
