@@ -1,0 +1,8 @@
+# Kept out of the image: local environments, caches and test output.
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+tests/

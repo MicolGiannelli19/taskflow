@@ -17,6 +17,7 @@ lives.
 - [Security headers and Content Security Policy](#security-headers-and-content-security-policy)
 - [Offline backend test suite](#offline-backend-test-suite)
 - [Continuous integration on pull requests](#continuous-integration-on-pull-requests)
+- [Free-tier deployment](#free-tier-deployment)
 
 ## Authentication with Clerk
 
@@ -226,3 +227,18 @@ After adding or changing a dependency, run `yarn install` and commit the updated
 lockfile.
 
 Code: `.github/workflows/ci.yml`.
+
+## Free-tier deployment
+
+The demo is hosted for free across three services: the frontend on Vercel, the
+backend on a Render web service and Postgres on Supabase. The backend's Render
+settings are a Blueprint in `render.yaml`, with every secret entered in the
+Render dashboard rather than the repo. Render builds the `production` stage of
+`backend/Dockerfile`, which listens on the port Render assigns, runs one worker
+so the startup seed can't race itself, and trusts Render's proxy for the
+original `https` scheme. The database connection goes through Supabase's
+session pooler over TLS, and the backend creates and seeds the schema on its
+first start, as it does locally.
+
+Code: `render.yaml`, `backend/Dockerfile`, `backend/app/database/session.py`.
+Steps: [deployment.md](./deployment.md).

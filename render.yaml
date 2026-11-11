@@ -1,0 +1,38 @@
+# Render Blueprint: the backend API as a free Render web service.
+# Steps and the reasoning behind each setting: docs/deployment.md.
+services:
+  - type: web
+    name: taskflow-api
+    runtime: docker
+    plan: free
+    # Fixed at creation. Keep it next to the Supabase project (eu-central-1),
+    # or every query crosses an ocean.
+    region: frankfurt
+    dockerContext: ./backend
+    # The last stage of this file is `production`, which Docker builds by default.
+    dockerfilePath: ./backend/Dockerfile
+    healthCheckPath: /
+    # Only rebuild when the backend changes, not on frontend-only commits.
+    buildFilter:
+      paths:
+        - backend/**
+    # `sync: false` means "ask for the value in the dashboard". Secrets never
+    # go in this file: the repo is public.
+    envVars:
+      # Supabase's *session pooler* connection string, ending in ?sslmode=require.
+      - key: DATABASE_URL
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+      # Signing secret of the webhook endpoint pointing at this service.
+      - key: CLERK_WEBHOOK_SIGNING_SECRET
+        sync: false
+      # Password the demo users get in Clerk. Visitors sign in with it.
+      - key: SEED_PASSWORD
+        sync: false
+      # The frontend's production origin, e.g. https://taskflow.vercel.app.
+      # Comma-separated if there are several. Never `*`.
+      - key: CLERK_AUTHORIZED_PARTIES
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false

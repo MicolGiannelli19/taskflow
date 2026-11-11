@@ -21,6 +21,8 @@ Services:
 - Backend API: http://localhost:8000
 - PostgreSQL: localhost:5432
 
+Deployed demo: frontend on Vercel, backend on Render (`render.yaml`, builds the `production` stage of `backend/Dockerfile`), Postgres on Supabase. Steps: `docs/deployment.md`.
+
 Test credentials (from seed data): `alice@example.com` / the `SEED_PASSWORD` from the root `.env`
 
 ## Frontend (React + TypeScript + Vite)

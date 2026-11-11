@@ -65,9 +65,16 @@ USER appuser
 # Expose port
 EXPOSE 8000
 
-# Health check
+# Health check. urllib is in the standard library; `requests` is not installed.
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/')"
+    CMD python -c "import os, urllib.request; urllib.request.urlopen(f'http://localhost:{os.environ.get(\"PORT\", \"8000\")}/')"
 
-# Run without reload for production
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+# Run without reload for production.
+# - PORT: hosts such as Render say which port to listen on; 8000 otherwise.
+# - One worker: every worker runs the startup seed, so several racing on an
+#   empty database can insert the demo data twice. One also fits in 512 MB.
+# - --forwarded-allow-ips: the host's proxy terminates HTTPS and passes the
+#   original scheme in X-Forwarded-Proto. Trusting it keeps redirect URLs on
+#   https (an http one is blocked as mixed content). Safe only because nothing
+#   but that proxy can reach the container.
+CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1 --proxy-headers --forwarded-allow-ips='*'"]
