@@ -240,5 +240,10 @@ original `https` scheme. The database connection goes through Supabase's
 session pooler over TLS, and the backend creates and seeds the schema on its
 first start, as it does locally.
 
-Code: `render.yaml`, `backend/Dockerfile`, `backend/app/database/session.py`.
+The frontend reads the API's address from `VITE_API_URL` at build time, and
+the same value goes into the page's CSP `connect-src`. `frontend/vercel.json`
+serves `index.html` for every path so client-side routes survive a reload.
+
+Code: `render.yaml`, `backend/Dockerfile`, `backend/app/database/session.py`,
+`frontend/src/api/axios.ts`, `frontend/vercel.json`.
 Steps: [deployment.md](./deployment.md).

@@ -163,6 +163,7 @@ lookup here (see §3).
 - `UNIQUE (board_id, user_id)` — one membership per user per board (no contradictory dual roles).
 - `CHECK role IN ('owner','admin','member','viewer')` (`valid_board_role`).
 - Partial unique index `one_owner_per_board` on `(board_id) WHERE role = 'owner'` — at most one owner.
+- Index `ix_board_members_user_id` on `(user_id)` — "list my boards" (see D8).
 
 ### `columns`
 Kanban columns, ordered within a board by `position`. (Model class is
@@ -175,6 +176,8 @@ Kanban columns, ordered within a board by `position`. (Model class is
 | name | varchar(255) | not null |
 | position | integer | not null |
 | created_at / updated_at | timestamp | |
+
+**Index:** `ix_columns_board_id` on `(board_id)` — load a board's columns (see D8).
 
 ### `tickets`
 
@@ -192,6 +195,9 @@ Kanban columns, ordered within a board by `position`. (Model class is
 | due_date | timestamp | |
 | created_at / updated_at | timestamp | |
 
+**Indexes:** `ix_tickets_board_id` on `(board_id)` and `ix_tickets_column_id` on
+`(column_id)` (see D8).
+
 ### `comments`
 
 | column | type | notes |
@@ -201,6 +207,8 @@ Kanban columns, ordered within a board by `position`. (Model class is
 | user_id | uuid FK → users.id | not null, `ON DELETE CASCADE` ⚠️ (see §4) |
 | content | text | not null |
 | created_at / updated_at | timestamp | |
+
+**Index:** `ix_comments_ticket_id` on `(ticket_id)` — load a ticket's comments (see D8).
 
 ---
 
@@ -298,6 +306,72 @@ the spec for index locality at scale).
 The ORM is the single source of truth for schema and defaults, consistent with
 the "no raw SQL / no Alembic during MVP" stance — schema is `create_all`, reset
 via `docker compose down -v`.
+
+### D8 — index the foreign keys that queries filter by
+**Background.** An index is a sorted copy of one or more columns, with a pointer
+back to each row. Like the index at the back of a book, it lets Postgres jump to
+the rows it wants. Without one, `WHERE board_id = :b` is a **sequential scan**:
+Postgres reads every row in the table, from every board, and keeps the matches.
+With one, it finds where that board's rows start (`O(log N)`) and reads only
+those. So the cost depends on how many rows match, not on how big the table is.
+
+**Postgres does not index foreign keys for you.** A foreign key is a *rule*
+("this `board_id` must exist in `boards`"). Checking that rule only needs the
+*referenced* side, `boards.id`, which is already indexed as a primary key. The
+referencing column (`tickets.board_id`) gets no index unless you ask for one.
+MySQL adds one automatically, which is why people often assume Postgres does too.
+
+**What is indexed, and the query each index serves:**
+
+| index | query it serves |
+|---|---|
+| `tickets (board_id)` | board view: every ticket on a board (`board_service.get_board_with_data`) |
+| `columns (board_id)` | board view and column list: every column on a board |
+| `tickets (column_id)` | count of tickets in a column, used to place a new ticket and to block deleting a non-empty column |
+| `comments (ticket_id)` | ticket detail: every comment on a ticket |
+| `board_members (user_id)` | home page: "list my boards" (`board_service`, filters by `user_id` alone) |
+
+These same indexes also speed up `ON DELETE CASCADE`. Deleting a board makes
+Postgres find that board's columns, tickets and memberships; deleting a ticket
+makes it find that ticket's comments. Each of those lookups is a filter on the
+foreign key, so without an index each one would read the whole table.
+
+**Why `board_members.user_id` needs its own index.** The `UNIQUE (board_id,
+user_id)` constraint is already an index, but a multi-column index is sorted by
+its *first* column, like a phone book sorted by surname. It helps queries that
+filter on `board_id` (the permission check, the member list), but not a query
+that filters on `user_id` alone. The spec (§9) instead plans
+`UNIQUE (user_id, board_id) INCLUDE (role)` plus a separate `INDEX (board_id)`.
+That covers the same queries, and `INCLUDE (role)` would let the permission
+check skip reading the table. We kept the existing constraint and added the
+missing direction, which is the smaller change.
+
+**Deliberately *not* indexed:** `tickets.assignee_id`, `tickets.creator_id`,
+`comments.user_id` and `user_identities.user_id`. No query filters on them. They
+would only be searched when a `users` row is deleted, and nothing deletes users
+today (see §6). Each index slows down every insert and update on its table and
+takes disk space, so they aren't worth adding until a query needs them (for
+example, a "tickets assigned to me" view would need `assignee_id`).
+
+**Applying to an existing database.** `create_all` only creates tables that
+don't exist yet; it doesn't add indexes to tables that do. Locally, reset with
+`docker compose down -v`. On a database you don't want to wipe (Supabase), run
+the same statements by hand. The names match what SQLAlchemy generates, so a
+later reset produces the same schema:
+
+```sql
+CREATE INDEX IF NOT EXISTS ix_tickets_board_id       ON tickets (board_id);
+CREATE INDEX IF NOT EXISTS ix_tickets_column_id      ON tickets (column_id);
+CREATE INDEX IF NOT EXISTS ix_columns_board_id       ON columns (board_id);
+CREATE INDEX IF NOT EXISTS ix_comments_ticket_id     ON comments (ticket_id);
+CREATE INDEX IF NOT EXISTS ix_board_members_user_id  ON board_members (user_id);
+```
+
+To check that an index is used, run `EXPLAIN SELECT * FROM tickets WHERE
+board_id = '<id>';` and look for `Index Scan` or `Bitmap Index Scan` rather than
+`Seq Scan`. On a tiny table Postgres may still pick a sequential scan, because
+reading a few rows directly is cheaper than going through an index. That's
+expected.
 
 ---
 

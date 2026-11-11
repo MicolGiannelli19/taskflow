@@ -1,9 +1,12 @@
 import axios from "axios";
 import { getAuthToken } from "./clerkToken";
 
+// The API's origin, fixed at build time. vite.config.ts hands the same value to
+// the CSP's connect-src, so the two can't drift apart. Local default otherwise.
+const apiUrl = (import.meta.env.VITE_API_URL ?? "http://localhost:8000").replace(/\/+$/, "");
+
 const instance = axios.create({
-  // TODO: this should be set somewhere in a a config
-  baseURL: "http://localhost:8000/api",
+  baseURL: `${apiUrl}/api`,
   headers: {
     "Content-Type": "application/json",
   },

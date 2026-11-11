@@ -8,8 +8,10 @@ from app.database.session import Base
 class Ticket(Base):
     __tablename__ = "tickets"
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    board_id = Column(Uuid(as_uuid=True), ForeignKey("boards.id", ondelete="CASCADE"), nullable=False)
-    column_id = Column(Uuid(as_uuid=True), ForeignKey("columns.id", ondelete="CASCADE"), nullable=False)
+    # Indexed: the board view loads every ticket on a board (schema.md D8).
+    board_id = Column(Uuid(as_uuid=True), ForeignKey("boards.id", ondelete="CASCADE"), nullable=False, index=True)
+    # Indexed: tickets are counted per column on create and column delete.
+    column_id = Column(Uuid(as_uuid=True), ForeignKey("columns.id", ondelete="CASCADE"), nullable=False, index=True)
     title = Column(String(500), nullable=False)
     description = Column(Text)
     position = Column(Integer, nullable=False)

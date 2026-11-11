@@ -16,7 +16,8 @@ None of them needs a payment card. The backend is described in `render.yaml`
 at the repo root (a Render *Blueprint*), so its settings live in the repo rather
 than only in a dashboard.
 
-This page covers the backend and database. The frontend steps come next.
+The order matters: the database first, then the backend that connects to it,
+then the frontend that calls the backend.
 
 ## 1. Database: Supabase
 
@@ -90,10 +91,52 @@ instance, so the demo users are the same accounts in both. Clerk's development
 instances work on any domain; they show a small "Development mode" badge and
 allow up to 100 users.
 
+## 4. Frontend: Vercel
+
+Vercel already builds `frontend/` on every push. Two things change for the
+deployed app to work:
+
+1. **Environment variables** (Project → Settings → Environment Variables,
+   *Production*):
+
+   | Variable | Value |
+   |----------|-------|
+   | `VITE_API_URL` | `https://<service>.onrender.com`, without `/api` and without a trailing slash |
+   | `VITE_CLERK_PUBLISHABLE_KEY` | The `pk_test_…` value from your root `.env` |
+
+   `VITE_` variables are copied into the JavaScript at **build** time, so a
+   change only takes effect after a new deployment (Deployments → ⋯ →
+   Redeploy). They are visible to anyone who opens the app, which is fine for
+   these two and is why no secret may ever have a `VITE_` name.
+   `vite.config.ts` puts `VITE_API_URL` into the page's CSP `connect-src` too,
+   so the browser allows requests to the API and nowhere else.
+2. **Let visitors in** (Settings → Deployment Protection). Vercel
+   Authentication on *Standard Protection* keeps preview and per-deployment
+   URLs private but leaves the production domain public, which is what a demo
+   wants. If the production domain asks for a Vercel login in a private
+   window, the setting is on a stricter level.
+
+`frontend/vercel.json` sends every path to `index.html`. Routing happens in the
+browser (React Router), so without it, reloading `/board/<id>` or opening a
+shared ticket link asks Vercel for a file that doesn't exist and gets a 404.
+
+### Check it works
+
+In a private window, open the production domain and sign in as
+`alice@example.com` with `SEED_PASSWORD`. The demo board should load. In the
+browser's Network tab, API calls go to `<service>.onrender.com`; the first one
+after a quiet spell takes about a minute while Render wakes the backend.
+
+If calls fail with a CORS error, the backend's `CORS_ALLOWED_ORIGINS` doesn't
+match the address in the browser bar exactly. Per-deployment URLs such as
+`taskflow-abc123-team.vercel.app` are different origins from the production
+domain, so they fail on purpose.
+
 ## Day to day
 
 - **Deploys:** every push to `main` that changes `backend/` rebuilds and
-  redeploys the service (`buildFilter` in `render.yaml`).
+  redeploys the service (`buildFilter` in `render.yaml`). Vercel redeploys the
+  frontend on every push.
 - **Logs and environment variables:** the service's page in the Render
   dashboard.
 - **Database paused:** if the API's log shows connection errors after a quiet

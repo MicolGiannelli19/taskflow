@@ -28,6 +28,8 @@ class BoardMember(Base):
     )
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     board_id = Column(Uuid(as_uuid=True), ForeignKey("boards.id", ondelete="CASCADE"), nullable=False)
-    user_id = Column(Uuid(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    # Indexed on its own: "list my boards" filters by user_id alone, which the
+    # (board_id, user_id) constraint above can't serve because board_id leads.
+    user_id = Column(Uuid(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     role = Column(String(20), nullable=False, default="member")
     created_at = Column(TIMESTAMP, default=datetime.utcnow)

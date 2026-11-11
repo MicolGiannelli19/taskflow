@@ -58,6 +58,7 @@ Table board_members {
     // Partial unique index (not expressible in DBML): UNIQUE (board_id)
     // WHERE role = 'owner' — enforces at most one owner per board.
     board_id [name: 'one_owner_per_board', note: 'partial unique WHERE role=owner']
+    user_id [name: 'ix_board_members_user_id', note: 'list my boards']
   }
 }
 
@@ -68,6 +69,10 @@ Table columns {
   position integer [not null]
   created_at timestamp
   updated_at timestamp
+
+  indexes {
+    board_id [name: 'ix_columns_board_id']
+  }
 }
 
 Table tickets {
@@ -83,6 +88,11 @@ Table tickets {
   due_date timestamp
   created_at timestamp
   updated_at timestamp
+
+  indexes {
+    board_id [name: 'ix_tickets_board_id']
+    column_id [name: 'ix_tickets_column_id']
+  }
   // PLANNED (spec §11, not yet implemented): completed_at timestamp,
   // completed_by uuid ref users.id — powers the board progress bar.
 }
@@ -94,4 +104,8 @@ Table comments {
   content text [not null]
   created_at timestamp
   updated_at timestamp
+
+  indexes {
+    ticket_id [name: 'ix_comments_ticket_id']
+  }
 }

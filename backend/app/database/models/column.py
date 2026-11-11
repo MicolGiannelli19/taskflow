@@ -8,7 +8,8 @@ from app.database.session import Base
 class BoardColumn(Base):
     __tablename__ = "columns"
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    board_id = Column(Uuid(as_uuid=True), ForeignKey("boards.id", ondelete="CASCADE"), nullable=False)
+    # Indexed: the board view loads every column on a board (schema.md D8).
+    board_id = Column(Uuid(as_uuid=True), ForeignKey("boards.id", ondelete="CASCADE"), nullable=False, index=True)
     name = Column(String(255), nullable=False)
     position = Column(Integer, nullable=False)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
